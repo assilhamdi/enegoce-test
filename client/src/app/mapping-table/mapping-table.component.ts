@@ -7,11 +7,12 @@ import { MappingService } from '../services/mapping/mapping.service';
   templateUrl: './mapping-table.component.html',
   styleUrl: './mapping-table.component.css'
 })
-export class MappingTableComponent implements OnInit{
+export class MappingTableComponent implements OnInit {
 
-  mappings: MtFieldMapping [] = [];
+  mappings: MtFieldMapping[] = [];
+  order: boolean = true;
 
-  constructor(private mappingService: MappingService) {}
+  constructor(private mappingService: MappingService) { }
 
   ngOnInit(): void {
     this.fetchMappings();
@@ -20,6 +21,17 @@ export class MappingTableComponent implements OnInit{
   fetchMappings() {
     this.mappingService.getAllMappings().subscribe(mappings => {
       this.mappings = mappings
+    });
+  }
+
+  sortByOrder(order: boolean) {
+    this.mappingService.orderMappingsByFO(order).subscribe({
+      next: mappings => {
+        this.mappings = mappings;
+      },
+      error: error => {
+        console.error('Error fetching mappings:', error);
+      }
     });
   }
 

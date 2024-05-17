@@ -1,29 +1,35 @@
 <table class="finance-table">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Status</th>
-        <th>Database Field</th>
-        <th>Tag</th>
-        <th>Field Description</th>
-        <th>Entity Name</th>
-        <th>Mapping Rule</th>
-        <th>MT</th>
-        <th>Field Order</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let mapping of mappings">
-        <td>{{ mapping.id }}</td>
-        <td>{{ mapping.status }}</td>
-        <td>{{ mapping.databaseField }}</td>
-        <td>{{ mapping.tag }}</td>
-        <td>{{ mapping.fieldDescription }}</td>
-        <td>{{ mapping.entityName }}</td>
-        <td>{{ mapping.mappingRule }}</td>
-        <td>{{ mapping.mt }}</td>
-        <td>{{ mapping.fieldOrder }}</td>
-      </tr>
-    </tbody>
-  </table>
-  
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Status</th>
+      <th>Database Field</th>
+      <th>Tag</th>
+      <th>Field Description</th>
+      <th>Entity Name</th>
+      <th>Mapping Rule</th>
+      <th>MT</th>
+      <th>Field Order
+        <button (click)="sortByOrder(true)">
+          &uarr; <!-- Up arrow symbol -->
+        </button>
+        <button (click)="sortByOrder(false)">
+          &darr; <!-- Down arrow symbol -->
+        </button>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let mapping of mappings">
+      <td>{{ mapping.id }}</td>
+      <td>{{ mapping.status }}</td>
+      <td>{{ mapping.databaseField }}</td>
+      <td>{{ mapping.tag }}</td>
+      <td>{{ mapping.fieldDescription }}</td>
+      <td>{{ mapping.entityName }}</td>
+      <td>{{ mapping.mappingRule }}</td>
+      <td>{{ mapping.mt }}</td>
+      <td>{{ mapping.fieldOrder }}</td>
+    </tr>
+  </tbody>
+</table>

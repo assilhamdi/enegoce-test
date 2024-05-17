@@ -16,6 +16,23 @@ const GET_MAPPINGS = gql`
   }
 `;
 
+
+const SORT_MAPPINGS_BY_ORDER = gql`
+  query OrderMappingsByFO($order: Boolean!) {
+    orderMappingsByFO(order: $order) {
+      id
+      status
+      databaseField
+      tag
+      fieldDescription
+      entityName
+      mappingRule
+      mt
+      fieldOrder
+    }
+  }
+`;
+
 const ADD_MT_MAPPING = gql`
   mutation CreateMtMapping($input: MtFieldMappingInput!) {
     addMtFieldMapping(input: $input) {
@@ -31,4 +48,4 @@ const ADD_MT_MAPPING = gql`
   }
 `;
 
-export {GET_MAPPINGS, ADD_MT_MAPPING}
+export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER }
