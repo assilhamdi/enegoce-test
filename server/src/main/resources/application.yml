@@ -1,0 +1,19 @@
+server:
+  port: 8020
+spring:
+  application:
+    name: dealLC
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/dealLC
+    username: "postgres"
+    password: "0000"
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  graphql:
+    graphiql:
+      enabled: true
