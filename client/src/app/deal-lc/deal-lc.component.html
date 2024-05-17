@@ -1,0 +1,39 @@
+<div class="card-container">
+  <h1>Financial Deals</h1>
+
+  <div *ngIf="operationSuccess !== null" class="feedback" [ngClass]="{'success': operationSuccess, 'error': !operationSuccess}">
+    {{ operationSuccess ? 'Deal created successfully!' : 'Error creating deal. Please try again.' }}
+    <button (click)="dismissFeedback()">Dismiss</button>
+</div>
+
+  <button (click)="openDrawer()">Add Deal</button>
+  <app-deal-lc-add-drawer 
+  [isOpen]="isOpen" 
+  (drawerStateChange)="handleDrawerStateChange($event)" 
+  [operationSuccess]="operationSuccess"
+  (dealAdded)="handleDealAdded()">
+</app-deal-lc-add-drawer>
+  <div *ngIf="deals" class="card-list">
+    <div *ngFor="let deal of deals" class="card">
+      <div class="card-content">
+        <p><strong>Form LC:</strong> {{ deal.formLC }}</p>
+        <p><strong>Due Date:</strong> {{ deal.dueDate }}</p>
+        <p><strong>Expiry Date:</strong> {{ deal.expiryDate }}</p>
+        <p><strong>Expiry Place:</strong> {{ deal.expiryPlace }}</p>
+        <p><strong>Customer Reference:</strong> {{ deal.customerReference }}</p>
+        <p><strong>Counter Party:</strong> {{ deal.counterParty }}</p>
+        <p><strong>Bank ISS Reference:</strong> {{ deal.bankISSRef }}</p>
+        <p><strong>Bank RMB Reference:</strong> {{ deal.bankRMBRef }}</p>
+        <p><strong>Creation Date:</strong> {{ deal.creationDate }}</p>
+        <p><strong>Currency ID:</strong> {{ deal.currencyId }}</p>
+        <p><strong>LC Amount:</strong> {{ deal.lcAmount }}</p>
+        <p><strong>Var Amount Tolerance:</strong> {{ deal.varAmountTolerance }}</p>
+        <p><strong>Available With:</strong> {{ deal.availableWith }}</p>
+        <p><strong>Partial Transhipment:</strong> {{ deal.partialTranshipment }}</p>
+        <p><strong>Transhipment:</strong> {{ deal.transhipment }}</p>
+        <button (click)="exportDeal(deal.dealId)">Export</button>
+        <button (click)="exportMT700(deal.dealId)">Generate MT700</button>
+      </div>
+    </div>
+  </div>
+</div>
