@@ -2,8 +2,9 @@ package com.enegoce.service;
 
 import com.enegoce.entities.DealLC;
 import com.enegoce.entities.DealLCInput;
+import com.enegoce.entities.MtFieldMapping;
 import com.enegoce.repository.DealLCRepository;
-import jakarta.validation.Valid;
+import com.enegoce.repository.MtFieldMappingRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +26,9 @@ public class DealLCService {
 
     @Autowired
     private DealLCRepository dealRepo;
+
+    @Autowired
+    private MtFieldMappingRepository mappingRepo;
 
     private static final Logger logger = LogManager.getLogger(DealLCService.class);
 
@@ -73,6 +78,68 @@ public class DealLCService {
 
         return dealRepo.save(deal);
 
+    }
+
+    public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath) {
+
+
+        Object entity;
+        List<MtFieldMapping> mappings;
+
+        if ("700".equals(mt)) {
+            entity = this.dealById(dealId);
+            if (entity == null) {
+                logger.error("Entity not found for id: " + dealId);
+                return false;
+            }
+            mappings = mappingRepo.findByMt(mt);
+            if (mappings.isEmpty()) {
+                logger.error("No mappings found for mt: " + mt);
+                return false;
+            }
+        } /*else if ("701".equals(mt)) {
+            entity = dealGoodsService.dealGoodsById(dealId); //TODO: dealGoodsService
+        }*/ else {
+            logger.error("Unsupported MT: " + mt);
+            return false;
+        }
+
+        mappings.sort(Comparator.comparingInt(MtFieldMapping::getFieldOrder));
+        logger.info(mappings);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+
+            for (MtFieldMapping mapping : mappings) {
+                String entityName = mapping.getEntityName();
+                String fieldName = mapping.getDatabaseField();
+                String mt700Tag = mapping.getTag();
+
+                // Find corresponding getter method for the field
+                String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                logger.info(getterMethodName);
+                Object fieldValue = null;
+                try {
+                    // Dynamically invoke getter method based on entity name
+                    if ("DealLC".equals(entityName)) {
+                        fieldValue = entity.getClass().getMethod(getterMethodName).invoke(entity);
+                    } /*else if ("OtherEntity".equals(entityName)) {
+                        // Fetch field value from other entity based on entity name
+                    }*/
+                } catch (Exception e) {
+                    // Handle exception if getter method not found or other issues
+                    logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
+                }
+
+                if (fieldValue != null) {
+                    // Write MT700 message to text file
+                    writer.write(mt700Tag + ":" + fieldValue + "\r\n");
+                }
+            }
+            return true; // Return true if writing is successful
+        } catch (Exception e) {
+            logger.error("Error accessing file or database: " + e);
+            return false; // Return false if accessing file or database fails
+        }
     }
 
 

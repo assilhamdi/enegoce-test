@@ -20,8 +20,6 @@ import java.util.List;
 @Controller
 public class MtMappingController {
 
-    private static final Logger logger = LogManager.getLogger(DealLCController.class);
-
     @Autowired
     private MtMappingService service;
 
@@ -39,7 +37,9 @@ public class MtMappingController {
     }
 
     @QueryMapping
-    public List<String> mts(){ return service.mts();} //For populating Select
+    public List<String> mts() {
+        return service.mts();
+    } //For populating Select
 
     @QueryMapping
     List<MtFieldMapping> mappingsByFD(@Argument String fieldDescription) {
@@ -96,24 +96,5 @@ public class MtMappingController {
         return service.deleteMtFieldMapping(id);
     }
 
-    @MutationMapping
-    public String exportMT(@Argument Integer id, @Argument String mt) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String mt700FilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT" + mt + "_" + timestamp + ".txt";
 
-        boolean conversionSuccessful = service.generateAndExportMtMessage(id, mt, mt700FilePath);
-        String response;
-
-        if (conversionSuccessful) {
-            response = String.valueOf(ResponseEntity.ok()
-                    .body("{\"message\": \"Conversion successful\", \"mt700FilePath\": \"" + mt700FilePath + "\"}"));
-        } else {
-            logger.error("Unsuccessful Conversion");
-            response = String.valueOf(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"message\": \"Conversion failed. Please check your Input and try again.\"}"));
-        }
-        return response;
-
-
-    }
 }

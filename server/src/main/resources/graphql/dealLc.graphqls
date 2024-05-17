@@ -1,0 +1,49 @@
+extend type Query {
+
+    getAllDealLCs: [DealLC]
+    getDealLCById(id: Int!): DealLC
+}
+
+extend type Mutation {
+
+    addDealLC(input: DealLCInput): DealLC
+    exportDeal(id: Int!): String
+    exportMT(id: Int!, mt:String): String
+}
+
+type DealLC {
+    dealId: ID!
+    formLC: String
+    dueDate: String
+    expiryDate: String
+    expiryPlace: String
+    customerReference: String
+    counterParty: String
+    bankISSRef: String
+    bankRMBRef: String
+    creationDate: String
+    currencyId: String
+    lcAmount: String
+    varAmountTolerance: String
+    availableWith: String
+    partialTranshipment: String
+    transhipment: String
+}
+
+input DealLCInput {
+    formLC: String
+    dueDate: String
+    expiryDate: String
+    expiryPlace: String
+    customerReference: String
+    counterParty: String
+    bankISSRef: String
+    bankRMBRef: String
+    creationDate: String
+    currencyId: String
+    lcAmount: String
+    varAmountTolerance: String
+    availableWith: String
+    partialTranshipment: String
+    transhipment: String
+}

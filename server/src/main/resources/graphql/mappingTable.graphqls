@@ -1,0 +1,42 @@
+extend type Query {
+
+    getAllMappings: [MtFieldMapping]
+    orderMappingsByFO(order: Boolean): [MtFieldMapping]
+    mappingsByMt(mt: String!): [MtFieldMapping]
+    mappingsByFD(fieldDescription: String!): [MtFieldMapping]
+    mappingsByDF(dbField: String!): [MtFieldMapping]
+    mappingsByST(status: String!): [MtFieldMapping]
+    mts:[String]
+
+}
+
+extend type Mutation {
+
+    addMtFieldMapping(input: MtFieldMappingInput!): MtFieldMapping
+    updateFieldMapping(id :Int!, input: MtFieldMappingInput!): MtFieldMapping
+    deleteFieldMapping(id: Int!): Boolean
+
+}
+
+type MtFieldMapping {
+    id: ID!
+    status: String
+    databaseField: String
+    tag: String
+    fieldDescription: String
+    entityName: String
+    mappingRule: String
+    mt: String
+    fieldOrder: Int
+}
+
+input MtFieldMappingInput {
+    status: String
+    tag: String
+    fieldDescription: String
+    mappingRule: String
+    databaseField: String
+    entityName: String
+    mt: String
+    fieldOrder: Int
+}
