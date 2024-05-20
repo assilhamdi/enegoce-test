@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, map } from 'rxjs';
 import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
-import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING, DELETE_MT_MAPPING } from '../../graphql/graphql.queries_mapping';
+import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +16,14 @@ export class MappingService {
       query: GET_MAPPINGS
     }).valueChanges.pipe(
       map(result => result.data.getAllMappings)
+    );
+  }
+
+  getUniqueMts(): Observable<string[]> {
+    return this.apollo.watchQuery<any>({
+      query: MTS
+    }).valueChanges.pipe(
+      map(result => result.data.mts)
     );
   }
 
@@ -62,5 +70,20 @@ export class MappingService {
       map(result => result.data?.deleteFieldMapping ?? false)
     );
   }
+
+  ////////////////// FILTERING ////////////////
+  /////////////////////////////////////////////
+
+  MappingsByMT(mt: String): Observable<MtFieldMapping[]> {
+    return this.apollo.watchQuery<any>({
+      query: MAPPINGS_BY_MT,
+      variables: {
+        mt: mt
+      }
+    }).valueChanges.pipe(
+      map(result => result.data.MappingsByMT)
+    );
+  }
+
 
 }

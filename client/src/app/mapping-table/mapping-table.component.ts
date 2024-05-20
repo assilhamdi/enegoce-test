@@ -10,6 +10,8 @@ import { MappingService } from '../services/mapping/mapping.service';
 export class MappingTableComponent implements OnInit {
 
   mappings: MtFieldMapping[] = [];
+  distinctMtValues: string[] = [];
+  selectedMt: string | null = null;
   order: boolean = true;
   isOpen: boolean = false;
   mappingToUpdate: MtFieldMapping | null = null; // Holds the mapping to update
@@ -19,6 +21,7 @@ export class MappingTableComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchMappings();
+    this.fetchUniqueMts();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -40,6 +43,18 @@ export class MappingTableComponent implements OnInit {
     );
   }
 
+  fetchUniqueMts(): void {
+    this.mappingService.getUniqueMts().subscribe(
+      mts => {
+        this.distinctMtValues = mts;
+        console.log('Distinct MT values:', this.distinctMtValues);
+      },
+      error => {
+        console.error('Error fetching unique MTs:', error);
+      }
+    );
+  }
+
   sortByOrder(order: boolean) {
     this.mappingService.orderMappingsByFO(order).subscribe({
       next: mappings => {
@@ -55,7 +70,7 @@ export class MappingTableComponent implements OnInit {
     this.mappingToUpdate = mappingToUpdate; // Set the mapping to update if provided
     this.isOpen = true;
   }
-  
+
 
   closeDrawer(): void {
     this.isOpen = false;
@@ -73,7 +88,7 @@ export class MappingTableComponent implements OnInit {
   refreshMappings(): void {
     this.fetchMappings();
   }
-  
+
 
   deleteMapping(id: Number): void {
     this.mappingService.deleteFieldMapping(id).subscribe(
@@ -89,6 +104,43 @@ export class MappingTableComponent implements OnInit {
         console.error('Error deleting mapping:', error);
       }
     );
+  }
+
+
+  ////////////////// FILTERING ////////////////
+  /////////////////////////////////////////////
+
+
+
+  /*filterMappingsByMt(): void {
+    if (this.selectedMt) {
+      this.mappingService.MappingsByMT(this.selectedMt).subscribe(
+        mappings => {
+          this.mappings = mappings;
+        },
+        error => {
+          console.error('Error fetching filtered mappings:', error);
+        }
+      );
+    } else {
+      this.fetchMappings();
+    }
+  }*/
+
+  filterMappingsByMt(): void {
+    if (this.selectedMt !== 'All') {
+      // Filter the mappings based on the selected MT
+      this.mappings = this.mappings.filter(mapping => mapping.mt === this.selectedMt);
+    } else {
+      // If 'All' is selected, show all mappings
+      this.fetchMappings();
+    }
+  }
+
+  resetFilter(): void {
+    // Reset the selected MT and show all mappings
+    this.selectedMt = 'All';
+    this.fetchMappings();
   }
 
 }

@@ -16,6 +16,12 @@ const GET_MAPPINGS = gql`
   }
 `;
 
+const MTS = gql`
+  query {
+    mts
+  }
+`;
+
 
 const SORT_MAPPINGS_BY_ORDER = gql`
   query OrderMappingsByFO($order: Boolean!) {
@@ -69,4 +75,28 @@ const DELETE_MT_MAPPING = gql`
   }
 `;
 
-export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING, DELETE_MT_MAPPING }
+
+////////////////// FILTERING ////////////////
+/////////////////////////////////////////////
+
+
+const MAPPINGS_BY_MT = gql`
+  query MappingsByMT($mt: String!) {
+    mappingsByMt(mt: $mt) {
+      id
+      status
+      databaseField
+      tag
+      fieldDescription
+      entityName
+      mappingRule
+      mt
+      fieldOrder
+    }
+  }
+`;
+
+
+
+
+export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS }

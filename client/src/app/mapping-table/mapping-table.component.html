@@ -1,5 +1,14 @@
 <h1>Mappings</h1>
 <button (click)="openDrawer()">Add Mapping</button>
+<br> <!-- Line break for separation -->
+<button (click)="filterMappingsByMt()">Filter by MT</button>
+
+<select [(ngModel)]="selectedMt">
+  <option value="All">All</option>
+  <option *ngFor="let mt of distinctMtValues" [value]="mt">{{ mt }}</option>
+</select>
+<button (click)="resetFilter()">Reset</button>
+
 <app-mapping-table-management-drawer 
 [isOpen]="isOpen" 
 [mappingToUpdate]="mappingToUpdate"
