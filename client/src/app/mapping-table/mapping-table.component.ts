@@ -11,6 +11,7 @@ export class MappingTableComponent implements OnInit {
 
   mappings: MtFieldMapping[] = [];
   order: boolean = true;
+  isOpen: boolean = false;
 
   constructor(private mappingService: MappingService) { }
 
@@ -33,6 +34,18 @@ export class MappingTableComponent implements OnInit {
         console.error('Error fetching mappings:', error);
       }
     });
+  }
+
+  openDrawer(): void {
+    this.isOpen = true;
+  }
+
+  closeDrawer(): void {
+    this.isOpen = false;
+  }
+
+  handleDrawerStateChange(isOpen: boolean): void {
+    this.isOpen = isOpen;
   }
 
 }

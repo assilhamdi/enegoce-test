@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, map } from 'rxjs';
-import { MtFieldMapping } from '../../graphql/types';
-import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER } from '../../graphql/graphql.queries_mapping';
+import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
+import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +27,17 @@ export class MappingService {
       }
     }).valueChanges.pipe(
       map(result => result.data.orderMappingsByFO)
+    );
+  }
+
+  addMtFieldMapping(mapping: MtFieldMappingInput): Observable<MtFieldMapping> {
+    return this.apollo.mutate<any>({
+      mutation: ADD_MT_MAPPING,
+      variables: {
+        input: mapping
+      }
+    }).pipe(
+      map(result => result.data.addMtFieldMapping)
     );
   }
 }
