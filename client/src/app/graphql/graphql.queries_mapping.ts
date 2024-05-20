@@ -48,4 +48,19 @@ const ADD_MT_MAPPING = gql`
   }
 `;
 
-export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER }
+const UPDATE_MT_MAPPING = gql`
+  mutation UpdateMtMapping($id: Int!, $input: MtFieldMappingInput!) {
+    updateFieldMapping(id: $id, input: $input) {
+      status
+      databaseField
+      tag
+      fieldDescription
+      entityName
+      mappingRule
+      mt
+      fieldOrder
+    }
+  }
+`;
+
+export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING }

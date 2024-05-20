@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, map } from 'rxjs';
 import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
-import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING } from '../../graphql/graphql.queries_mapping';
+import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
   providedIn: 'root'
@@ -40,4 +40,17 @@ export class MappingService {
       map(result => result.data.addMtFieldMapping)
     );
   }
+
+  updateMtFieldMapping(id: Number, mapping: MtFieldMappingInput): Observable<MtFieldMapping> {
+    return this.apollo.mutate<any>({
+      mutation: UPDATE_MT_MAPPING,
+      variables: {
+        id: id,
+        input: mapping
+      }
+    }).pipe(
+      map(result => result.data.updateFieldMapping)
+    );
+  }
+
 }

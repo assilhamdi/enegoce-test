@@ -1,8 +1,9 @@
 <h1>Mappings</h1>
 <button (click)="openDrawer()">Add Mapping</button>
 <app-mapping-table-management-drawer 
-  [isOpen]="isOpen" 
-  (drawerStateChange)="handleDrawerStateChange($event)">
+[isOpen]="isOpen" 
+[mappingToUpdate]="mappingToUpdate"
+(drawerStateChange)="handleDrawerStateChange($event)">
 </app-mapping-table-management-drawer>
 
 
@@ -34,6 +35,9 @@
       <td>{{ mapping.entityName }}</td>
       <td>{{ mapping.mt }}</td>
       <td>{{ mapping.fieldOrder }}</td>
+      <td>
+        <button (click)="openDrawer(mapping)">Edit</button> <!-- Pass mapping to update -->
+      </td>
     </tr>
   </tbody>
 </table>
