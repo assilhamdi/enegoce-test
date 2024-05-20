@@ -3,7 +3,9 @@
 <app-mapping-table-management-drawer 
 [isOpen]="isOpen" 
 [mappingToUpdate]="mappingToUpdate"
-(drawerStateChange)="handleDrawerStateChange($event)">
+(drawerStateChange)="handleDrawerStateChange($event)"
+(mappingAdded)="refreshMappings()"
+(mappingUpdated)="refreshMappings()">
 </app-mapping-table-management-drawer>
 
 
@@ -24,6 +26,7 @@
           &darr; <!-- Down arrow symbol -->
         </button>
       </th>
+      <th>Operations</th>
     </tr>
   </thead>
   <tbody>
@@ -37,6 +40,7 @@
       <td>{{ mapping.fieldOrder }}</td>
       <td>
         <button (click)="openDrawer(mapping)">Edit</button> <!-- Pass mapping to update -->
+        <button (click)="deleteMapping(mapping.id)">Delete</button> <!-- Delete button -->
       </td>
     </tr>
   </tbody>

@@ -12,7 +12,9 @@ export class MappingTableManagementDrawerComponent implements OnInit {
 
   @Input() isOpen: boolean = false;
   @Input() mappingToUpdate: MtFieldMapping | null = null; // Input for mapping to update
-  @Output() drawerStateChange = new EventEmitter<boolean>();
+  @Output() drawerStateChange = new EventEmitter<boolean>();  
+  @Output() mappingAdded = new EventEmitter<void>();
+  @Output() mappingUpdated = new EventEmitter<void>();
 
   newMapping: MtFieldMappingInput = {
     status: '',
@@ -71,6 +73,7 @@ export class MappingTableManagementDrawerComponent implements OnInit {
       this.mappingService.updateMtFieldMapping(this.mappingToUpdate.id, this.newMapping).subscribe(
         () => {
           console.log('Mapping updated successfully');
+          this.mappingUpdated.emit();
           this.resetForm();
           this.closeDrawer();
         },
@@ -82,7 +85,8 @@ export class MappingTableManagementDrawerComponent implements OnInit {
       // Otherwise, we're adding a new mapping
       this.mappingService.addMtFieldMapping(this.newMapping).subscribe(
         () => {
-          console.log('Mapping added successfully');
+          console.log('Mapping added successfully');          
+          this.mappingAdded.emit();
           // Reset form fields and close drawer
           this.resetForm();
           this.closeDrawer();

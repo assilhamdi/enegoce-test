@@ -63,4 +63,10 @@ const UPDATE_MT_MAPPING = gql`
   }
 `;
 
-export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING }
+const DELETE_MT_MAPPING = gql`
+  mutation DeleteMtMapping($id: Int!) {
+    deleteFieldMapping(id: $id)
+  }
+`;
+
+export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING, DELETE_MT_MAPPING }

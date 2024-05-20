@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, map } from 'rxjs';
 import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
-import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING } from '../../graphql/graphql.queries_mapping';
+import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING, DELETE_MT_MAPPING } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
   providedIn: 'root'
@@ -50,6 +50,16 @@ export class MappingService {
       }
     }).pipe(
       map(result => result.data.updateFieldMapping)
+    );
+  }
+
+  deleteFieldMapping(id: Number): Observable<boolean> {
+    return this.apollo.mutate<{ deleteFieldMapping: boolean }>({
+      mutation: DELETE_MT_MAPPING,
+      variables: { id },
+      refetchQueries: [{ query: GET_MAPPINGS }]
+    }).pipe(
+      map(result => result.data?.deleteFieldMapping ?? false)
     );
   }
 

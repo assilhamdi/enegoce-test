@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output, SimpleChanges } from '@angular/core';
 import { MtFieldMapping } from '../graphql/types';
 import { MappingService } from '../services/mapping/mapping.service';
 
@@ -21,10 +21,23 @@ export class MappingTableComponent implements OnInit {
     this.fetchMappings();
   }
 
-  fetchMappings() {
-    this.mappingService.getAllMappings().subscribe(mappings => {
-      this.mappings = mappings
-    });
+  ngOnChanges(changes: SimpleChanges): void {
+    // React to changes in mappingToUpdate
+    if (changes['mappingToUpdate'] && !changes['mappingToUpdate'].firstChange) {
+      // If mappingToUpdate changes, refresh mappings
+      this.fetchMappings();
+    }
+  }
+
+  fetchMappings(): void {
+    this.mappingService.getAllMappings().subscribe(
+      mappings => {
+        this.mappings = mappings;
+      },
+      error => {
+        console.error('Error fetching mappings:', error);
+      }
+    );
   }
 
   sortByOrder(order: boolean) {
@@ -55,6 +68,27 @@ export class MappingTableComponent implements OnInit {
       // If drawer is closed, reset mapping to update
       this.mappingToUpdate = null;
     }
+  }
+
+  refreshMappings(): void {
+    this.fetchMappings();
+  }
+  
+
+  deleteMapping(id: Number): void {
+    this.mappingService.deleteFieldMapping(id).subscribe(
+      success => {
+        if (success) {
+          console.log('Mapping deleted successfully');
+          this.refreshMappings();
+        } else {
+          console.error('Failed to delete mapping');
+        }
+      },
+      error => {
+        console.error('Error deleting mapping:', error);
+      }
+    );
   }
 
 }
