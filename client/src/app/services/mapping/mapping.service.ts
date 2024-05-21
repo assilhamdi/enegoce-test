@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, map } from 'rxjs';
 import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
-import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS } from '../../graphql/graphql.queries_mapping';
+import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_ST, MAPPINGS_BY_FD } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
   providedIn: 'root'
@@ -81,9 +81,33 @@ export class MappingService {
         mt: mt
       }
     }).valueChanges.pipe(
-      map(result => result.data.MappingsByMT)
+      map(result => result.data.mappingsByMt)
     );
   }
+
+  MappingsByST(status: String): Observable<MtFieldMapping[]> {
+    return this.apollo.watchQuery<any>({
+      query: MAPPINGS_BY_ST,
+      variables: {
+        status: status
+      }
+    }).valueChanges.pipe(
+      map(result => result.data.mappingsByST)
+    );
+  }
+
+  MappingsByFD(dbField: String): Observable<MtFieldMapping[]> {
+    return this.apollo.watchQuery<any>({
+      query: MAPPINGS_BY_FD,
+      variables: {
+        dbField: dbField
+      }
+    }).valueChanges.pipe(
+      map(result => result.data.mappingsByDF)
+    );
+  }
+
+
 
 
 }

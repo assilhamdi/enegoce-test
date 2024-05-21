@@ -96,7 +96,41 @@ const MAPPINGS_BY_MT = gql`
   }
 `;
 
+const MAPPINGS_BY_ST = gql`
+  query MappingsByStatus($status: String!) {
+    mappingsByST(status: $status) {
+      id
+      status
+      databaseField
+      tag
+      fieldDescription
+      entityName
+      mappingRule
+      mt
+      fieldOrder
+    }
+  }
+`;
+
+const MAPPINGS_BY_FD = gql`
+  query MappingsByDbField($dbField: String!) {
+    mappingsByDF(dbField: $dbField) {
+      id
+      status
+      databaseField
+      tag
+      fieldDescription
+      entityName
+      mappingRule
+      mt
+      fieldOrder
+    }
+  }
+`;
 
 
 
-export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS }
+
+
+
+export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_FD, MAPPINGS_BY_ST }

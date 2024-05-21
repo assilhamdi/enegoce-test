@@ -9,10 +9,28 @@
 </select>
 <button (click)="resetFilter()">Reset</button>
 
+<br> <!-- Line break for separation -->
+
+<button (click)="filterMappingsBySt()">Filter by Status</button>
+<select [(ngModel)]="selectedSt">
+  <option value="O">O</option>
+  <option value="M">M</option>
+</select>
+<button (click)="resetFilter()">Reset</button>
+
+<br> <!-- Line break for separation -->
+
+<button (click)="filterMappingsByDf()">Filter by db Field</button>
+<input [(ngModel)]="dfFilter">
+<button (click)="resetFilter()">Reset</button>
+
+<br> <!-- Line break for separation -->
+
+
 <app-mapping-table-management-drawer 
 [isOpen]="isOpen" 
 [mappingToUpdate]="mappingToUpdate"
-(drawerStateChange)="handleDrawerStateChange($event)"
+(drawerStateChange)="handleDrawerStateChange($event)" 
 (mappingAdded)="refreshMappings()"
 (mappingUpdated)="refreshMappings()">
 </app-mapping-table-management-drawer>

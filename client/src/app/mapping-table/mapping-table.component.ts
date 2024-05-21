@@ -11,7 +11,9 @@ export class MappingTableComponent implements OnInit {
 
   mappings: MtFieldMapping[] = [];
   distinctMtValues: string[] = [];
-  selectedMt: string | null = null;
+  selectedMt: string = "";
+  selectedSt: string = "";
+  dfFilter: String = "";
   order: boolean = true;
   isOpen: boolean = false;
   mappingToUpdate: MtFieldMapping | null = null; // Holds the mapping to update
@@ -129,12 +131,39 @@ export class MappingTableComponent implements OnInit {
 
   filterMappingsByMt(): void {
     if (this.selectedMt !== 'All') {
-      // Filter the mappings based on the selected MT
-      this.mappings = this.mappings.filter(mapping => mapping.mt === this.selectedMt);
+      this.mappingService.MappingsByMT(this.selectedMt).subscribe(
+        mappings => {
+          this.mappings = mappings;
+        },
+        error => {
+          console.error('Error fetching mappings by MT:', error);
+        }
+      );
     } else {
-      // If 'All' is selected, show all mappings
       this.fetchMappings();
     }
+  }
+
+  filterMappingsBySt(): void {
+    this.mappingService.MappingsByST(this.selectedSt).subscribe(
+      mappings => {
+        this.mappings = mappings;
+      },
+      error => {
+        console.error('Error fetching mappings by Status:', error);
+      }
+    );
+  }
+
+  filterMappingsByDf(): void {
+    this.mappingService.MappingsByFD(this.dfFilter).subscribe(
+      mappings => {
+        this.mappings = mappings;
+      },
+      error => {
+        console.error('Error fetching mappings by Database Field:', error);
+      }
+    );
   }
 
   resetFilter(): void {
