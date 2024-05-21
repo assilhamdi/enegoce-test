@@ -33,11 +33,11 @@ public class MtMappingService {
     }
 
     public List<MtFieldMapping> mappingsByFD(String fieldDescription) {
-        return mappingRepo.findByFieldDescriptionContaining(fieldDescription);
+        return mappingRepo.findByFieldDescriptionContainingIgnoreCase(fieldDescription);
     }
 
     public List<MtFieldMapping> mappingsByDF(String dbField) {
-        return mappingRepo.findByDatabaseFieldContaining(dbField);
+        return mappingRepo.findByDatabaseFieldContainingIgnoreCase(dbField);
     }
 
     public List<MtFieldMapping> mappingsByST(char status) {

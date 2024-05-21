@@ -17,9 +17,9 @@ public interface MtFieldMappingRepository extends JpaRepository<MtFieldMapping, 
     @Query("SELECT DISTINCT m.mt FROM MtFieldMapping m")
     List<String> findDistinctMtValues();
 
-    List<MtFieldMapping> findByFieldDescriptionContaining(String fieldDescription); //Field description lookup
+    List<MtFieldMapping> findByFieldDescriptionContainingIgnoreCase(String fieldDescription); //Field description lookup
 
-    List<MtFieldMapping> findByDatabaseFieldContaining(String fieldDescription); //Field description lookup
+    List<MtFieldMapping> findByDatabaseFieldContainingIgnoreCase(String fieldDescription); //Field description lookup
 
     List<MtFieldMapping> findByStatus(char status); //Field description lookup
 
