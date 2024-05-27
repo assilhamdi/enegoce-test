@@ -15,6 +15,9 @@ public class DealGoods {
     @JoinColumn(name = "dealLcId")
     private DealLC dealLC = new DealLC();
 
+    @Column(name = "GoodsDesc", length = 6500)
+    private String goodsDesc; // Descriptions of goods // Varchar(6500)
+
     @Column(name = "StepID", length = 5)
     private String stepID; // Etape du deal // Varchar(5)
 
@@ -26,9 +29,6 @@ public class DealGoods {
 
     @Column(name = "GoodsType")
     private String goodsType;
-
-    @Column(name = "GoodsDesc", length = 6500)
-    private String goodsDesc; // Descriptions of goods // Varchar(6500)
 
     @Column(name = "GoodsOrigin", length = 2)
     private String goodsOrigin; // Origin of Goods // varchar(2)

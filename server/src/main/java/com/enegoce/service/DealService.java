@@ -1,8 +1,10 @@
 package com.enegoce.service;
 
+import com.enegoce.entities.DealGoods;
 import com.enegoce.entities.DealLC;
 import com.enegoce.entities.DealLCInput;
 import com.enegoce.entities.MtFieldMapping;
+import com.enegoce.repository.DealGoodsRepository;
 import com.enegoce.repository.DealLCRepository;
 import com.enegoce.repository.MtFieldMappingRepository;
 import org.apache.logging.log4j.LogManager;
@@ -17,12 +19,13 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DealLCService {
+public class DealService {
 
     @Autowired
     private DealLCRepository dealRepo;
@@ -30,7 +33,10 @@ public class DealLCService {
     @Autowired
     private MtFieldMappingRepository mappingRepo;
 
-    private static final Logger logger = LogManager.getLogger(DealLCService.class);
+    @Autowired
+    private DealGoodsRepository goodsRepo;
+
+    private static final Logger logger = LogManager.getLogger(DealService.class);
 
     public List<DealLC> deals() {
         return dealRepo.findAll();
@@ -80,7 +86,7 @@ public class DealLCService {
 
     }
 
-    public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath) {
+    /*public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath) {
 
 
         Object entity;
@@ -97,9 +103,18 @@ public class DealLCService {
                 logger.error("No mappings found for mt: " + mt);
                 return false;
             }
-        } /*else if ("701".equals(mt)) {
-            entity = dealGoodsService.dealGoodsById(dealId); //TODO: dealGoodsService
-        }*/ else {
+        } else if ("701".equals(mt)) {
+            entity = this.goodsByDealId(dealId); //TODO: fix this cuz it returns a list
+            if (entity == null) {
+                logger.error("Goods not found for deal id: " + dealId);
+                return false;
+            }
+            mappings = mappingRepo.findByMt(mt);
+            if (mappings.isEmpty()) {
+                logger.error("No mappings found for mt: " + mt);
+                return false;
+            }
+        } else {
             logger.error("Unsupported MT: " + mt);
             return false;
         }
@@ -112,7 +127,7 @@ public class DealLCService {
             for (MtFieldMapping mapping : mappings) {
                 String entityName = mapping.getEntityName();
                 String fieldName = mapping.getDatabaseField();
-                String mt700Tag = mapping.getTag();
+                String mtTag = mapping.getTag();
 
                 // Find corresponding getter method for the field
                 String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
@@ -122,9 +137,9 @@ public class DealLCService {
                     // Dynamically invoke getter method based on entity name
                     if ("DealLC".equals(entityName)) {
                         fieldValue = entity.getClass().getMethod(getterMethodName).invoke(entity);
-                    } /*else if ("OtherEntity".equals(entityName)) {
-                        // Fetch field value from other entity based on entity name
-                    }*/
+                    } else if ("DealGoods".equals(entityName)) {
+                        DealGoods dealGoods =
+                    }
                 } catch (Exception e) {
                     // Handle exception if getter method not found or other issues
                     logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
@@ -132,7 +147,7 @@ public class DealLCService {
 
                 if (fieldValue != null) {
                     // Write MT700 message to text file
-                    writer.write(mt700Tag + ":" + fieldValue + "\r\n");
+                    writer.write(mtTag + ":" + fieldValue + "\r\n");
                 }
             }
             return true; // Return true if writing is successful
@@ -140,7 +155,168 @@ public class DealLCService {
             logger.error("Error accessing file or database: " + e);
             return false; // Return false if accessing file or database fails
         }
+    }*/
+
+
+    public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath) {
+
+        List<DealGoods> dealGoodsList = new ArrayList<>();
+        DealLC dealLC = null;
+        List<MtFieldMapping> mappings;
+
+        if ("700".equals(mt)) {
+            dealLC = this.dealById(dealId);
+            if (dealLC == null) {
+                logger.error("Entity not found for id: " + dealId);
+                return false;
+            }
+        } else if ("701".equals(mt)) {
+            dealGoodsList = this.goodsByDealId(dealId);
+            if (dealGoodsList == null || dealGoodsList.isEmpty()) {
+                logger.error("Goods not found for deal id: " + dealId);
+                return false;
+            }
+        } else {
+            logger.error("Unsupported MT: " + mt);
+            return false;
+        }
+
+        mappings = mappingRepo.findByMt(mt);
+        if (mappings.isEmpty()) {
+            logger.error("No mappings found for mt: " + mt);
+            return false;
+        }
+
+        mappings.sort(Comparator.comparingInt(MtFieldMapping::getFieldOrder));
+        logger.info(mappings);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            if ("700".equals(mt)) {
+                processDealLC(writer, dealLC, mappings);
+            } else if ("701".equals(mt)) {
+                processDealGoods(writer, dealGoodsList, mappings);
+            }
+            return true; // Return true if writing is successful
+        } catch (Exception e) {
+            logger.error("Error accessing file or database: " + e);
+            return false; // Return false if accessing file or database fails
+        }
     }
+
+    private void processDealLC(BufferedWriter writer, DealLC dealLC, List<MtFieldMapping> mappings) throws IOException {
+        for (MtFieldMapping mapping : mappings) {
+            String entityName = mapping.getEntityName();
+            String fieldName = mapping.getDatabaseField();
+            String mtTag = mapping.getTag();
+
+            // Skip if fieldName or entityName is null
+            if (fieldName == null || entityName == null) {
+                continue;
+            }
+
+            // Find corresponding getter method for the field
+            String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+            logger.info(getterMethodName);
+            Object fieldValue = null;
+            try {
+                if ("DealLC".equals(entityName)) {
+                    fieldValue = dealLC.getClass().getMethod(getterMethodName).invoke(dealLC);
+                }
+            } catch (Exception e) {
+                logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
+            }
+
+            if (fieldValue != null) {
+                writer.write(mtTag + ":" + fieldValue + "\r\n");
+            }
+        }
+    }
+
+    private void processDealGoods(BufferedWriter writer, List<DealGoods> dealGoodsList, List<MtFieldMapping> mappings) throws IOException {
+        int totalGoods = dealGoodsList.size();
+        int counter = 1;
+
+        for (DealGoods dealGoods : dealGoodsList) {
+            // Write sequence total for each entry
+            writer.write("27:" + counter + "/" + totalGoods + "\r\n");
+
+            for (MtFieldMapping mapping : mappings) {
+                String entityName = mapping.getEntityName();
+                String fieldName = mapping.getDatabaseField();
+                String mtTag = mapping.getTag();
+
+                // Skip if fieldName or entityName is null
+                if (fieldName == null || entityName == null) {
+                    continue;
+                }
+
+                Object fieldValue = null;
+                try {
+                    if ("DealGoods".equals(entityName)) {
+                        if ("dealLC".equals(fieldName)) {
+                            fieldValue = dealGoods.getDealLC().getDealId();
+                        } else {
+                            // Handle other fields of DealGoods entity
+                            String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                            fieldValue = dealGoods.getClass().getMethod(getterMethodName).invoke(dealGoods);
+                        }
+                    } /*else if ("DealLC".equals(entityName)) {
+                        // Handle fields of associated DealLC entity
+                        DealLC dealLC = dealGoods.getDealLC();
+                        String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                        fieldValue = dealLC.getClass().getMethod(getterMethodName).invoke(dealLC);
+                    }*/
+                } catch (Exception e) {
+                    logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
+                }
+
+                if (fieldValue != null) {
+                    writer.write(mtTag + ":" + fieldValue + "\r\n");
+                }
+            }
+            counter++;
+        }
+    }
+
+    public boolean generateAndExportMt798Message(Integer dealId, String mt, String filePath) {
+        if (!"700".equals(mt) && !"701".equals(mt)) {
+            logger.error("Unsupported MT for MT798: " + mt);
+            return false;
+        }
+
+        List<MtFieldMapping> mappings = mappingRepo.findByMt(mt);
+        if (mappings.isEmpty()) {
+            logger.error("No mappings found for mt: " + mt);
+            return false;
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            writer.write("12:" + mt + "\r\n");
+            writer.write("=========================\r\n");
+
+            if ("700".equals(mt)) {
+                // Generate MT700 content
+                return generateAndExportMtMessage(dealId, mt, filePath);
+            } else if ("701".equals(mt)) {
+                // Generate MT701 content
+                List<DealGoods> dealGoodsList = this.goodsByDealId(dealId);
+                if (dealGoodsList == null || dealGoodsList.isEmpty()) {
+                    logger.error("Goods not found for deal id: " + dealId);
+                    return false;
+                }
+                processDealGoods(writer, dealGoodsList, mappingRepo.findByMt(mt));
+                return true;
+            }
+        } catch (Exception e) {
+            logger.error("Error generating MT798: " + e);
+        }
+        return false;
+    }
+
+
+
+
+
 
 
     public boolean exportFIN700(DealLC deal, String finFilePath) {
@@ -223,4 +399,16 @@ public class DealLCService {
 
         return true;
     }
+
+    ////////////////////DealGoods////////////////////
+    /////////////////////////////////////////////////
+
+    public List<DealGoods> goods() { return goodsRepo.findAll(); }
+
+    public DealGoods dealGoodsById(Integer id){
+        Optional<DealGoods> deal = goodsRepo.findById(id);
+        return deal.orElse(null);
+    }
+
+    public List<DealGoods> goodsByDealId(Integer id){ return goodsRepo.findGoodsByDealId(id); }
 }

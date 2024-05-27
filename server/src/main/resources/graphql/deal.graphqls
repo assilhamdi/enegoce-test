@@ -2,6 +2,10 @@ extend type Query {
 
     getAllDealLCs: [DealLC]
     getDealLCById(id: Int!): DealLC
+
+    getAllDealGoods: [DealGoods]
+    dealGoodsById(id: Int!): DealGoods
+    goodsByDealId(id: Int!): [DealGoods]
 }
 
 extend type Mutation {
@@ -9,6 +13,7 @@ extend type Mutation {
     addDealLC(input: DealLCInput): DealLC
     exportDeal(id: Int!): String
     exportMT(id: Int!, mt:String): String
+    exportMT798(dealId: Int!, mt: String): String
 }
 
 type DealLC {
@@ -28,6 +33,13 @@ type DealLC {
     availableWith: String
     partialTranshipment: String
     transhipment: String
+    dealGoods: [DealGoods]
+}
+
+type DealGoods {
+    id: ID!
+    goodsDesc: String
+    dealLC: DealLC
 }
 
 input DealLCInput {
@@ -46,4 +58,8 @@ input DealLCInput {
     availableWith: String
     partialTranshipment: String
     transhipment: String
+}
+
+input DealGoodsInput {
+    goodsDesc: String
 }
