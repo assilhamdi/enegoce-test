@@ -86,36 +86,10 @@ public class DealService {
 
     }
 
-    /*public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath) {
-
-
-        Object entity;
-        List<MtFieldMapping> mappings;
-
-        if ("700".equals(mt)) {
-            entity = this.dealById(dealId);
-            if (entity == null) {
-                logger.error("Entity not found for id: " + dealId);
-                return false;
-            }
-            mappings = mappingRepo.findByMt(mt);
-            if (mappings.isEmpty()) {
-                logger.error("No mappings found for mt: " + mt);
-                return false;
-            }
-        } else if ("701".equals(mt)) {
-            entity = this.goodsByDealId(dealId); //TODO: fix this cuz it returns a list
-            if (entity == null) {
-                logger.error("Goods not found for deal id: " + dealId);
-                return false;
-            }
-            mappings = mappingRepo.findByMt(mt);
-            if (mappings.isEmpty()) {
-                logger.error("No mappings found for mt: " + mt);
-                return false;
-            }
-        } else {
-            logger.error("Unsupported MT: " + mt);
+    public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath) {
+        List<MtFieldMapping> mappings = mappingRepo.findByMt(mt);
+        if (mappings.isEmpty()) {
+            logger.error("No mappings found for mt: " + mt);
             return false;
         }
 
@@ -123,46 +97,16 @@ public class DealService {
         logger.info(mappings);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-
-            for (MtFieldMapping mapping : mappings) {
-                String entityName = mapping.getEntityName();
-                String fieldName = mapping.getDatabaseField();
-                String mtTag = mapping.getTag();
-
-                // Find corresponding getter method for the field
-                String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-                logger.info(getterMethodName);
-                Object fieldValue = null;
-                try {
-                    // Dynamically invoke getter method based on entity name
-                    if ("DealLC".equals(entityName)) {
-                        fieldValue = entity.getClass().getMethod(getterMethodName).invoke(entity);
-                    } else if ("DealGoods".equals(entityName)) {
-                        DealGoods dealGoods =
-                    }
-                } catch (Exception e) {
-                    // Handle exception if getter method not found or other issues
-                    logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
-                }
-
-                if (fieldValue != null) {
-                    // Write MT700 message to text file
-                    writer.write(mtTag + ":" + fieldValue + "\r\n");
-                }
-            }
-            return true; // Return true if writing is successful
+            return generateAndExportMtMessageWithWriter(dealId, mt, writer, mappings);
         } catch (Exception e) {
-            logger.error("Error accessing file or database: " + e);
-            return false; // Return false if accessing file or database fails
+            logger.error("Error generating MT message: " + e);
+            return false;
         }
-    }*/
+    }
 
-
-    public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath) {
-
-        List<DealGoods> dealGoodsList = new ArrayList<>();
+    private boolean generateAndExportMtMessageWithWriter(Integer dealId, String mt, BufferedWriter writer, List<MtFieldMapping> mappings) {
         DealLC dealLC = null;
-        List<MtFieldMapping> mappings;
+        List<DealGoods> dealGoodsList = new ArrayList<>();
 
         if ("700".equals(mt)) {
             dealLC = this.dealById(dealId);
@@ -176,12 +120,29 @@ public class DealService {
                 logger.error("Goods not found for deal id: " + dealId);
                 return false;
             }
-        } else {
-            logger.error("Unsupported MT: " + mt);
+        }
+
+        try {
+            if ("700".equals(mt)) {
+                processDealLC(writer, dealLC, mappings);
+            } else if ("701".equals(mt)) {
+                processDealGoods(writer, dealGoodsList, mappings);
+            }
+            return true; // Return true if writing is successful
+        } catch (Exception e) {
+            logger.error("Error processing data: " + e);
+            return false; // Return false if processing data fails
+        }
+    }
+
+
+    public boolean generateAndExportMt798Message(Integer dealId, String mt, String filePath) {
+        if (!"700".equals(mt) && !"701".equals(mt)) {
+            logger.error("Unsupported MT for MT798: " + mt);
             return false;
         }
 
-        mappings = mappingRepo.findByMt(mt);
+        List<MtFieldMapping> mappings = mappingRepo.findByMt(mt);
         if (mappings.isEmpty()) {
             logger.error("No mappings found for mt: " + mt);
             return false;
@@ -191,17 +152,16 @@ public class DealService {
         logger.info(mappings);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            if ("700".equals(mt)) {
-                processDealLC(writer, dealLC, mappings);
-            } else if ("701".equals(mt)) {
-                processDealGoods(writer, dealGoodsList, mappings);
-            }
-            return true; // Return true if writing is successful
+            writer.write("12:" + mt + "\r\n");
+            writer.write("=========================\r\n");
+
+            return generateAndExportMtMessageWithWriter(dealId, mt, writer, mappings);
         } catch (Exception e) {
-            logger.error("Error accessing file or database: " + e);
-            return false; // Return false if accessing file or database fails
+            logger.error("Error generating MT798: " + e);
+            return false;
         }
     }
+
 
     private void processDealLC(BufferedWriter writer, DealLC dealLC, List<MtFieldMapping> mappings) throws IOException {
         for (MtFieldMapping mapping : mappings) {
@@ -277,46 +237,6 @@ public class DealService {
             counter++;
         }
     }
-
-    public boolean generateAndExportMt798Message(Integer dealId, String mt, String filePath) {
-        if (!"700".equals(mt) && !"701".equals(mt)) {
-            logger.error("Unsupported MT for MT798: " + mt);
-            return false;
-        }
-
-        List<MtFieldMapping> mappings = mappingRepo.findByMt(mt);
-        if (mappings.isEmpty()) {
-            logger.error("No mappings found for mt: " + mt);
-            return false;
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write("12:" + mt + "\r\n");
-            writer.write("=========================\r\n");
-
-            if ("700".equals(mt)) {
-                // Generate MT700 content
-                return generateAndExportMtMessage(dealId, mt, filePath);
-            } else if ("701".equals(mt)) {
-                // Generate MT701 content
-                List<DealGoods> dealGoodsList = this.goodsByDealId(dealId);
-                if (dealGoodsList == null || dealGoodsList.isEmpty()) {
-                    logger.error("Goods not found for deal id: " + dealId);
-                    return false;
-                }
-                processDealGoods(writer, dealGoodsList, mappingRepo.findByMt(mt));
-                return true;
-            }
-        } catch (Exception e) {
-            logger.error("Error generating MT798: " + e);
-        }
-        return false;
-    }
-
-
-
-
-
 
 
     public boolean exportFIN700(DealLC deal, String finFilePath) {
@@ -403,12 +323,16 @@ public class DealService {
     ////////////////////DealGoods////////////////////
     /////////////////////////////////////////////////
 
-    public List<DealGoods> goods() { return goodsRepo.findAll(); }
+    public List<DealGoods> goods() {
+        return goodsRepo.findAll();
+    }
 
-    public DealGoods dealGoodsById(Integer id){
+    public DealGoods dealGoodsById(Integer id) {
         Optional<DealGoods> deal = goodsRepo.findById(id);
         return deal.orElse(null);
     }
 
-    public List<DealGoods> goodsByDealId(Integer id){ return goodsRepo.findGoodsByDealId(id); }
+    public List<DealGoods> goodsByDealId(Integer id) {
+        return goodsRepo.findGoodsByDealId(id);
+    }
 }
