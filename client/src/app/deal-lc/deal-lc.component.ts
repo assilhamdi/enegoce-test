@@ -16,7 +16,7 @@ export class DealLcComponent implements OnInit {
   isOpen: boolean = false;
   operationSuccess: boolean | null = null;
   distinctMtValues: string[] = [];
-  selectedMt: string = "";  
+  selectedMt: string = "";
   selectedSubMt: string = "";
 
   constructor(private dealService: DealLcService, private mappingService: MappingService) { }
@@ -56,10 +56,10 @@ export class DealLcComponent implements OnInit {
   }
 
   exportMT(dealId: Number, mt: String) {
-    this.dealService.exportMT(dealId,mt)
+    this.dealService.exportMT(dealId, mt)
       .pipe(
         catchError(error => {
-          console.error('Error exporting MT',mt,':', error);
+          console.error('Error exporting MT', mt, ':', error);
           return EMPTY; // Return empty observable to handle the error
         })
       )
@@ -69,7 +69,7 @@ export class DealLcComponent implements OnInit {
   }
 
   exportMT798(id: Number, mt: String) {
-    this.dealService.exportMT798(id,mt)
+    this.dealService.exportMT798(id, mt)
       .pipe(
         catchError(error => {
           console.error('Error exporting MT798:', error);

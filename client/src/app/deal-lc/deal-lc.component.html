@@ -43,7 +43,6 @@
         </div>
 
         <!-- Button with conditional click event -->
-        <!-- Button with updated behavior -->
         <button [disabled]="selectedMt === ''"
           (click)="selectedMt === '798' && selectedSubMt !== null ? exportMT798(deal.dealId, selectedSubMt) : exportMT(deal.dealId, selectedMt)">
           Generate MT{{ selectedMt === '798' ? '798' : selectedMt }}
