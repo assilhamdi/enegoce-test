@@ -1,18 +1,16 @@
 <div class="card-container">
   <h1>Financial Deals</h1>
 
-  <div *ngIf="operationSuccess !== null" class="feedback" [ngClass]="{'success': operationSuccess, 'error': !operationSuccess}">
+  <div *ngIf="operationSuccess !== null" class="feedback"
+    [ngClass]="{'success': operationSuccess, 'error': !operationSuccess}">
     {{ operationSuccess ? 'Deal created successfully!' : 'Error creating deal. Please try again.' }}
     <button (click)="dismissFeedback()">Dismiss</button>
-</div>
+  </div>
 
   <button (click)="openDrawer()">Add Deal</button>
-  <app-deal-lc-add-drawer 
-  [isOpen]="isOpen" 
-  (drawerStateChange)="handleDrawerStateChange($event)" 
-  [operationSuccess]="operationSuccess"
-  (dealAdded)="handleDealAdded()">
-</app-deal-lc-add-drawer>
+  <app-deal-lc-add-drawer [isOpen]="isOpen" (drawerStateChange)="handleDrawerStateChange($event)"
+    [operationSuccess]="operationSuccess" (dealAdded)="handleDealAdded()">
+  </app-deal-lc-add-drawer>
   <div *ngIf="deals" class="card-list">
     <div *ngFor="let deal of deals" class="card">
       <div class="card-content">
@@ -31,8 +29,25 @@
         <p><strong>Available With:</strong> {{ deal.availableWith }}</p>
         <p><strong>Partial Transhipment:</strong> {{ deal.partialTranshipment }}</p>
         <p><strong>Transhipment:</strong> {{ deal.transhipment }}</p>
-        <button (click)="exportDeal(deal.dealId)">Export</button>
-        <button (click)="exportMT700(deal.dealId)">Generate MT700</button>
+        <!--<button (click)="exportDeal(deal.dealId)">Generate MT</button>-->
+        <select [(ngModel)]="selectedMt">
+          <option *ngFor="let mt of distinctMtValues" [value]="mt">{{ mt }}</option>
+        </select>
+        <br>
+
+        <div *ngIf="selectedMt === '798'">
+          <select [(ngModel)]="selectedSubMt">
+            <option value="700">700</option>
+            <option value="701">701</option>
+          </select>
+        </div>
+
+        <!-- Button with conditional click event -->
+        <!-- Button with updated behavior -->
+        <button [disabled]="selectedMt === ''"
+          (click)="selectedMt === '798' && selectedSubMt !== null ? exportMT798(deal.dealId, selectedSubMt) : exportMT(deal.dealId, selectedMt)">
+          Generate MT{{ selectedMt === '798' ? '798' : selectedMt }}
+        </button>
       </div>
     </div>
   </div>
