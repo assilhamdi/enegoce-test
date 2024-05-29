@@ -15,49 +15,43 @@ public class DealGoods {
     @JoinColumn(name = "dealLcId")
     private DealLC dealLC = new DealLC();
 
-    @Column(name = "GoodsDesc", length = 6500)
+    @Column(length = 6500)
     private String goodsDesc; // Descriptions of goods // Varchar(6500)
 
-    @Column(name = "StepID", length = 5)
+    @Column(length = 5)
     private String stepID; // Etape du deal // Varchar(5)
 
-    @Column(name = "Seq")
     private Integer seq; // Sequence de la modification // Number(3)
 
-    @Column(name = "GoodsCODE")
     private String goodsCODE;
 
-    @Column(name = "GoodsType")
     private String goodsType;
 
-    @Column(name = "GoodsOrigin", length = 2)
+    @Column(length = 2)
     private String goodsOrigin; // Origin of Goods // varchar(2)
 
-    @Column(name = "PlaceOfTakingCharge", length = 50)
+    @Column(length = 50)
     private String placeOfTakingCharge; // Place of taking charge // Varchar(50)
 
-    @Column(name = "PortOfLoading", length = 50)
+    @Column(length = 50)
     private String portOfLoading; // Port of Loading or Airport of departure 44E // Varchar(50)
 
-    @Column(name = "PortOfDischarge", length = 50)
+    @Column(length = 50)
     private String portOfDischarge; // Port of Discharge 44F // Varchar(50)
 
-    @Column(name = "PlaceOfFinalDestination", length = 50)
+    @Column(length = 50)
     private String placeOfFinalDestination; // place of final destination 44 // Varchar(50)
 
-    @Column(name = "TransportationType", length = 3)
+    @Column(length = 3)
     private String transportationType; // transportation type (Air/SEA) list // Varchar(3)
 
-    @Column(name = "Transhipment", length = 10)
+    @Column(length = 10)
     private String transhipment; // transhipment Allowed/Not Allowed // Varchar(10)
-
-    @Column(name = "ShipmentPeriod")
+    
     private Integer shipmentPeriod; // ShipmentPeriod // Number
 
-    @Column(name = "ShipmentDateFirst")
     private Date shipmentDateFirst; // date d'expedition // date
 
-    @Column(name = "ShipmentDateLast")
     private Date shipmentDateLast; // last date expedition // date
 
 

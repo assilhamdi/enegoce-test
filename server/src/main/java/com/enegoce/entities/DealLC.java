@@ -19,7 +19,6 @@ public class DealLC {
 
     @Column(length = 24)
     @Length(max = 24, message = "Max length allowed : 24")
-    @XType
     private String formLC; //40A: //Form of Documentary Credit //X
     private Date dueDate; //31C: //Date of Issue
 
@@ -29,18 +28,15 @@ public class DealLC {
 
     @Column(length = 29)
     @Length(max = 29, message = "Max length allowed : 29")
-    @XType
     private String expiryPlace; //31D: //Place of Expiry //X //TODO: ???
 
     @Column(length = 144) // 4 lines of 35 characters each including newline characters
     @Length(max = 144, message = "Max length allowed : 144")
-    @XType
     private String customerReference; //Applicant //50: //X
 
 
     @Column(length = 178) // 4 lines of 35 characters each including newline characters + 34
     @Length(max = 178, message = "Max length allowed : 178")
-    @XType
     private String counterParty; //Beneficiary - Name & Address //59: //X //TODO: With Address ??
 
     //@Column(length = 20)
@@ -67,12 +63,10 @@ public class DealLC {
 
     @Column(length = 11)
     @Length(max = 11, message = "Max length allowed : 11")
-    @XType
     private String partialTranshipment; //43P //Partial Shipments //X
 
     @Column(length = 11)
     @Length(max = 11, message = "Max length allowed : 11")
-    @XType
     private String transhipment; //43T //Partial Transhipment //X
 
     @OneToMany(mappedBy = "dealLC", cascade = CascadeType.ALL)

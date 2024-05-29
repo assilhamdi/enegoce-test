@@ -16,13 +16,11 @@ public class DealComment {
     @JoinColumn(name = "dealLcId")
     private DealLC dealLC;
 
-    @Column(name = "Comment", length = 350)
+    @Column(length = 350)
     private String comment;
 
-    @Column(name = "Seq")
     private Integer seq;
 
-    @Column(name = "DateCreation")
     private Timestamp dateCreation;
 
     /*@Column(name = "user", length = 35)

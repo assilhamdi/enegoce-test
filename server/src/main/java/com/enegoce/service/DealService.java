@@ -135,7 +135,6 @@ public class DealService {
         }
     }
 
-
     public boolean generateAndExportMt798Message(Integer dealId, String mt, String filePath) {
         if (!"700".equals(mt) && !"701".equals(mt)) {
             logger.error("Unsupported MT for MT798: " + mt);
@@ -161,7 +160,6 @@ public class DealService {
             return false;
         }
     }
-
 
     private void processDealLC(BufferedWriter writer, DealLC dealLC, List<MtFieldMapping> mappings) throws IOException {
         for (MtFieldMapping mapping : mappings) {
@@ -238,87 +236,6 @@ public class DealService {
         }
     }
 
-
-    public boolean exportFIN700(DealLC deal, String finFilePath) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(finFilePath))) {
-            // **Message Header**
-            writer.write("------------------------- Message Header -------------------------");
-            writer.newLine();
-            writer.write("Swift Input: FIN 700  Issue of a Documentary Credit");
-            writer.newLine();
-            writer.write("Sender  : " + deal.getBankISSRef());
-            writer.newLine();
-            writer.write("Receiver: " + deal.getBankRMBRef());
-            writer.newLine();
-
-            writer.write("-------------------------- Message Text -------------------------");
-            writer.newLine();
-            writer.write("27 : Sequence of Total");
-            writer.newLine();
-            writer.write("     N/A"); //TODO 27:
-            writer.newLine();
-
-            // **Essential Message Fields**
-            writer.write("40A: Form of Documentary Credit");
-            writer.newLine();
-            writer.write("     " + deal.getFormLC());
-            writer.newLine(); // Adding a new line after each field for readability
-            writer.write("20 : Documentary Credit Number");
-            writer.newLine();
-            writer.write("     " + deal.getDealId());
-            writer.newLine();
-            writer.write("31C: Date of Issue " + deal.getDueDate());
-            writer.newLine();
-            writer.write("40E: Applicable Rules");
-            writer.newLine();
-            writer.write("     " + "N/A"); //TODO 40E:
-            writer.newLine();
-            writer.write("31D: Date and Place of Expiry " + deal.getExpiryDate() + " " + deal.getExpiryPlace());
-            writer.newLine();
-
-            // **Additional Fields (based on FIN 700 structure)**
-            writer.write("50 : Applicant");
-            writer.newLine();
-            writer.write("     " + deal.getCustomerReference());
-            writer.newLine();
-            writer.write("59 : Beneficiary - Name & Address");
-            writer.newLine();
-            writer.write("     " + deal.getCounterParty());
-            writer.newLine();
-            writer.write("32B: Currency Code, Amount");
-            writer.newLine();
-            writer.write("     Currency: " + deal.getCurrencyId());
-            writer.newLine();
-            writer.write("     Amount: " + deal.getLcAmount());
-            writer.newLine();
-            writer.write("39A: Percentage Credit Amt Tolerance");
-            writer.newLine();
-            writer.write("     " + deal.getVarAmountTolerance());
-            writer.newLine();
-
-            // **Optional Fields (if applicable)**
-            writer.write("41A: Available With");
-            writer.newLine();
-            writer.write("     " + deal.getAvailableWith());
-            writer.newLine();
-            writer.write("43P: Partial Shipments");
-            writer.newLine();
-            writer.write("     " + deal.getPartialTranshipment());
-            writer.newLine();
-            writer.write("43T: Transhipment");
-            writer.newLine();
-            writer.write("     " + deal.getTranshipment());
-            writer.newLine();
-            //TODO : 44F
-
-        } catch (IOException e) {
-            logger.error("An Error has occurred", e);
-            return false;
-        }
-
-
-        return true;
-    }
 
     ////////////////////DealGoods////////////////////
     /////////////////////////////////////////////////

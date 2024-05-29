@@ -13,28 +13,28 @@ public class DealParty {
     @JoinColumn(name = "dealLcId")
     private DealLC dealLC = new DealLC();
 
-    @Column(name = "codPrt", length = 35)
+    @Column(length = 35)
     private String codPrt;
 
-    @Column(name = "name", length = 35)
+    @Column(length = 35)
     private String name;
 
-    @Column(name = "address", length = 35)
+    @Column(length = 35)
     private String address;
 
-    @Column(name = "address1", length = 35)
+    @Column(length = 35)
     private String address1;
 
-    @Column(name = "address2", length = 35)
+    @Column(length = 35)
     private String address2;
 
-    @Column(name = "city", length = 35)
+    @Column(length = 35)
     private String city;
 
-    @Column(name = "cp", length = 10)
+    @Column(length = 10)
     private String cp;
 
-    @Column(name = "country", length = 35)
+    @Column(length = 35)
     private String country;
 
     public DealParty() {

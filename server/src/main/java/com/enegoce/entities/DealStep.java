@@ -16,36 +16,29 @@ public class DealStep {
     @JoinColumn(name = "dealLcId")
     private DealLC dealLC;
 
-    @Column(name = "Seq")
     private Integer seq;
 
-    @Column(name = "DealID")
-    private Long dealID;
-
-    @Column(name = "Step", length = 3)
+    @Column(length = 3)
     private String step;
 
-    @Column(name = "version", length = 3)
+    @Column(length = 3)
     private String version;
 
-    @Column(name = "comment")
     private String comment;
 
     /*@Column(name = "user")
     private String user;*/
 
-    @Column(name = "dateCreation")
     private Timestamp dateCreation;
 
     public DealStep() {
     }
 
-    public DealStep(Integer id, DealLC dealLC, Integer seq, Long dealID,
+    public DealStep(Integer id, DealLC dealLC, Integer seq,
                     String step, String version, String comment, Timestamp dateCreation) {
         this.id = id;
         this.dealLC = dealLC;
         this.seq = seq;
-        this.dealID = dealID;
         this.step = step;
         this.version = version;
         this.comment = comment;
@@ -74,14 +67,6 @@ public class DealStep {
 
     public void setSeq(Integer seq) {
         this.seq = seq;
-    }
-
-    public Long getDealID() {
-        return dealID;
-    }
-
-    public void setDealID(Long dealID) {
-        this.dealID = dealID;
     }
 
     public String getStep() {

@@ -45,26 +45,6 @@ public class DealController {
         return service.dealById(id);
     }
 
-    @MutationMapping
-    public String exportDeal(@Argument Integer id) {
-        DealLC deal = service.dealById(id);
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String finFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/Fin_700_" + timestamp + ".txt";
-
-        boolean conversionSuccessful = service.exportFIN700(deal, finFilePath);
-        String response;
-
-        if (conversionSuccessful) {
-            response = String.valueOf(ResponseEntity.ok()
-                    .body("{\"message\": \"Conversion successful\", \"finFilePath\": \"" + finFilePath + "\"}"));
-        } else {
-            logger.error("Unsuccessful Conversion");
-            response = String.valueOf(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"message\": \"Conversion failed. Please check your Input and try again.\"}"));
-        }
-        return response;
-
-    }
 
     @MutationMapping
     public String exportMT(@Argument Integer id, @Argument String mt) {
@@ -103,19 +83,23 @@ public class DealController {
     }
 
 
-
     //////////////////////////////DealGoods//////////////////////////////
     /////////////////////////////////////////////////////////////////////
 
     @QueryMapping
-    public List<DealGoods> getAllDealGoods() {return service.goods();}
+    public List<DealGoods> getAllDealGoods() {
+        return service.goods();
+    }
 
     @QueryMapping
-    public DealGoods dealGoodsById(@Argument Integer id) {return service.dealGoodsById(id);}
+    public DealGoods dealGoodsById(@Argument Integer id) {
+        return service.dealGoodsById(id);
+    }
 
     @QueryMapping
-    public List<DealGoods> goodsByDealId(@Argument Integer id) {return service.goodsByDealId(id);}
-
+    public List<DealGoods> goodsByDealId(@Argument Integer id) {
+        return service.goodsByDealId(id);
+    }
 
 
 }

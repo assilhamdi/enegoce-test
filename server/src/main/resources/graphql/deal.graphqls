@@ -2,7 +2,6 @@ extend type Query {
 
     getAllDealLCs: [DealLC]
     getDealLCById(id: Int!): DealLC
-
     getAllDealGoods: [DealGoods]
     dealGoodsById(id: Int!): DealGoods
     goodsByDealId(id: Int!): [DealGoods]
@@ -11,7 +10,6 @@ extend type Query {
 extend type Mutation {
 
     addDealLC(input: DealLCInput): DealLC
-    exportDeal(id: Int!): String
     exportMT(id: Int!, mt:String): String
     exportMT798(dealId: Int!, mt: String): String
 }
