@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { DealLC, DealLCInput } from '../../graphql/types';
-import { CREATE_DEAL_LC, EXPORT_DEAL, GET_DEALS, EXPORT_MT, EXPORT_MT798 } from '../../graphql/graphql.queries_deal-lc';
+import { CREATE_DEAL_LC, GET_DEALS, EXPORT_MT, EXPORT_MT798 } from '../../graphql/graphql.queries_deal-lc';
 import { Apollo } from 'apollo-angular';
 
 @Injectable({
@@ -17,15 +17,6 @@ export class DealLcService {
     }).valueChanges.pipe(
       map(result => result.data.getAllDealLCs)
     );
-  }
-
-  exportDeal(dealId: Number): Observable<any> {
-    return this.apollo.mutate({
-      mutation: EXPORT_DEAL,
-      variables: {
-        id: dealId
-      }
-    });
   }
 
   exportMT(dealId: Number, mt: String): Observable<any> {

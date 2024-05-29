@@ -42,19 +42,6 @@ export class DealLcComponent implements OnInit {
     );
   }
 
-  exportDeal(dealId: Number) {
-    this.dealService.exportDeal(dealId)
-      .pipe(
-        catchError(error => {
-          console.error('Error exporting deal:', error);
-          return EMPTY; // Return empty observable to handle the error
-        })
-      )
-      .subscribe(result => {
-        console.log('Deal exported successfully:', result);
-      });
-  }
-
   exportMT(dealId: Number, mt: String) {
     this.dealService.exportMT(dealId, mt)
       .pipe(

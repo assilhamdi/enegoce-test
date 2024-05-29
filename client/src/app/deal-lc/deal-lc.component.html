@@ -29,7 +29,6 @@
         <p><strong>Available With:</strong> {{ deal.availableWith }}</p>
         <p><strong>Partial Transhipment:</strong> {{ deal.partialTranshipment }}</p>
         <p><strong>Transhipment:</strong> {{ deal.transhipment }}</p>
-        <!--<button (click)="exportDeal(deal.dealId)">Generate MT</button>-->
         <select [(ngModel)]="selectedMt">
           <option *ngFor="let mt of distinctMtValues" [value]="mt">{{ mt }}</option>
         </select>

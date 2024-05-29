@@ -23,12 +23,6 @@ const GET_DEALS = gql`
   }
 `;
 
-const EXPORT_DEAL = gql`
-  mutation ExportDeal($id: Int!) {
-    exportDeal(id: $id)
-  }
-`;
-
 const EXPORT_MT = gql`
   mutation ExportMT($id: Int!, $mt: String) {
     exportMT(id: $id, mt: $mt)
@@ -65,4 +59,4 @@ const CREATE_DEAL_LC = gql`
 
 
 
-export { GET_DEALS, EXPORT_DEAL, CREATE_DEAL_LC, EXPORT_MT, EXPORT_MT798 };
+export { GET_DEALS, CREATE_DEAL_LC, EXPORT_MT, EXPORT_MT798 };
