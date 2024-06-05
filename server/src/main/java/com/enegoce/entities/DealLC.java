@@ -69,6 +69,13 @@ public class DealLC {
     @Length(max = 11, message = "Max length allowed : 11")
     private String transhipment; //43T //Partial Transhipment //X
 
+    private Integer presDay; //48
+
+    private String confirmationCharge; //49
+
+    private String addAmtCovered; //39C
+
+
     @OneToMany(mappedBy = "dealLC", cascade = CascadeType.ALL)
     private List<DealParty> dealParties = new ArrayList<>();
 
@@ -256,6 +263,30 @@ public class DealLC {
         this.dealSteps = dealSteps;
     }
 
+    public Integer getPresDay() {
+        return presDay;
+    }
+
+    public void setPresDay(Integer presDay) {
+        this.presDay = presDay;
+    }
+
+    public String getConfirmationCharge() {
+        return confirmationCharge;
+    }
+
+    public void setConfirmationCharge(String confirmationCharge) {
+        this.confirmationCharge = confirmationCharge;
+    }
+
+    public String getAddAmtCovered() {
+        return addAmtCovered;
+    }
+
+    public void setAddAmtCovered(String addAmtCovered) {
+        this.addAmtCovered = addAmtCovered;
+    }
+
     public DealLC() {
     }
 
@@ -264,6 +295,7 @@ public class DealLC {
                   String bankISSRef, String bankRMBRef, Timestamp creationDate,
                   String currencyId, BigDecimal lcAmount, BigDecimal varAmountTolerance,
                   String availableWith, String partialTranshipment, String transhipment,
+                  Integer presDay, String confirmationCharge, String addAmtCovered,
                   List<DealParty> dealParties, List<DealGoods> dealGoods, List<DealDoc> dealDocs,
                   List<DealComment> dealComments, List<DealStep> dealSteps) {
         this.dealId = dealId;
@@ -282,6 +314,9 @@ public class DealLC {
         this.availableWith = availableWith;
         this.partialTranshipment = partialTranshipment;
         this.transhipment = transhipment;
+        this.presDay = presDay;
+        this.confirmationCharge = confirmationCharge;
+        this.addAmtCovered = addAmtCovered;
         this.dealParties = dealParties;
         this.dealGoods = dealGoods;
         this.dealDocs = dealDocs;

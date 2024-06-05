@@ -4,5 +4,6 @@ public record DealLCInput(String formLC, String dueDate, String expiryDate, Stri
                           String customerReference, String counterParty, String bankISSRef,
                           String bankRMBRef, String creationDate, String currencyId,
                           String lcAmount, String varAmountTolerance, String availableWith,
-                          String partialTranshipment, String transhipment) {
+                          String partialTranshipment, String transhipment, Integer presDay,
+                          String confirmationCharge, String addAmtCovered) {
 }

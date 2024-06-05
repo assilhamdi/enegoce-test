@@ -32,6 +32,9 @@ type DealLC {
     partialTranshipment: String
     transhipment: String
     dealGoods: [DealGoods]
+    presDay: Int
+    confirmationCharge: String
+    addAmtCovered: String
 }
 
 type DealGoods {
@@ -56,6 +59,9 @@ input DealLCInput {
     availableWith: String
     partialTranshipment: String
     transhipment: String
+    presDay: Int
+    confirmationCharge: String
+    addAmtCovered: String
 }
 
 input DealGoodsInput {

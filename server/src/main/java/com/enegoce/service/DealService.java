@@ -9,6 +9,8 @@ import com.enegoce.repository.DealLCRepository;
 import com.enegoce.repository.MtFieldMappingRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +61,9 @@ public class DealService {
         deal.setAvailableWith(dealInput.availableWith());
         deal.setPartialTranshipment(dealInput.partialTranshipment());
         deal.setTranshipment(dealInput.transhipment());
+        deal.setPresDay(dealInput.presDay());
+        deal.setConfirmationCharge(dealInput.confirmationCharge());
+        deal.setAddAmtCovered(dealInput.addAmtCovered());
 
         try {
             deal.setDueDate(new SimpleDateFormat("yyyy-MM-dd").parse(dealInput.dueDate()));
@@ -166,26 +171,67 @@ public class DealService {
             String entityName = mapping.getEntityName();
             String fieldName = mapping.getDatabaseField();
             String mtTag = mapping.getTag();
+            String mappingRule = mapping.getMappingRule();
 
-            // Skip if fieldName or entityName is null
-            if (fieldName == null || entityName == null) {
-                continue;
-            }
+            if (mappingRule != null && !mappingRule.isEmpty()) {
+                // Parse the mapping rule
+                JSONObject ruleJson = new JSONObject(mappingRule);
+                JSONArray fieldsArray = ruleJson.getJSONArray("fields");
+                String delimiter = ruleJson.getString("delimiter");
+                StringBuilder combinedValue = new StringBuilder();
 
-            // Find corresponding getter method for the field
-            String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-            logger.info(getterMethodName);
-            Object fieldValue = null;
-            try {
-                if ("DealLC".equals(entityName)) {
-                    fieldValue = dealLC.getClass().getMethod(getterMethodName).invoke(dealLC);
+                for (int i = 0; i < fieldsArray.length(); i++) {
+                    String fullFieldName = fieldsArray.getString(i);
+                    String[] parts = fullFieldName.split("\\.");
+                    String entity = parts[0];
+                    String field = parts[1];
+                    String getterMethodName = "get" + Character.toUpperCase(field.charAt(0)) + field.substring(1);
+
+                    Object fieldValue = null;
+                    try {
+                        if ("DealLC".equals(entity)) {
+                            fieldValue = dealLC.getClass().getMethod(getterMethodName).invoke(dealLC);
+                        } else if ("DealGoods".equals(entity)) {
+                            // Handle DealGoods if necessary
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error accessing field " + field + " in entity " + entity, e);
+                    }
+
+                    if (fieldValue != null) {
+                        if (!combinedValue.isEmpty()) {
+                            combinedValue.append(delimiter);
+                        }
+                        combinedValue.append(fieldValue.toString());
+                    }
                 }
-            } catch (Exception e) {
-                logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
-            }
 
-            if (fieldValue != null) {
-                writer.write(mtTag + ":" + fieldValue + "\r\n");
+                if (!combinedValue.isEmpty()) {
+                    writer.write(mtTag + ":" + combinedValue.toString() + "\r\n");
+                }
+            } else {
+                // Handle normal single field logic
+                if (fieldName == null || entityName == null) {
+                    continue;
+                }
+
+                if (fieldName.contains("//todo//") || entityName.contains("//todo//")) { //TODO: Temporary
+                    continue;
+                }
+
+                String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                Object fieldValue = null;
+                try {
+                    if ("DealLC".equals(entityName)) {
+                        fieldValue = dealLC.getClass().getMethod(getterMethodName).invoke(dealLC);
+                    }
+                } catch (Exception e) {
+                    logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
+                }
+
+                if (fieldValue != null) {
+                    writer.write(mtTag + ":" + fieldValue + "\r\n");
+                }
             }
         }
     }
