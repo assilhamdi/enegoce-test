@@ -79,6 +79,9 @@ public class InfoDeal {
     private List<DealGoods> dealGoods = new ArrayList<>();
 
     @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
+    private List<Settlement> settlements = new ArrayList<>();
+
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
     private List<DealDoc> dealDocs = new ArrayList<>();
 
     @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
@@ -274,6 +277,14 @@ public class InfoDeal {
         this.dealGoods = dealGoods;
     }
 
+    public List<Settlement> getSettlements() {
+        return settlements;
+    }
+
+    public void setSettlements(List<Settlement> settlements) {
+        this.settlements = settlements;
+    }
+
     public List<DealDoc> getDealDocs() {
         return dealDocs;
     }
@@ -298,13 +309,7 @@ public class InfoDeal {
         this.dealSteps = dealSteps;
     }
 
-    public InfoDeal(Integer id, String formLC, Date dueDate, Date expiryDate, String expiryPlace,
-                    String customerReference, String counterParty, String bankISSRef,
-                    String bankRMBRef, Timestamp creationDate, String currencyID, BigDecimal lcAmount,
-                    BigDecimal varAmountTolerance, String partialTranshipment, String transhipment,
-                    Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt,
-                    String draft, String document, List<DealParty> dealParties, List<DealGoods> dealGoods,
-                    List<DealDoc> dealDocs, List<DealComment> dealComments, List<DealStep> dealSteps) {
+    public InfoDeal(Integer id, String formLC, Date dueDate, Date expiryDate, String expiryPlace, String customerReference, String counterParty, String bankISSRef, String bankRMBRef, Timestamp creationDate, String currencyID, BigDecimal lcAmount, BigDecimal varAmountTolerance, String partialTranshipment, String transhipment, Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt, String draft, String document, List<DealParty> dealParties, List<DealGoods> dealGoods, List<Settlement> settlements, List<DealDoc> dealDocs, List<DealComment> dealComments, List<DealStep> dealSteps) {
         this.id = id;
         this.formLC = formLC;
         this.dueDate = dueDate;
@@ -328,6 +333,7 @@ public class InfoDeal {
         this.document = document;
         this.dealParties = dealParties;
         this.dealGoods = dealGoods;
+        this.settlements = settlements;
         this.dealDocs = dealDocs;
         this.dealComments = dealComments;
         this.dealSteps = dealSteps;

@@ -2,9 +2,21 @@ extend type Query {
 
     getAllInfoDeals: [InfoDeal]
     getInfoDealById(id: Int!): InfoDeal
+
+    ###DealGoods
     getAllDealGoods: [DealGoods]
     dealGoodsById(id: Int!): DealGoods
     goodsByDealId(id: Int!): [DealGoods]
+
+    ###DealParty
+    getAllDealParties: [DealParty]
+    dealPartyById(id: Int!): DealParty
+    partiesByDealId(id: Int!): [DealParty]
+
+    ###Settlement
+    getAllSettlements: [Settlement]
+    settlementById(id: Int!): [Settlement]
+    settlementsByDealId(id: Int!): [Settlement]
 }
 
 extend type Mutation {
@@ -30,16 +42,14 @@ type InfoDeal {
     varAmountTolerance: String
     partialTranshipment: String
     transhipment: String
-    dealGoods: [DealGoods]
     presDay: Int
     confirmationCharge: String
     addAmtCovered: String
-}
+    dealGoods: [DealGoods]
+    dealParties: [DealParty]
+    settlements: [Settlement]
 
-type DealGoods {
-    id: ID!
-    goodsDesc: String
-    infoDeal: InfoDeal
+
 }
 
 input InfoDealInput {
@@ -62,6 +72,44 @@ input InfoDealInput {
     addAmtCovered: String
 }
 
+###DealGoods
+
+type DealGoods {
+    id: ID!
+    goodsDesc: String
+}
+
 input DealGoodsInput {
     goodsDesc: String
+}
+
+###DealParty
+
+type DealParty {
+    id: ID!
+    codPrt: String
+    name: String
+    address: String
+    address1: String
+    address2: String
+    city: String
+    cp: String # TODO: party code ??
+    country: String
+}
+
+###Settlement
+
+type Settlement {
+    id: ID!
+    paymentType: String
+    availableWithBank: String
+    availableWithOther: String
+    mixedPay1: String
+    mixedPay2: String
+    mixedPay3: String
+    mixedPay4: String
+    negDefPay1: String
+    negDefPay2: String
+    negDefPay3: String
+    negDefPay4: String
 }

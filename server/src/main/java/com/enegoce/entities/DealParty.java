@@ -11,7 +11,7 @@ public class DealParty {
 
     @ManyToOne
     @JoinColumn(name = "deal_id")
-    private InfoDeal deal = new InfoDeal();
+    private InfoDeal deal;
 
     @Column(length = 35)
     private String codPrt;

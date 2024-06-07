@@ -13,7 +13,7 @@ public class DealGoods {
 
     @ManyToOne
     @JoinColumn(name = "deal_id")
-    private InfoDeal deal = new InfoDeal();
+    private InfoDeal deal;
 
     @Column(length = 6500)
     private String goodsDesc; // Descriptions of goods // Varchar(6500)

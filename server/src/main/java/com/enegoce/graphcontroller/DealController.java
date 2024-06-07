@@ -1,8 +1,6 @@
 package com.enegoce.graphcontroller;
 
-import com.enegoce.entities.DealGoods;
-import com.enegoce.entities.InfoDeal;
-import com.enegoce.entities.InfoDealInput;
+import com.enegoce.entities.*;
 import com.enegoce.service.DealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -100,6 +98,30 @@ public class DealController {
     public List<DealGoods> goodsByDealId(@Argument Integer id) {
         return service.goodsByDealId(id);
     }
+
+    ////////////////////DealParty////////////////////
+    /////////////////////////////////////////////////
+
+    @QueryMapping
+    public List<DealParty> getAllDealParties() {return service.parties();}
+
+    @QueryMapping
+    public DealParty dealPartyById(@Argument Integer id) {return service.dealPartyById(id);}
+
+    @QueryMapping
+    public List<DealParty> partiesByDealId(@Argument Integer id) {return service.partiesByDealId(id);}
+
+    ////////////////////Settlement////////////////////
+    /////////////////////////////////////////////////
+
+    @QueryMapping
+    public List<Settlement> getAllSettlements() {return service.settlements();}
+
+    @QueryMapping
+    public Settlement settlementById (@Argument Integer id) {return service.settlementById(id);}
+
+    @QueryMapping
+    public List<Settlement> settlementsByDealId (@Argument Integer id){ return service.settlementsByDealId(id);}
 
 
 }
