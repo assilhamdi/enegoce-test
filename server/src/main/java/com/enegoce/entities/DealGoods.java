@@ -12,8 +12,8 @@ public class DealGoods {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "dealLcId")
-    private DealLC dealLC = new DealLC();
+    @JoinColumn(name = "deal_id")
+    private InfoDeal deal = new InfoDeal();
 
     @Column(length = 6500)
     private String goodsDesc; // Descriptions of goods // Varchar(6500)
@@ -58,19 +58,18 @@ public class DealGoods {
     public DealGoods() {
     }
 
-    public DealGoods(Integer id, DealLC dealLC, String stepID, Integer seq, String goodsCODE,
-                     String goodsType, String goodsDesc, String goodsOrigin,
-                     String placeOfTakingCharge, String portOfLoading, String portOfDischarge,
-                     String placeOfFinalDestination, String transportationType,
-                     String transhipment, Integer shipmentPeriod, Date shipmentDateFirst,
-                     Date shipmentDateLast) {
+    public DealGoods(Integer id, InfoDeal deal, String goodsDesc, String stepID, Integer seq,
+                     String goodsCODE, String goodsType, String goodsOrigin, String placeOfTakingCharge,
+                     String portOfLoading, String portOfDischarge, String placeOfFinalDestination,
+                     String transportationType, String transhipment, Integer shipmentPeriod,
+                     Date shipmentDateFirst, Date shipmentDateLast) {
         this.id = id;
-        this.dealLC = dealLC;
+        this.deal = deal;
+        this.goodsDesc = goodsDesc;
         this.stepID = stepID;
         this.seq = seq;
         this.goodsCODE = goodsCODE;
         this.goodsType = goodsType;
-        this.goodsDesc = goodsDesc;
         this.goodsOrigin = goodsOrigin;
         this.placeOfTakingCharge = placeOfTakingCharge;
         this.portOfLoading = portOfLoading;
@@ -91,12 +90,12 @@ public class DealGoods {
         this.id = id;
     }
 
-    public DealLC getDealLC() {
-        return dealLC;
+    public InfoDeal getDeal() {
+        return deal;
     }
 
-    public void setDealLC(DealLC dealLC) {
-        this.dealLC = dealLC;
+    public void setDeal(InfoDeal deal) {
+        this.deal = deal;
     }
 
     public String getStepID() {

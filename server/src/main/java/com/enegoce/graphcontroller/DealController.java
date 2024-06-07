@@ -1,8 +1,8 @@
 package com.enegoce.graphcontroller;
 
 import com.enegoce.entities.DealGoods;
-import com.enegoce.entities.DealLC;
-import com.enegoce.entities.DealLCInput;
+import com.enegoce.entities.InfoDeal;
+import com.enegoce.entities.InfoDealInput;
 import com.enegoce.service.DealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -31,17 +31,17 @@ public class DealController {
     private DealService service;
 
     @QueryMapping
-    public List<DealLC> getAllDealLCs() {
+    public List<InfoDeal> getAllInfoDeals() {
         return service.deals();
     }
 
     @MutationMapping
-    public DealLC addDealLC(@Argument DealLCInput input) {
-        return service.createDealLC(input);
+    public InfoDeal addInfoDeal(@Argument InfoDealInput input) {
+        return service.createInfoDeal(input);
     }
 
     @QueryMapping
-    public DealLC getDealLCById(@Argument Integer id) {
+    public InfoDeal getInfoDealById(@Argument Integer id) {
         return service.dealById(id);
     }
 
@@ -64,7 +64,7 @@ public class DealController {
         }
     }
 
-    @MutationMapping
+    /*@MutationMapping
     public String exportMT798(@Argument Integer dealId, @Argument String mt) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT798_" + timestamp + ".txt";
@@ -80,7 +80,7 @@ public class DealController {
             response = "{\"message\": \"Conversion failed. Please check your Input and try again.\"}";
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
         }
-    }
+    }*/
 
 
     //////////////////////////////DealGoods//////////////////////////////

@@ -13,8 +13,8 @@ public class DealStep {
 
 
     @ManyToOne
-    @JoinColumn(name = "dealLcId")
-    private DealLC dealLC;
+    @JoinColumn(name = "deal_id")
+    private InfoDeal deal;
 
     private Integer seq;
 
@@ -34,17 +34,6 @@ public class DealStep {
     public DealStep() {
     }
 
-    public DealStep(Integer id, DealLC dealLC, Integer seq,
-                    String step, String version, String comment, Timestamp dateCreation) {
-        this.id = id;
-        this.dealLC = dealLC;
-        this.seq = seq;
-        this.step = step;
-        this.version = version;
-        this.comment = comment;
-        this.dateCreation = dateCreation;
-    }
-
     public Integer getId() {
         return id;
     }
@@ -53,12 +42,12 @@ public class DealStep {
         this.id = id;
     }
 
-    public DealLC getDealLC() {
-        return dealLC;
+    public InfoDeal getDeal() {
+        return deal;
     }
 
-    public void setDealLC(DealLC dealLC) {
-        this.dealLC = dealLC;
+    public void setDeal(InfoDeal deal) {
+        this.deal = deal;
     }
 
     public Integer getSeq() {

@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface DealGoodsRepository extends JpaRepository<DealGoods,Integer> {
 
-    @Query("SELECT dg FROM DealGoods dg WHERE dg.dealLC.dealId = :dealId")
+    @Query("SELECT dg FROM DealGoods dg WHERE dg.deal.id = :dealId")
     List<DealGoods> findGoodsByDealId(@Param("dealId") Integer dealId);
 
 }

@@ -1,7 +1,7 @@
 extend type Query {
 
-    getAllDealLCs: [DealLC]
-    getDealLCById(id: Int!): DealLC
+    getAllInfoDeals: [InfoDeal]
+    getInfoDealById(id: Int!): InfoDeal
     getAllDealGoods: [DealGoods]
     dealGoodsById(id: Int!): DealGoods
     goodsByDealId(id: Int!): [DealGoods]
@@ -9,13 +9,13 @@ extend type Query {
 
 extend type Mutation {
 
-    addDealLC(input: DealLCInput): DealLC
+    addInfoDeal(input: InfoDealInput): InfoDeal
     exportMT(id: Int!, mt:String): String
-    exportMT798(dealId: Int!, mt: String): String
+    #exportMT798(dealId: Int!, mt: String): String
 }
 
-type DealLC {
-    dealId: ID!
+type InfoDeal {
+    id: ID!
     formLC: String
     dueDate: String
     expiryDate: String
@@ -28,7 +28,6 @@ type DealLC {
     currencyId: String
     lcAmount: String
     varAmountTolerance: String
-    availableWith: String
     partialTranshipment: String
     transhipment: String
     dealGoods: [DealGoods]
@@ -40,10 +39,10 @@ type DealLC {
 type DealGoods {
     id: ID!
     goodsDesc: String
-    dealLC: DealLC
+    infoDeal: InfoDeal
 }
 
-input DealLCInput {
+input InfoDealInput {
     formLC: String
     dueDate: String
     expiryDate: String
@@ -56,7 +55,6 @@ input DealLCInput {
     currencyId: String
     lcAmount: String
     varAmountTolerance: String
-    availableWith: String
     partialTranshipment: String
     transhipment: String
     presDay: Int

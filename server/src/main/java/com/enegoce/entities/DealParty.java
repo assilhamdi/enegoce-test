@@ -10,8 +10,8 @@ public class DealParty {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "dealLcId")
-    private DealLC dealLC = new DealLC();
+    @JoinColumn(name = "deal_id")
+    private InfoDeal deal = new InfoDeal();
 
     @Column(length = 35)
     private String codPrt;
@@ -32,27 +32,12 @@ public class DealParty {
     private String city;
 
     @Column(length = 10)
-    private String cp;
+    private String cp; //TODO: party code ??
 
     @Column(length = 35)
     private String country;
 
     public DealParty() {
-    }
-
-    public DealParty(Integer id, DealLC dealLC, String codPrt, String name, String address,
-                     String address1, String address2, String city, String cp,
-                     String country) {
-        this.id = id;
-        this.dealLC = dealLC;
-        this.codPrt = codPrt;
-        this.name = name;
-        this.address = address;
-        this.address1 = address1;
-        this.address2 = address2;
-        this.city = city;
-        this.cp = cp;
-        this.country = country;
     }
 
     public Integer getId() {
@@ -63,12 +48,12 @@ public class DealParty {
         this.id = id;
     }
 
-    public DealLC getDealLC() {
-        return dealLC;
+    public InfoDeal getDeal() {
+        return deal;
     }
 
-    public void setDealLC(DealLC dealLC) {
-        this.dealLC = dealLC;
+    public void setDeal(InfoDeal deal) {
+        this.deal = deal;
     }
 
     public String getCodPrt() {

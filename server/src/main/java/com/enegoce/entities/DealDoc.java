@@ -12,8 +12,8 @@ public class DealDoc {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "dealLcId")
-    private DealLC dealLC;
+    @JoinColumn(name = "deal_id")
+    private InfoDeal deal;
 
     @Column(length = 100)
     private String idGED;
@@ -31,18 +31,6 @@ public class DealDoc {
     public DealDoc() {
     }
 
-    public DealDoc(Integer id, DealLC dealLC, String idGED,
-                   String description, String sentID, Date dateUpload,
-                   String userUpload) {
-        this.id = id;
-        this.dealLC = dealLC;
-        this.idGED = idGED;
-        this.description = description;
-        this.sentID = sentID;
-        this.dateUpload = dateUpload;
-        this.userUpload = userUpload;
-    }
-
     public Integer getId() {
         return id;
     }
@@ -51,12 +39,12 @@ public class DealDoc {
         this.id = id;
     }
 
-    public DealLC getDealLC() {
-        return dealLC;
+    public InfoDeal getDeal() {
+        return deal;
     }
 
-    public void setDealLC(DealLC dealLC) {
-        this.dealLC = dealLC;
+    public void setDeal(InfoDeal deal) {
+        this.deal = deal;
     }
 
     public String getIdGED() {

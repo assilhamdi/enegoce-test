@@ -11,10 +11,9 @@ public class DealComment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
     @ManyToOne
-    @JoinColumn(name = "dealLcId")
-    private DealLC dealLC;
+    @JoinColumn(name = "deal_id")
+    private InfoDeal deal;
 
     @Column(length = 350)
     private String comment;
@@ -29,13 +28,6 @@ public class DealComment {
     public DealComment() {
     }
 
-    public DealComment(Integer id, DealLC dealLC, String comment, Integer seq, Timestamp dateCreation) {
-        this.id = id;
-        this.dealLC = dealLC;
-        this.comment = comment;
-        this.seq = seq;
-        this.dateCreation = dateCreation;
-    }
 
     public Integer getId() {
         return id;
@@ -45,12 +37,12 @@ public class DealComment {
         this.id = id;
     }
 
-    public DealLC getDealLC() {
-        return dealLC;
+    public InfoDeal getDeal() {
+        return deal;
     }
 
-    public void setDealLC(DealLC dealLC) {
-        this.dealLC = dealLC;
+    public void setDeal(InfoDeal deal) {
+        this.deal = deal;
     }
 
     public String getComment() {

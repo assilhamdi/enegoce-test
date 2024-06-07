@@ -1,6 +1,5 @@
 package com.enegoce.entities;
 
-import com.enegoce.validation.XType;
 import jakarta.persistence.*;
 import org.hibernate.validator.constraints.Length;
 
@@ -11,55 +10,47 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-public class DealLC {
+public class InfoDeal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer dealId; //20: //Documentary Credit Number //TODO: Validation
+    private Integer id; //20: //Documentary Credit Number
 
     @Column(length = 24)
     @Length(max = 24, message = "Max length allowed : 24")
     private String formLC; //40A: //Form of Documentary Credit //X
+
     private Date dueDate; //31C: //Date of Issue
 
     //TODO: 40E ??
     private Date expiryDate; //31D: //Date of Expiry
 
-
     @Column(length = 29)
     @Length(max = 29, message = "Max length allowed : 29")
-    private String expiryPlace; //31D: //Place of Expiry //X //TODO: ???
+    private String expiryPlace; //31D: //Place of Expiry //X
 
     @Column(length = 144) // 4 lines of 35 characters each including newline characters
     @Length(max = 144, message = "Max length allowed : 144")
     private String customerReference; //Applicant //50: //X
 
-
     @Column(length = 178) // 4 lines of 35 characters each including newline characters + 34
     @Length(max = 178, message = "Max length allowed : 178")
-    private String counterParty; //Beneficiary - Name & Address //59: //X //TODO: With Address ??
+    private String counterParty; //Beneficiary - Name & Address //59: //X
 
     //@Column(length = 20)
-    private String bankISSRef; //Sender //51a: //TODO: A or D
+    private String bankISSRef; //Sender //51a:
 
     //@Column(length = 20)
-    private String bankRMBRef; //Receiver //53a: //TODO: A or D
+    private String bankRMBRef; //Receiver //53a:
 
     private Timestamp creationDate; //Auto-Generated
 
     //@Column(length = 3)
-    private String currencyId; //32B: //Currency Code //TODO
+    private String currencyID; //32B: //Currency Code
     //@Column(precision = 13, scale = 2)
-    private BigDecimal lcAmount; //32B: //Amount //TODO
+    private BigDecimal lcAmount; //32B: //Amount
     //@Column(precision = 13, scale = 2)
-    private BigDecimal varAmountTolerance; //39A: //Percentage Credit Amt Tolerance //TODO: n?
-
-    /*@Column(precision = 13, scale = 2)
-    private BigDecimal addAmtCovered;*/
-
-    //@Column(length = 3)
-    private String availableWith; //41A: //Available With //A or D
-
+    private BigDecimal varAmountTolerance; //39A: //Percentage Credit Amt Tolerance
 
     @Column(length = 11)
     @Length(max = 11, message = "Max length allowed : 11")
@@ -75,32 +66,36 @@ public class DealLC {
 
     private String addAmtCovered; //39C
 
+    private String draftAt; //42C
 
-    @OneToMany(mappedBy = "dealLC", cascade = CascadeType.ALL)
+    private String draft; //42a
+
+    private String document; //46A
+
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
     private List<DealParty> dealParties = new ArrayList<>();
 
-    @OneToMany(mappedBy = "dealLC", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
     private List<DealGoods> dealGoods = new ArrayList<>();
 
-    @OneToMany(mappedBy = "dealLC", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
     private List<DealDoc> dealDocs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "dealLC", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
     private List<DealComment> dealComments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "dealLC", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
     private List<DealStep> dealSteps = new ArrayList<>();
 
-
-    //TODO:  Mixed Pay list no List<> of mixed pays db multiple fields, same for NEGDEFPAY
-
-
-    public Integer getDealId() {
-        return dealId;
+    public InfoDeal() {
     }
 
-    public void setDealId(Integer dealId) {
-        this.dealId = dealId;
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getFormLC() {
@@ -139,8 +134,8 @@ public class DealLC {
         return customerReference;
     }
 
-    public void setCustomerReference(String costumerReference) {
-        this.customerReference = costumerReference;
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
     }
 
     public String getCounterParty() {
@@ -175,12 +170,12 @@ public class DealLC {
         this.creationDate = creationDate;
     }
 
-    public String getCurrencyId() {
-        return currencyId;
+    public String getCurrencyID() {
+        return currencyID;
     }
 
-    public void setCurrencyId(String currencyId) {
-        this.currencyId = currencyId;
+    public void setCurrencyID(String currencyID) {
+        this.currencyID = currencyID;
     }
 
     public BigDecimal getLcAmount() {
@@ -199,14 +194,6 @@ public class DealLC {
         this.varAmountTolerance = varAmountTolerance;
     }
 
-    public String getAvailableWith() {
-        return availableWith;
-    }
-
-    public void setAvailableWith(String availableWith) {
-        this.availableWith = availableWith;
-    }
-
     public String getPartialTranshipment() {
         return partialTranshipment;
     }
@@ -221,6 +208,54 @@ public class DealLC {
 
     public void setTranshipment(String transhipment) {
         this.transhipment = transhipment;
+    }
+
+    public Integer getPresDay() {
+        return presDay;
+    }
+
+    public void setPresDay(Integer presDay) {
+        this.presDay = presDay;
+    }
+
+    public String getConfirmationCharge() {
+        return confirmationCharge;
+    }
+
+    public void setConfirmationCharge(String confirmationCharge) {
+        this.confirmationCharge = confirmationCharge;
+    }
+
+    public String getAddAmtCovered() {
+        return addAmtCovered;
+    }
+
+    public void setAddAmtCovered(String addAmtCovered) {
+        this.addAmtCovered = addAmtCovered;
+    }
+
+    public String getDraftAt() {
+        return draftAt;
+    }
+
+    public void setDraftAt(String draftAt) {
+        this.draftAt = draftAt;
+    }
+
+    public String getDraft() {
+        return draft;
+    }
+
+    public void setDraft(String draft) {
+        this.draft = draft;
+    }
+
+    public String getDocument() {
+        return document;
+    }
+
+    public void setDocument(String document) {
+        this.document = document;
     }
 
     public List<DealParty> getDealParties() {
@@ -263,42 +298,14 @@ public class DealLC {
         this.dealSteps = dealSteps;
     }
 
-    public Integer getPresDay() {
-        return presDay;
-    }
-
-    public void setPresDay(Integer presDay) {
-        this.presDay = presDay;
-    }
-
-    public String getConfirmationCharge() {
-        return confirmationCharge;
-    }
-
-    public void setConfirmationCharge(String confirmationCharge) {
-        this.confirmationCharge = confirmationCharge;
-    }
-
-    public String getAddAmtCovered() {
-        return addAmtCovered;
-    }
-
-    public void setAddAmtCovered(String addAmtCovered) {
-        this.addAmtCovered = addAmtCovered;
-    }
-
-    public DealLC() {
-    }
-
-    public DealLC(Integer dealId, String formLC, Date dueDate, Date expiryDate,
-                  String expiryPlace, String customerReference, String counterParty,
-                  String bankISSRef, String bankRMBRef, Timestamp creationDate,
-                  String currencyId, BigDecimal lcAmount, BigDecimal varAmountTolerance,
-                  String availableWith, String partialTranshipment, String transhipment,
-                  Integer presDay, String confirmationCharge, String addAmtCovered,
-                  List<DealParty> dealParties, List<DealGoods> dealGoods, List<DealDoc> dealDocs,
-                  List<DealComment> dealComments, List<DealStep> dealSteps) {
-        this.dealId = dealId;
+    public InfoDeal(Integer id, String formLC, Date dueDate, Date expiryDate, String expiryPlace,
+                    String customerReference, String counterParty, String bankISSRef,
+                    String bankRMBRef, Timestamp creationDate, String currencyID, BigDecimal lcAmount,
+                    BigDecimal varAmountTolerance, String partialTranshipment, String transhipment,
+                    Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt,
+                    String draft, String document, List<DealParty> dealParties, List<DealGoods> dealGoods,
+                    List<DealDoc> dealDocs, List<DealComment> dealComments, List<DealStep> dealSteps) {
+        this.id = id;
         this.formLC = formLC;
         this.dueDate = dueDate;
         this.expiryDate = expiryDate;
@@ -308,15 +315,17 @@ public class DealLC {
         this.bankISSRef = bankISSRef;
         this.bankRMBRef = bankRMBRef;
         this.creationDate = creationDate;
-        this.currencyId = currencyId;
+        this.currencyID = currencyID;
         this.lcAmount = lcAmount;
         this.varAmountTolerance = varAmountTolerance;
-        this.availableWith = availableWith;
         this.partialTranshipment = partialTranshipment;
         this.transhipment = transhipment;
         this.presDay = presDay;
         this.confirmationCharge = confirmationCharge;
         this.addAmtCovered = addAmtCovered;
+        this.draftAt = draftAt;
+        this.draft = draft;
+        this.document = document;
         this.dealParties = dealParties;
         this.dealGoods = dealGoods;
         this.dealDocs = dealDocs;
