@@ -12,6 +12,7 @@ extend type Query {
     getAllDealParties: [DealParty]
     dealPartyById(id: Int!): DealParty
     partiesByDealId(id: Int!): [DealParty]
+    partyByDealIdAndCode(id: Int!, code: String): DealParty
 
     ###Settlement
     getAllSettlements: [Settlement]

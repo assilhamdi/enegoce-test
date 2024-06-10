@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DealGoodsRepository extends JpaRepository<DealGoods,Integer> {
+public interface DealGoodsRepository extends JpaRepository<DealGoods, Integer> {
 
     @Query("SELECT dg FROM DealGoods dg WHERE dg.deal.id = :dealId")
     List<DealGoods> findGoodsByDealId(@Param("dealId") Integer dealId);
