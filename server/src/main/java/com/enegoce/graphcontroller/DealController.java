@@ -103,25 +103,42 @@ public class DealController {
     /////////////////////////////////////////////////
 
     @QueryMapping
-    public List<DealParty> getAllDealParties() {return service.parties();}
+    public List<DealParty> getAllDealParties() {
+        return service.parties();
+    }
 
     @QueryMapping
-    public DealParty dealPartyById(@Argument Integer id) {return service.dealPartyById(id);}
+    public DealParty dealPartyById(@Argument Integer id) {
+        return service.dealPartyById(id);
+    }
 
     @QueryMapping
-    public List<DealParty> partiesByDealId(@Argument Integer id) {return service.partiesByDealId(id);}
+    public List<DealParty> partiesByDealId(@Argument Integer id) {
+        return service.partiesByDealId(id);
+    }
+
+    @QueryMapping
+    public DealParty partyByDealIdAndCode(@Argument Integer id, @Argument String code) {
+        return service.partyByDealIdAndCode(id, code);
+    }
 
     ////////////////////Settlement////////////////////
     /////////////////////////////////////////////////
 
     @QueryMapping
-    public List<Settlement> getAllSettlements() {return service.settlements();}
+    public List<Settlement> getAllSettlements() {
+        return service.settlements();
+    }
 
     @QueryMapping
-    public Settlement settlementById (@Argument Integer id) {return service.settlementById(id);}
+    public Settlement settlementById(@Argument Integer id) {
+        return service.settlementById(id);
+    }
 
     @QueryMapping
-    public List<Settlement> settlementsByDealId (@Argument Integer id){ return service.settlementsByDealId(id);}
+    public List<Settlement> settlementsByDealId(@Argument Integer id) {
+        return service.settlementsByDealId(id);
+    }
 
 
 }

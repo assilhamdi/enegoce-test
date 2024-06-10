@@ -17,9 +17,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class DealService {
@@ -121,29 +119,22 @@ public class DealService {
     /////////////////////////////////////////////////////
 
     public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath) {
-        // Retrieve field mappings for the specified message type
         List<MtFieldMapping> mappings = mappingRepo.findByMt(mt);
         if (mappings.isEmpty()) {
-            // Log error and return false if no mappings are found
             logger.error("No mappings found for mt: " + mt);
             return false;
         }
 
-        // Sort the mappings based on the field order
         mappings.sort(Comparator.comparingInt(MtFieldMapping::getFieldOrder));
-        logger.info(mappings);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            // Retrieve data related to the deal
             InfoDeal infoDeal = this.dealById(dealId);
             List<DealGoods> dealGoodsList = this.goodsByDealId(dealId);
             List<DealParty> dealPartiesList = this.partiesByDealId(dealId);
             List<Settlement> settlementList = this.settlementsByDealId(dealId);
 
-            // Generate and export MT message using the writer and mappings
             return generateAndExportMtMessageWithWriter(infoDeal, dealGoodsList, dealPartiesList, settlementList, writer, mappings);
         } catch (Exception e) {
-            // Log error and return false if an exception occurs
             logger.error("Error generating MT message: " + e);
             return false;
         }
@@ -151,58 +142,41 @@ public class DealService {
 
     private boolean generateAndExportMtMessageWithWriter(InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, BufferedWriter writer, List<MtFieldMapping> mappings) {
         try {
-            // Process and write the MT message details
             processInfoDeal(writer, infoDeal, dealGoodsList, dealPartiesList, settlementList, mappings);
-            return true; // Return true if writing is successful
+            return true;
         } catch (Exception e) {
-            // Log error and return false if an exception occurs
             logger.error("Error processing data: " + e);
-            return false; // Return false if processing data fails
+            return false;
         }
     }
 
     private void processInfoDeal(BufferedWriter writer, InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<MtFieldMapping> mappings) throws IOException {
         for (MtFieldMapping mapping : mappings) {
-            // Extract entity name, field name, tag, and mapping rule from the mapping
             String entityName = mapping.getEntityName();
             String fieldName = mapping.getDatabaseField();
             String mtTag = mapping.getTag();
             String mappingRule = mapping.getMappingRule();
 
             if (mappingRule != null && !mappingRule.isEmpty()) {
-                // Process mapping rule if it exists
                 processMappingRule(writer, mappingRule, mtTag, infoDeal, dealGoodsList, dealPartiesList, settlementList);
             } else {
-                // Process single field if no mapping rule exists
-                if (fieldName == null || entityName == null) {
+                if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
                     continue;
                 }
 
-                if (fieldName.contains("//todo//") || entityName.contains("//todo//")) { // TODO: Temporary
-                    continue;
-                }
-
-                // Construct the getter method name for the field
                 String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
                 Object fieldValue = null;
 
                 try {
-                    // Retrieve the field value based on the entity name
-                    if ("InfoDeal".equals(entityName)) {
-                        fieldValue = infoDeal.getClass().getMethod(getterMethodName).invoke(infoDeal);
-                    } else if ("DealGoods".equals(entityName)) {
-                        fieldValue = getFieldValueFromList(dealGoodsList, getterMethodName);
-                    } else if ("DealParty".equals(entityName)) {
-                        fieldValue = getFieldValueFromList(dealPartiesList, getterMethodName);
-                    } else if ("Settlement".equals(entityName)) {
-                        fieldValue = getFieldValueFromList(settlementList, getterMethodName);
+                    if ("DealGoods".equals(entityName)) {
+                        fieldValue = getDealGoodsFieldValue(fieldName, getterMethodName, dealGoodsList);
+                    } else {
+                        fieldValue = getFieldValue(entityName, getterMethodName, infoDeal, dealGoodsList, dealPartiesList, settlementList, null);
                     }
                 } catch (Exception e) {
-                    // Log error if there's an issue accessing the field
                     logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
                 }
 
-                // Write the field value to the writer if it's not null
                 if (fieldValue != null) {
                     writer.write(mtTag + ":" + fieldValue + "\r\n");
                 }
@@ -212,39 +186,28 @@ public class DealService {
 
     private void processMappingRule(BufferedWriter writer, String mappingRule, String mtTag, InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList) throws IOException {
         try {
-            // Parse the mapping rule JSON
             JSONObject ruleJson = new JSONObject(mappingRule);
             JSONArray fieldsArray = ruleJson.optJSONArray("fields");
             String delimiter = ruleJson.optString("delimiter", "");
-            StringBuilder combinedValue = new StringBuilder();
+            String code = ruleJson.optString("code", null);
 
             if (fieldsArray != null) {
+                StringBuilder combinedValue = new StringBuilder();
+                DealParty party = code != null ? partyByDealIdAndCode(infoDeal.getId(), code) : null;
+
+                if (party == null && code != null) {
+                    logger.warn("No DealParty found for code: " + code);
+                    return;
+                }
+
                 for (int i = 0; i < fieldsArray.length(); i++) {
-                    // Split the full field name into entity and field parts
-                    String fullFieldName = fieldsArray.getString(i);
-                    String[] parts = fullFieldName.split("\\.");
+                    String[] parts = fieldsArray.getString(i).split("\\.");
                     String entity = parts[0];
                     String field = parts[1];
                     String getterMethodName = "get" + Character.toUpperCase(field.charAt(0)) + field.substring(1);
 
-                    Object fieldValue = null;
-                    try {
-                        // Retrieve the field value based on the entity name
-                        if ("InfoDeal".equals(entity)) {
-                            fieldValue = infoDeal.getClass().getMethod(getterMethodName).invoke(infoDeal);
-                        } else if ("DealGoods".equals(entity)) {
-                            fieldValue = getFieldValueFromList(dealGoodsList, getterMethodName);
-                        } else if ("DealParty".equals(entity)) {
-                            fieldValue = getFieldValueFromList(dealPartiesList, getterMethodName);
-                        } else if ("Settlement".equals(entity)) {
-                            fieldValue = getFieldValueFromList(settlementList, getterMethodName);
-                        }
-                    } catch (Exception e) {
-                        // Log error if there's an issue accessing the field
-                        logger.error("Error accessing field " + field + " in entity " + entity, e);
-                    }
+                    Object fieldValue = getFieldValue(entity, getterMethodName, infoDeal, dealGoodsList, dealPartiesList, settlementList, party);
 
-                    // Append the field value to the combined value if it's not null
                     if (fieldValue != null) {
                         if (!combinedValue.isEmpty()) {
                             combinedValue.append(delimiter);
@@ -253,31 +216,72 @@ public class DealService {
                     }
                 }
 
-                // Write the combined value to the writer if it's not empty
                 if (!combinedValue.isEmpty()) {
                     writer.write(mtTag + ":" + combinedValue.toString() + "\r\n");
                 }
             }
         } catch (JSONException e) {
-            // Log error if there's an issue parsing the mapping rule
             logger.error("Error parsing mappingRule: " + mappingRule, e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Object getFieldValue(String entityName, String getterMethodName, InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, DealParty party) throws Exception {
+        switch (entityName) {
+            case "InfoDeal":
+                return infoDeal.getClass().getMethod(getterMethodName).invoke(infoDeal);
+            case "Settlement":
+                return getFieldValueFromList(settlementList, getterMethodName);
+            case "DealParty":
+                return party != null ? party.getClass().getMethod(getterMethodName).invoke(party) : getFieldValueFromList(dealPartiesList, getterMethodName);
+            default:
+                return null;
         }
     }
 
     private Object getFieldValueFromList(List<?> list, String getterMethodName) {
         for (Object obj : list) {
             try {
-                // Invoke the getter method to retrieve the field value
                 Object value = obj.getClass().getMethod(getterMethodName).invoke(obj);
                 if (value != null) {
                     return value;
                 }
             } catch (Exception e) {
-                // Log error if there's an issue accessing the field in list element
                 logger.error("Error accessing field using method " + getterMethodName + " in list element", e);
             }
         }
-        return null; // Return null if no value is found
+        return null;
+    }
+
+    private Object getDealGoodsFieldValue(String fieldName, String getterMethodName, List<DealGoods> dealGoodsList) throws Exception {
+        if ("goodsDesc".equals(fieldName)) {
+            StringBuilder goodsValues = new StringBuilder();
+            for (DealGoods dealGoods : dealGoodsList) {
+                Object goodsValue = dealGoods.getClass().getMethod(getterMethodName).invoke(dealGoods);
+                if (goodsValue != null) {
+                    if (!goodsValues.isEmpty()) {
+                        goodsValues.append("\n+");
+                    } else {
+                        goodsValues.append("+");
+                    }
+                    goodsValues.append(goodsValue);
+                }
+            }
+            return !goodsValues.isEmpty() ? goodsValues.toString() : null;
+        } else {
+            StringBuilder goodsValues = new StringBuilder();
+            for (DealGoods dealGoods : dealGoodsList) {
+                Object goodsValue = dealGoods.getClass().getMethod(getterMethodName).invoke(dealGoods);
+                if (goodsValue != null) {
+                    if (!goodsValues.isEmpty()) {
+                        goodsValues.append(", ");  // Adjust delimiter as needed
+                    }
+                    goodsValues.append(goodsValue);
+                }
+            }
+            return !goodsValues.isEmpty() ? goodsValues.toString() : null;
+        }
     }
 
 
@@ -301,9 +305,11 @@ public class DealService {
     ////////////////////DealParty////////////////////
     /////////////////////////////////////////////////
 
-    public List<DealParty> parties() { return partiesRepo.findAll();}
+    public List<DealParty> parties() {
+        return partiesRepo.findAll();
+    }
 
-    public DealParty dealPartyById(Integer id){
+    public DealParty dealPartyById(Integer id) {
         Optional<DealParty> party = partiesRepo.findById(id);
         return party.orElse(null);
     }
@@ -312,13 +318,19 @@ public class DealService {
         return partiesRepo.findPartiesByDealId(id);
     }
 
+    public DealParty partyByDealIdAndCode(Integer id, String code) {
+        return partiesRepo.findPartyByDealIdAndCode(id, code);
+    }
+
 
     ////////////////////Settlement////////////////////
     /////////////////////////////////////////////////
 
-    public List<Settlement> settlements() { return settRepo.findAll();}
+    public List<Settlement> settlements() {
+        return settRepo.findAll();
+    }
 
-    public Settlement settlementById(Integer id){
+    public Settlement settlementById(Integer id) {
         Optional<Settlement> settlement = settRepo.findById(id);
         return settlement.orElse(null);
     }
