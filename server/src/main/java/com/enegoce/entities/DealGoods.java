@@ -2,132 +2,83 @@ package com.enegoce.entities;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-public class DealGoods {
+public class DealGoods implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @EmbeddedId
+    private DealGoodsPK id;
 
-    @ManyToOne
-    @JoinColumn(name = "deal_id")
-    private InfoDeal deal;
+    private String productCode;
+
+    private String productName;
+
+    private String productOrigine;
 
     @Column(length = 6500)
-    private String goodsDesc; // Descriptions of goods // Varchar(6500)
+    private String goodsDesc;
 
-    @Column(length = 5)
-    private String stepID; // Etape du deal // Varchar(5)
+    @Column(precision = 13, scale = 2)
+    private BigDecimal unitPrice;
 
-    private Integer seq; // Sequence de la modification // Number(3)
+    @Column(length = 20)
+    private int quantity;
 
-    private String goodsCODE;
-
-    private String goodsType;
-
-    @Column(length = 2)
-    private String goodsOrigin; // Origin of Goods // varchar(2)
+    @Column(precision = 13, scale = 2)
+    private BigDecimal totalAmount;
 
     @Column(length = 50)
-    private String placeOfTakingCharge; // Place of taking charge // Varchar(50)
+    private String placeOfTakingCharge;
 
     @Column(length = 50)
-    private String portOfLoading; // Port of Loading or Airport of departure 44E // Varchar(50)
+    private String portOfLoading;
 
     @Column(length = 50)
-    private String portOfDischarge; // Port of Discharge 44F // Varchar(50)
+    private String portOfDischarge;
 
     @Column(length = 50)
-    private String placeOfFinalDestination; // place of final destination 44 // Varchar(50)
+    private String placeOfFinalDestination;
 
-    @Column(length = 3)
-    private String transportationType; // transportation type (Air/SEA) list // Varchar(3)
+    private Date shipmentDateLast;
 
-    @Column(length = 10)
-    private String transhipment; // transhipment Allowed/Not Allowed // Varchar(10)
-    
-    private Integer shipmentPeriod; // ShipmentPeriod // Number
-
-    private Date shipmentDateFirst; // date d'expedition // date
-
-    private Date shipmentDateLast; // last date expedition // date
-
+    private Integer shipmentPeriod;
 
     public DealGoods() {
     }
 
-    public DealGoods(Integer id, InfoDeal deal, String goodsDesc, String stepID, Integer seq,
-                     String goodsCODE, String goodsType, String goodsOrigin, String placeOfTakingCharge,
-                     String portOfLoading, String portOfDischarge, String placeOfFinalDestination,
-                     String transportationType, String transhipment, Integer shipmentPeriod,
-                     Date shipmentDateFirst, Date shipmentDateLast) {
-        this.id = id;
-        this.deal = deal;
-        this.goodsDesc = goodsDesc;
-        this.stepID = stepID;
-        this.seq = seq;
-        this.goodsCODE = goodsCODE;
-        this.goodsType = goodsType;
-        this.goodsOrigin = goodsOrigin;
-        this.placeOfTakingCharge = placeOfTakingCharge;
-        this.portOfLoading = portOfLoading;
-        this.portOfDischarge = portOfDischarge;
-        this.placeOfFinalDestination = placeOfFinalDestination;
-        this.transportationType = transportationType;
-        this.transhipment = transhipment;
-        this.shipmentPeriod = shipmentPeriod;
-        this.shipmentDateFirst = shipmentDateFirst;
-        this.shipmentDateLast = shipmentDateLast;
-    }
-
-    public Integer getId() {
+    public DealGoodsPK getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(DealGoodsPK id) {
         this.id = id;
     }
 
-    public InfoDeal getDeal() {
-        return deal;
+    public String getProductCode() {
+        return productCode;
     }
 
-    public void setDeal(InfoDeal deal) {
-        this.deal = deal;
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
     }
 
-    public String getStepID() {
-        return stepID;
+    public String getProductName() {
+        return productName;
     }
 
-    public void setStepID(String stepID) {
-        this.stepID = stepID;
+    public void setProductName(String productName) {
+        this.productName = productName;
     }
 
-    public Integer getSeq() {
-        return seq;
+    public String getProductOrigine() {
+        return productOrigine;
     }
 
-    public void setSeq(Integer seq) {
-        this.seq = seq;
-    }
-
-    public String getGoodsCODE() {
-        return goodsCODE;
-    }
-
-    public void setGoodsCODE(String goodsCODE) {
-        this.goodsCODE = goodsCODE;
-    }
-
-    public String getGoodsType() {
-        return goodsType;
-    }
-
-    public void setGoodsType(String goodsType) {
-        this.goodsType = goodsType;
+    public void setProductOrigine(String productOrigine) {
+        this.productOrigine = productOrigine;
     }
 
     public String getGoodsDesc() {
@@ -138,12 +89,28 @@ public class DealGoods {
         this.goodsDesc = goodsDesc;
     }
 
-    public String getGoodsOrigin() {
-        return goodsOrigin;
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
     }
 
-    public void setGoodsOrigin(String goodsOrigin) {
-        this.goodsOrigin = goodsOrigin;
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public BigDecimal getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public String getPlaceOfTakingCharge() {
@@ -178,20 +145,12 @@ public class DealGoods {
         this.placeOfFinalDestination = placeOfFinalDestination;
     }
 
-    public String getTransportationType() {
-        return transportationType;
+    public Date getShipmentDateLast() {
+        return shipmentDateLast;
     }
 
-    public void setTransportationType(String transportationType) {
-        this.transportationType = transportationType;
-    }
-
-    public String getTranshipment() {
-        return transhipment;
-    }
-
-    public void setTranshipment(String transhipment) {
-        this.transhipment = transhipment;
+    public void setShipmentDateLast(Date shipmentDateLast) {
+        this.shipmentDateLast = shipmentDateLast;
     }
 
     public Integer getShipmentPeriod() {
@@ -202,21 +161,20 @@ public class DealGoods {
         this.shipmentPeriod = shipmentPeriod;
     }
 
-    public Date getShipmentDateFirst() {
-        return shipmentDateFirst;
-    }
-
-    public void setShipmentDateFirst(Date shipmentDateFirst) {
-        this.shipmentDateFirst = shipmentDateFirst;
-    }
-
-    public Date getShipmentDateLast() {
-        return shipmentDateLast;
-    }
-
-    public void setShipmentDateLast(Date shipmentDateLast) {
+    public DealGoods(DealGoodsPK id, String productCode, String productName, String productOrigine, String goodsDesc, BigDecimal unitPrice, int quantity, BigDecimal totalAmount, String placeOfTakingCharge, String portOfLoading, String portOfDischarge, String placeOfFinalDestination, Date shipmentDateLast, Integer shipmentPeriod) {
+        this.id = id;
+        this.productCode = productCode;
+        this.productName = productName;
+        this.productOrigine = productOrigine;
+        this.goodsDesc = goodsDesc;
+        this.unitPrice = unitPrice;
+        this.quantity = quantity;
+        this.totalAmount = totalAmount;
+        this.placeOfTakingCharge = placeOfTakingCharge;
+        this.portOfLoading = portOfLoading;
+        this.portOfDischarge = portOfDischarge;
+        this.placeOfFinalDestination = placeOfFinalDestination;
         this.shipmentDateLast = shipmentDateLast;
+        this.shipmentPeriod = shipmentPeriod;
     }
-
-
 }

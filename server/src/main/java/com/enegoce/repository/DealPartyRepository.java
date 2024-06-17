@@ -11,9 +11,9 @@ import java.util.List;
 @Repository
 public interface DealPartyRepository extends JpaRepository<DealParty, Integer> {
 
-    @Query("SELECT dp FROM DealParty dp WHERE dp.deal.id = :dealId")
+    @Query("SELECT dp FROM DealParty dp WHERE dp.id.deal.id = :dealId")
     List<DealParty> findPartiesByDealId(@Param("dealId") Integer dealId);
 
-    @Query("SELECT dp FROM DealParty dp WHERE dp.deal.id = :dealId AND dp.cp LIKE :code")
+    @Query("SELECT dp FROM DealParty dp WHERE dp.id.deal.id = :dealId AND dp.id.codPrt LIKE :code")
     DealParty findPartyByDealIdAndCode(@Param("dealId") Integer dealId, @Param("code") String code);
 }

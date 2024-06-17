@@ -1,5 +1,6 @@
 extend type Query {
 
+    ###InfoDeal
     getAllInfoDeals: [InfoDeal]
     getInfoDealById(id: Int!): InfoDeal
 
@@ -22,10 +23,11 @@ extend type Query {
 
 extend type Mutation {
 
-    addInfoDeal(input: InfoDealInput): InfoDeal
-    exportMT(id: Int!, mt:String): String
+    exportMT(id: Int!, mt:String, format: String): String
     #exportMT798(dealId: Int!, mt: String): String
 }
+
+###InfoDeal
 
 type InfoDeal {
     id: ID!
@@ -33,11 +35,7 @@ type InfoDeal {
     dueDate: String
     expiryDate: String
     expiryPlace: String
-    customerReference: String
-    counterParty: String
     bankISSRef: String
-    bankRMBRef: String
-    creationDate: String
     currencyId: String
     lcAmount: String
     varAmountTolerance: String
@@ -49,53 +47,76 @@ type InfoDeal {
     dealGoods: [DealGoods]
     dealParties: [DealParty]
     settlements: [Settlement]
-
-
-}
-
-input InfoDealInput {
-    formLC: String
-    dueDate: String
-    expiryDate: String
-    expiryPlace: String
-    customerReference: String
-    counterParty: String
-    bankISSRef: String
-    bankRMBRef: String
-    creationDate: String
-    currencyId: String
-    lcAmount: String
-    varAmountTolerance: String
-    partialTranshipment: String
-    transhipment: String
-    presDay: Int
-    confirmationCharge: String
-    addAmtCovered: String
+    dealComments: [DealComment]
 }
 
 ###DealGoods
 
 type DealGoods {
-    id: ID!
+    id: DealGoodsPK!
+    productCode: String
+    productName: String
+    productOrigine: String
     goodsDesc: String
+    unitPrice: String
+    quantity: Int
+    totalAmount: String
+    placeOfTakingCharge: String
+    portOfLoading: String
+    portOfDischarge: String
+    placeOfFinalDestination: String
+    shipmentDateLast: String
+    shipmentPeriod: Int
 }
 
-input DealGoodsInput {
-    goodsDesc: String
+type DealGoodsPK {
+    stepId: String
+    seq: Int
 }
 
 ###DealParty
 
 type DealParty {
-    id: ID!
-    codPrt: String
-    name: String
-    address: String
-    address1: String
-    address2: String
-    city: String
-    cp: String # TODO: party code ??
+    id: DealPartyPK!
+    nom: String
+    street1: String
+    street2: String
+    street3: String
+    town: String
+    cp: String
     country: String
+    iban: String
+    dev: String
+    dynamicData1: String
+    dynamicData2: String
+    dynamicData3: String
+    nidn: String
+    compCheck: String
+    userCreated: String
+    dateCreation: String
+    userUpdated: String
+    dateUpdated: String
+    stepId: String
+}
+
+type DealPartyPK {
+    codPrt: String
+    seq: Int
+}
+
+###DealComment
+
+type DealComment {
+    id: DealCommentPK!
+    comment: String
+    dateCreation: String
+    useName: String
+    typeComt: String
+    stepId: String
+}
+
+type DealCommentPK {
+    seq: Int
 }
 
 ###Settlement

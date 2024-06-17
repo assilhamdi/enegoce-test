@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -14,51 +15,35 @@ public class InfoDeal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; //20: //Documentary Credit Number
+    private Integer id; //20 //Documentary Credit Number
 
     @Column(length = 24)
-    @Length(max = 24, message = "Max length allowed : 24")
-    private String formLC; //40A: //Form of Documentary Credit //X
+    private String formLC; //40A
 
-    private Date dueDate; //31C: //Date of Issue
+    private LocalDate dueDate; //31C //Date of Issue
 
-    //TODO: 40E ??
-    private Date expiryDate; //31D: //Date of Expiry
+    private LocalDate expiryDate; //31D //Date of Expiry
 
     @Column(length = 29)
-    @Length(max = 29, message = "Max length allowed : 29")
-    private String expiryPlace; //31D: //Place of Expiry //X
-
-    @Column(length = 144) // 4 lines of 35 characters each including newline characters
-    @Length(max = 144, message = "Max length allowed : 144")
-    private String customerReference; //Applicant //50: //X
-
-    @Column(length = 178) // 4 lines of 35 characters each including newline characters + 34
-    @Length(max = 178, message = "Max length allowed : 178")
-    private String counterParty; //Beneficiary - Name & Address //59: //X
+    private String expiryPlace; //31D
 
     //@Column(length = 20)
-    private String bankISSRef; //Sender //51a:
+    private String bankISSRef; //Sender //51a
 
-    //@Column(length = 20)
-    private String bankRMBRef; //Receiver //53a:
+    //TODO: 40E ??
 
-    private Timestamp creationDate; //Auto-Generated
+    @Column(length = 3)
+    private String currencyID; //32B //Currency Code
 
-    //@Column(length = 3)
-    private String currencyID; //32B: //Currency Code
-    //@Column(precision = 13, scale = 2)
-    private BigDecimal lcAmount; //32B: //Amount
-    //@Column(precision = 13, scale = 2)
-    private BigDecimal varAmountTolerance; //39A: //Percentage Credit Amt Tolerance
+    private BigDecimal lcAmount; //32B //Amount
+
+    private BigDecimal varAmountTolerance; //39A //Percentage Credit Amt Tolerance
 
     @Column(length = 11)
-    @Length(max = 11, message = "Max length allowed : 11")
-    private String partialTranshipment; //43P //Partial Shipments //X
+    private String partialTranshipment; //43P //Partial Shipments
 
     @Column(length = 11)
-    @Length(max = 11, message = "Max length allowed : 11")
-    private String transhipment; //43T //Partial Transhipment //X
+    private String transhipment; //43T //Partial Transhipment
 
     private Integer presDay; //48
 
@@ -72,23 +57,17 @@ public class InfoDeal {
 
     private String document; //46A
 
-    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "id.deal", cascade = CascadeType.ALL)
     private List<DealParty> dealParties = new ArrayList<>();
 
-    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "id.deal", cascade = CascadeType.ALL)
     private List<DealGoods> dealGoods = new ArrayList<>();
 
-    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
-    private List<Settlement> settlements = new ArrayList<>();
-
-    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
-    private List<DealDoc> dealDocs = new ArrayList<>();
-
-    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "id.deal", cascade = CascadeType.ALL)
     private List<DealComment> dealComments = new ArrayList<>();
 
     @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
-    private List<DealStep> dealSteps = new ArrayList<>();
+    private List<Settlement> settlements = new ArrayList<>();
 
     public InfoDeal() {
     }
@@ -109,19 +88,19 @@ public class InfoDeal {
         this.formLC = formLC;
     }
 
-    public Date getDueDate() {
+    public LocalDate getDueDate() {
         return dueDate;
     }
 
-    public void setDueDate(Date dueDate) {
+    public void setDueDate(LocalDate dueDate) {
         this.dueDate = dueDate;
     }
 
-    public Date getExpiryDate() {
+    public LocalDate getExpiryDate() {
         return expiryDate;
     }
 
-    public void setExpiryDate(Date expiryDate) {
+    public void setExpiryDate(LocalDate expiryDate) {
         this.expiryDate = expiryDate;
     }
 
@@ -133,44 +112,12 @@ public class InfoDeal {
         this.expiryPlace = expiryPlace;
     }
 
-    public String getCustomerReference() {
-        return customerReference;
-    }
-
-    public void setCustomerReference(String customerReference) {
-        this.customerReference = customerReference;
-    }
-
-    public String getCounterParty() {
-        return counterParty;
-    }
-
-    public void setCounterParty(String counterParty) {
-        this.counterParty = counterParty;
-    }
-
     public String getBankISSRef() {
         return bankISSRef;
     }
 
     public void setBankISSRef(String bankISSRef) {
         this.bankISSRef = bankISSRef;
-    }
-
-    public String getBankRMBRef() {
-        return bankRMBRef;
-    }
-
-    public void setBankRMBRef(String bankRMBRef) {
-        this.bankRMBRef = bankRMBRef;
-    }
-
-    public Timestamp getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(Timestamp creationDate) {
-        this.creationDate = creationDate;
     }
 
     public String getCurrencyID() {
@@ -285,14 +232,6 @@ public class InfoDeal {
         this.settlements = settlements;
     }
 
-    public List<DealDoc> getDealDocs() {
-        return dealDocs;
-    }
-
-    public void setDealDocs(List<DealDoc> dealDocs) {
-        this.dealDocs = dealDocs;
-    }
-
     public List<DealComment> getDealComments() {
         return dealComments;
     }
@@ -301,25 +240,13 @@ public class InfoDeal {
         this.dealComments = dealComments;
     }
 
-    public List<DealStep> getDealSteps() {
-        return dealSteps;
-    }
-
-    public void setDealSteps(List<DealStep> dealSteps) {
-        this.dealSteps = dealSteps;
-    }
-
-    public InfoDeal(Integer id, String formLC, Date dueDate, Date expiryDate, String expiryPlace, String customerReference, String counterParty, String bankISSRef, String bankRMBRef, Timestamp creationDate, String currencyID, BigDecimal lcAmount, BigDecimal varAmountTolerance, String partialTranshipment, String transhipment, Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt, String draft, String document, List<DealParty> dealParties, List<DealGoods> dealGoods, List<Settlement> settlements, List<DealDoc> dealDocs, List<DealComment> dealComments, List<DealStep> dealSteps) {
+    public InfoDeal(Integer id, String formLC, LocalDate dueDate, LocalDate expiryDate, String expiryPlace, String bankISSRef, String currencyID, BigDecimal lcAmount, BigDecimal varAmountTolerance, String partialTranshipment, String transhipment, Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt, String draft, String document, List<DealParty> dealParties, List<DealGoods> dealGoods, List<Settlement> settlements, List<DealComment> dealComments) {
         this.id = id;
         this.formLC = formLC;
         this.dueDate = dueDate;
         this.expiryDate = expiryDate;
         this.expiryPlace = expiryPlace;
-        this.customerReference = customerReference;
-        this.counterParty = counterParty;
         this.bankISSRef = bankISSRef;
-        this.bankRMBRef = bankRMBRef;
-        this.creationDate = creationDate;
         this.currencyID = currencyID;
         this.lcAmount = lcAmount;
         this.varAmountTolerance = varAmountTolerance;
@@ -334,8 +261,6 @@ public class InfoDeal {
         this.dealParties = dealParties;
         this.dealGoods = dealGoods;
         this.settlements = settlements;
-        this.dealDocs = dealDocs;
         this.dealComments = dealComments;
-        this.dealSteps = dealSteps;
     }
 }

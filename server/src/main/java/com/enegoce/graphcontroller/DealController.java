@@ -33,11 +33,6 @@ public class DealController {
         return service.deals();
     }
 
-    @MutationMapping
-    public InfoDeal addInfoDeal(@Argument InfoDealInput input) {
-        return service.createInfoDeal(input);
-    }
-
     @QueryMapping
     public InfoDeal getInfoDealById(@Argument Integer id) {
         return service.dealById(id);
@@ -45,19 +40,23 @@ public class DealController {
 
 
     @MutationMapping
-    public String exportMT(@Argument Integer id, @Argument String mt) {
+    public String exportMT(@Argument Integer id, @Argument String mt, @Argument String format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT" + mt + "_" + timestamp + ".txt";
+        String mtFilePath;
 
-        boolean conversionSuccessful = service.generateAndExportMtMessage(id, mt, mtFilePath);
-        String response;
+        if ("xml".equalsIgnoreCase(format)) {
+            mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT" + mt + "_" + timestamp + ".xml";
+        } else {
+            mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT" + mt + "_" + timestamp + ".txt";
+        }
+
+        boolean conversionSuccessful = service.generateAndExportMtMessage(id, mt, mtFilePath, "xml".equalsIgnoreCase(format));
 
         if (conversionSuccessful) {
-            response = String.format("{\"message\": \"Conversion successful\", \"filePath\": \"%s\"}", mtFilePath);
+            String response = String.format("{\"message\": \"Conversion successful\", \"filePath\": \"%s\"}", mtFilePath);
             return ResponseEntity.ok(response).getBody();
         } else {
-            logger.error("Unsuccessful Conversion");
-            response = "{\"message\": \"Conversion failed. Please check your Input and try again.\"}";
+            String response = "{\"message\": \"Conversion failed. Please check your Input and try again.\"}";
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
         }
     }

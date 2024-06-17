@@ -2,47 +2,38 @@ package com.enegoce.entities;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 
 @Entity
-public class DealComment {
+public class DealComment implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @EmbeddedId
+    private DealCommentPK id;
 
-    @ManyToOne
-    @JoinColumn(name = "deal_id")
-    private InfoDeal deal;
-
-    @Column(length = 350)
+    @Column(length = 6500)
     private String comment;
 
-    private Integer seq;
+    private LocalDate dateCreation;
 
-    private Timestamp dateCreation;
+    @Column(length = 35)
+    private String useName;
 
-    /*@Column(name = "user", length = 35)
-    private String user;*/
+    @Column(length = 5)
+    private String typeComt;
+
+    private String stepId;
 
     public DealComment() {
     }
 
-
-    public Integer getId() {
+    public DealCommentPK getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(DealCommentPK id) {
         this.id = id;
-    }
-
-    public InfoDeal getDeal() {
-        return deal;
-    }
-
-    public void setDeal(InfoDeal deal) {
-        this.deal = deal;
     }
 
     public String getComment() {
@@ -53,19 +44,44 @@ public class DealComment {
         this.comment = comment;
     }
 
-    public Integer getSeq() {
-        return seq;
-    }
-
-    public void setSeq(Integer seq) {
-        this.seq = seq;
-    }
-
-    public Timestamp getDateCreation() {
+    public LocalDate getDateCreation() {
         return dateCreation;
     }
 
-    public void setDateCreation(Timestamp dateCreation) {
+    public void setDateCreation(LocalDate dateCreation) {
         this.dateCreation = dateCreation;
+    }
+
+    public String getUseName() {
+        return useName;
+    }
+
+    public void setUseName(String useName) {
+        this.useName = useName;
+    }
+
+    public String getTypeComt() {
+        return typeComt;
+    }
+
+    public void setTypeComt(String typeComt) {
+        this.typeComt = typeComt;
+    }
+
+    public String getStepId() {
+        return stepId;
+    }
+
+    public void setStepId(String stepId) {
+        this.stepId = stepId;
+    }
+
+    public DealComment(DealCommentPK id, String comment, LocalDate dateCreation, String useName, String typeComt, String stepId) {
+        this.id = id;
+        this.comment = comment;
+        this.dateCreation = dateCreation;
+        this.useName = useName;
+        this.typeComt = typeComt;
+        this.stepId = stepId;
     }
 }
