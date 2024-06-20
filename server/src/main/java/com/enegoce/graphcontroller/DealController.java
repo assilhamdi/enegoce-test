@@ -1,6 +1,7 @@
 package com.enegoce.graphcontroller;
 
 import com.enegoce.entities.*;
+import com.enegoce.service.CommonUtilityService;
 import com.enegoce.service.DealService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -8,6 +9,8 @@ import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -27,6 +30,9 @@ public class DealController {
 
     @Autowired
     private DealService service;
+
+    @Autowired
+    private CommonUtilityService utService;
 
     @QueryMapping
     public List<InfoDeal> getAllInfoDeals() {
@@ -78,7 +84,6 @@ public class DealController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
         }
     }*/
-
 
     //////////////////////////////DealGoods//////////////////////////////
     /////////////////////////////////////////////////////////////////////
@@ -139,5 +144,27 @@ public class DealController {
         return service.settlementsByDealId(id);
     }
 
+    //////////////////Utilities/////////////////////
+    /////////////////////////////////////////////
 
+    @MutationMapping
+    public String convertTextToXml(@Argument String filePath) {
+
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String outputFilePath;
+
+        outputFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/XML" + "_" + timestamp + ".xml";
+
+        File textFile = new File(filePath);
+        if (!textFile.exists() || !textFile.isFile()) {
+            return "Invalid file path: " + filePath;
+        }
+
+        try {
+            File outputFile = utService.convertTextToXml(textFile, outputFilePath);
+            return "XML file successfully generated at: " + outputFile.getAbsolutePath();
+        } catch (IOException e) {
+            return "Error generating XML file: " + e.getMessage();
+        }
+    }
 }

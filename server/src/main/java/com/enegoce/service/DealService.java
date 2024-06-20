@@ -71,6 +71,9 @@ public class DealService {
         }
     }*/
 
+    //TODO: XML/TXT to database
+    //TODO: MT 798
+
     ////////////////////MT Generation////////////////////
     /////////////////////////////////////////////////////
 
@@ -143,7 +146,7 @@ public class DealService {
             String mappingRule = mapping.getMappingRule();
 
             if (mappingRule != null && !mappingRule.isEmpty()) {
-                processMappingRuleForXml(xmlWriter, mappingRule, mtTag, infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList);
+                processMappingRuleForXml(xmlWriter, mappingRule, mtTag, infoDeal, dealPartiesList, settlementList, dealCommentsList);
             } else {
                 if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
                     continue;
@@ -181,7 +184,7 @@ public class DealService {
         }
     }
 
-    private void processMappingRuleForXml(XMLStreamWriter xmlWriter, String mappingRule, String mtTag, InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList) {
+    private void processMappingRuleForXml(XMLStreamWriter xmlWriter, String mappingRule, String mtTag, InfoDeal infoDeal, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList) {
         try {
             JSONObject ruleJson = new JSONObject(mappingRule);
             JSONArray fieldsArray = ruleJson.optJSONArray("fields");
