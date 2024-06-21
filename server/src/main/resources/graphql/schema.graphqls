@@ -1,6 +1,3 @@
 type Query {}
 
-type Mutation {
-
-    convertTextToXml(filePath: String): String
-}
+type Mutation {}

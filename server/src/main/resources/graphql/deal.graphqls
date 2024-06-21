@@ -21,12 +21,6 @@ extend type Query {
     settlementsByDealId(id: Int!): [Settlement]
 }
 
-extend type Mutation {
-
-    exportMT(id: Int!, mt:String, format: String): String
-    #exportMT798(dealId: Int!, mt: String): String
-}
-
 ###InfoDeal
 
 type InfoDeal {
