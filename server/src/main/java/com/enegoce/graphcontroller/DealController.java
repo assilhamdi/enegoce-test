@@ -1,8 +1,8 @@
 package com.enegoce.graphcontroller;
 
 import com.enegoce.entities.*;
-import com.enegoce.service.CommonUtilityService;
 import com.enegoce.service.DealService;
+import com.enegoce.service.MTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -26,81 +26,37 @@ import org.springframework.http.ResponseEntity;
 @Controller
 public class DealController {
 
-    private static final Logger logger = LogManager.getLogger(DealController.class);
-
     @Autowired
-    private DealService service;
-
-    @Autowired
-    private CommonUtilityService utService;
+    private DealService dealService;
 
     @QueryMapping
     public List<InfoDeal> getAllInfoDeals() {
-        return service.deals();
+        return dealService.deals();
     }
 
     @QueryMapping
     public InfoDeal getInfoDealById(@Argument Integer id) {
-        return service.dealById(id);
+        return dealService.dealById(id);
     }
 
 
-    @MutationMapping
-    public String exportMT(@Argument Integer id, @Argument String mt, @Argument String format) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String mtFilePath;
-
-        if ("xml".equalsIgnoreCase(format)) {
-            mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT" + mt + "_" + timestamp + ".xml";
-        } else {
-            mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT" + mt + "_" + timestamp + ".txt";
-        }
-
-        boolean conversionSuccessful = service.generateAndExportMtMessage(id, mt, mtFilePath, "xml".equalsIgnoreCase(format));
-
-        if (conversionSuccessful) {
-            String response = String.format("{\"message\": \"Conversion successful\", \"filePath\": \"%s\"}", mtFilePath);
-            return ResponseEntity.ok(response).getBody();
-        } else {
-            String response = "{\"message\": \"Conversion failed. Please check your Input and try again.\"}";
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
-        }
-    }
-
-    /*@MutationMapping
-    public String exportMT798(@Argument Integer dealId, @Argument String mt) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT798_" + timestamp + ".txt";
-
-        boolean conversionSuccessful = service.generateAndExportMt798Message(dealId, mt, mtFilePath);
-        String response;
-
-        if (conversionSuccessful) {
-            response = String.format("{\"message\": \"Conversion successful\", \"filePath\": \"%s\"}", mtFilePath);
-            return ResponseEntity.ok(response).getBody();
-        } else {
-            logger.error("Unsuccessful Conversion");
-            response = "{\"message\": \"Conversion failed. Please check your Input and try again.\"}";
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
-        }
-    }*/
 
     //////////////////////////////DealGoods//////////////////////////////
     /////////////////////////////////////////////////////////////////////
 
     @QueryMapping
     public List<DealGoods> getAllDealGoods() {
-        return service.goods();
+        return dealService.goods();
     }
 
     @QueryMapping
     public DealGoods dealGoodsById(@Argument Integer id) {
-        return service.dealGoodsById(id);
+        return dealService.dealGoodsById(id);
     }
 
     @QueryMapping
     public List<DealGoods> goodsByDealId(@Argument Integer id) {
-        return service.goodsByDealId(id);
+        return dealService.goodsByDealId(id);
     }
 
     ////////////////////DealParty////////////////////
@@ -108,22 +64,22 @@ public class DealController {
 
     @QueryMapping
     public List<DealParty> getAllDealParties() {
-        return service.parties();
+        return dealService.parties();
     }
 
     @QueryMapping
     public DealParty dealPartyById(@Argument Integer id) {
-        return service.dealPartyById(id);
+        return dealService.dealPartyById(id);
     }
 
     @QueryMapping
     public List<DealParty> partiesByDealId(@Argument Integer id) {
-        return service.partiesByDealId(id);
+        return dealService.partiesByDealId(id);
     }
 
     @QueryMapping
     public DealParty partyByDealIdAndCode(@Argument Integer id, @Argument String code) {
-        return service.partyByDealIdAndCode(id, code);
+        return dealService.partyByDealIdAndCode(id, code);
     }
 
     ////////////////////Settlement////////////////////
@@ -131,40 +87,17 @@ public class DealController {
 
     @QueryMapping
     public List<Settlement> getAllSettlements() {
-        return service.settlements();
+        return dealService.settlements();
     }
 
     @QueryMapping
     public Settlement settlementById(@Argument Integer id) {
-        return service.settlementById(id);
+        return dealService.settlementById(id);
     }
 
     @QueryMapping
     public List<Settlement> settlementsByDealId(@Argument Integer id) {
-        return service.settlementsByDealId(id);
+        return dealService.settlementsByDealId(id);
     }
 
-    //////////////////Utilities/////////////////////
-    /////////////////////////////////////////////
-
-    @MutationMapping
-    public String convertTextToXml(@Argument String filePath) {
-
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String outputFilePath;
-
-        outputFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/XML" + "_" + timestamp + ".xml";
-
-        File textFile = new File(filePath);
-        if (!textFile.exists() || !textFile.isFile()) {
-            return "Invalid file path: " + filePath;
-        }
-
-        try {
-            File outputFile = utService.convertTextToXml(textFile, outputFilePath);
-            return "XML file successfully generated at: " + outputFile.getAbsolutePath();
-        } catch (IOException e) {
-            return "Error generating XML file: " + e.getMessage();
-        }
-    }
 }

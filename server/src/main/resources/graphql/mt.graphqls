@@ -1,0 +1,6 @@
+extend type Mutation {
+
+    exportMT(id: Int!, mt:String, format: String): String
+    exportMT798(dealId: Int!, mt: String, format:String): String
+    convertTextToXml(filePath: String): String
+}
