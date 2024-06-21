@@ -66,17 +66,17 @@ public class MtMappingController {
 
     @QueryMapping
     public List<MtFieldMapping> orderMappingsByDF(@Argument boolean order) {
-        return service.mappings();
+        return service.orderMappingsByDF(order);
     }
 
     @QueryMapping
     public List<MtFieldMapping> orderMappingsByST(@Argument boolean order) {
-        return service.mappings();
+        return service.orderMappingsByST(order);
     }
 
     @QueryMapping
     public List<MtFieldMapping> orderMappingsByFD(@Argument boolean order) {
-        return service.mappings();
+        return service.orderMappingsByFD(order);
     }
 
     /////////////////////////////////////////////////////////////

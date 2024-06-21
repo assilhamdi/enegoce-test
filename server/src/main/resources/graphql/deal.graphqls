@@ -30,7 +30,7 @@ type InfoDeal {
     expiryDate: String
     expiryPlace: String
     bankISSRef: String
-    currencyId: String
+    currencyID: String
     lcAmount: String
     varAmountTolerance: String
     partialTranshipment: String

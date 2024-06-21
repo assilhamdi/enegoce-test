@@ -1,12 +1,19 @@
 extend type Query {
 
     getAllMappings: [MtFieldMapping]
-    orderMappingsByFO(order: Boolean): [MtFieldMapping]
+    mts:[String]
+
+    ###Filtering
     mappingsByMt(mt: String!): [MtFieldMapping]
     mappingsByFD(fieldDescription: String!): [MtFieldMapping]
     mappingsByDF(dbField: String!): [MtFieldMapping]
     mappingsByST(status: String!): [MtFieldMapping]
-    mts:[String]
+
+    ###Sorting
+    orderMappingsByFO(order: Boolean): [MtFieldMapping]
+    orderMappingsByDF(order: Boolean): [MtFieldMapping]
+    orderMappingsByST(order: Boolean): [MtFieldMapping]
+    orderMappingsByFD(order: Boolean): [MtFieldMapping]
 
 }
 
