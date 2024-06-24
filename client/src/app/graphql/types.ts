@@ -1,38 +1,18 @@
-export type DealLC={
-    dealId: Number
+export type InfoDeal={
+    id: Number
     formLC: String
     dueDate: String
     expiryDate: String
     expiryPlace: String
-    customerReference: String
-    counterParty: String
     bankISSRef: String
-    bankRMBRef: String
-    creationDate: String
-    currencyId: String
+    currencyID: String
     lcAmount: String
     varAmountTolerance: String
-    availableWith: String
     partialTranshipment: String
     transhipment: String
-}
-
-export type DealLCInput={
-    formLC: String
-    dueDate: String
-    expiryDate: String
-    expiryPlace: String
-    customerReference: String
-    counterParty: String
-    bankISSRef: String
-    bankRMBRef: String
-    creationDate: String
-    currencyId: String
-    lcAmount: String
-    varAmountTolerance: String
-    availableWith: String
-    partialTranshipment: String
-    transhipment: String
+    presDay: Number
+    confirmationCharge: String
+    addAmtCovered: String
 }
 
 export type MtFieldMapping ={

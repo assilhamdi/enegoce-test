@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { DealLC } from '../graphql/types';
+import { InfoDeal } from '../graphql/types';
 import { DealLcService } from '../services/deal-lc/deal-lc.service';
 import { catchError } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
 import { MappingService } from '../services/mapping/mapping.service';
+import { MTService } from '../services/MT/mt.service';
 
 @Component({
   selector: 'app-deal-lc',
@@ -12,14 +13,14 @@ import { MappingService } from '../services/mapping/mapping.service';
 })
 export class DealLcComponent implements OnInit {
 
-  deals: DealLC[] = [];
-  isOpen: boolean = false;
-  operationSuccess: boolean | null = null;
+  deals: InfoDeal[] = [];
   distinctMtValues: string[] = [];
+  formats: string[] = ["XML","TXT"]
+  format: string = "";
   selectedMt: string = "";
   selectedSubMt: string = "";
 
-  constructor(private dealService: DealLcService, private mappingService: MappingService) { }
+  constructor(private dealService: DealLcService, private mappingService: MappingService, private mtService: MTService) { }
 
   ngOnInit(): void {
     this.fetchDeals();
@@ -27,7 +28,7 @@ export class DealLcComponent implements OnInit {
   }
 
   fetchDeals() {
-    this.dealService.getAllDealLCs().subscribe(deals => { this.deals = deals; });
+    this.dealService.getAllInfoDeals().subscribe(deals => { this.deals = deals; });
   }
 
   fetchUniqueMts(): void {
@@ -42,8 +43,8 @@ export class DealLcComponent implements OnInit {
     );
   }
 
-  exportMT(dealId: Number, mt: String) {
-    this.dealService.exportMT(dealId, mt)
+  exportMT(dealId: Number, mt: String, format:String) {
+    this.mtService.exportMT(dealId, mt, format)
       .pipe(
         catchError(error => {
           console.error('Error exporting MT', mt, ':', error);
@@ -55,8 +56,8 @@ export class DealLcComponent implements OnInit {
       });
   }
 
-  exportMT798(id: Number, mt: String) {
-    this.dealService.exportMT798(id, mt)
+  exportMT798(id: Number, mt: String, format: String) {
+    this.mtService.exportMT798(id, mt, format)
       .pipe(
         catchError(error => {
           console.error('Error exporting MT798:', error);
@@ -66,33 +67,6 @@ export class DealLcComponent implements OnInit {
       .subscribe(result => {
         console.log('Deal exported successfully:', result);
       });
-  }
-
-  openDrawer(): void {
-    this.isOpen = true;
-  }
-
-  closeDrawer(): void {
-    this.isOpen = false;
-  }
-
-  handleDrawerStateChange(isOpen: boolean): void {
-    this.isOpen = isOpen;
-  }
-
-  handleOperationSuccess(success: boolean) {
-    this.operationSuccess = success;
-    setTimeout(() => {
-      this.dismissFeedback(); // Dismiss feedback after a certain time
-    }, 5000); // Dismiss after 5 seconds (adjust as needed)
-  }
-
-  handleDealAdded() {
-    this.fetchDeals(); // Fetch deals again when a deal is added
-  }
-
-  dismissFeedback() {
-    this.operationSuccess = null;
   }
 
 }

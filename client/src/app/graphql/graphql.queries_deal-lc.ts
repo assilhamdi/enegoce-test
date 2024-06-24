@@ -2,61 +2,23 @@ import { gql } from "apollo-angular";
 
 const GET_DEALS = gql`
   query {
-    getAllDealLCs {
-      dealId
+    getAllInfoDeals {
+      id
       formLC
       dueDate
       expiryDate
       expiryPlace
-      customerReference
-      counterParty
       bankISSRef
-      bankRMBRef
-      creationDate
-      currencyId
+      currencyID
       lcAmount
       varAmountTolerance
-      availableWith
       partialTranshipment
       transhipment
+      presDay
+      confirmationCharge
+      addAmtCovered
     }
   }
 `;
 
-const EXPORT_MT = gql`
-  mutation ExportMT($id: Int!, $mt: String) {
-    exportMT(id: $id, mt: $mt)
-  }
-`;
-
-const EXPORT_MT798 = gql`
-  mutation ExportMT798($id: Int!, $mt: String) {
-    exportMT798(dealId: $id, mt: $mt)
-  }
-`;
-
-const CREATE_DEAL_LC = gql`
-  mutation CreateDealLC($input: DealLCInput!) {
-    addDealLC(input: $input) {
-      formLC
-      dueDate
-      expiryDate
-      expiryPlace
-      customerReference
-      counterParty
-      bankISSRef
-      bankRMBRef
-      creationDate
-      currencyId
-      lcAmount
-      varAmountTolerance
-      availableWith
-      partialTranshipment
-      transhipment
-    }
-  }
-`;
-
-
-
-export { GET_DEALS, CREATE_DEAL_LC, EXPORT_MT, EXPORT_MT798 };
+export { GET_DEALS };

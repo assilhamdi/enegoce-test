@@ -7,7 +7,6 @@ import { AppComponent } from './app.component';
 import { HttpClientModule } from '@angular/common/http';
 import { GraphQLModule } from './graphql.module';
 import { DealLcComponent } from './deal-lc/deal-lc.component';
-import { DealLcAddDrawerComponent } from './deal-lc/deal-lc-add-drawer/deal-lc-add-drawer.component';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -21,7 +20,6 @@ import { MappingTableManagementDrawerComponent } from './mapping-table/mapping-t
   declarations: [
     AppComponent,
     DealLcComponent,
-    DealLcAddDrawerComponent,
     MappingTableComponent,
     MappingTableManagementDrawerComponent,
   ],

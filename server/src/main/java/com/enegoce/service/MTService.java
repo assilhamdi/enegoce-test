@@ -411,9 +411,6 @@ public class MTService {
             xmlWriter.writeCharacters("\n");
             xmlWriter.writeStartElement("MT798");
             xmlWriter.writeCharacters("\n");
-
-            // Add dynamic header
-
             xmlWriter.writeStartElement("header");
             xmlWriter.writeCharacters("\n\t"); // Add indentation for <field>
             xmlWriter.writeStartElement("field");
@@ -423,10 +420,11 @@ public class MTService {
             xmlWriter.writeEndElement(); // End tag
             xmlWriter.writeCharacters("\n\t\t"); // Add indentation for <value>
             xmlWriter.writeStartElement("value");
-            xmlWriter.writeCharacters(mt); // Dynamically set the value based on the mt parameter
+            xmlWriter.writeCharacters(mt); // set the value based on the mt parameter
             xmlWriter.writeEndElement(); // End value
             xmlWriter.writeCharacters("\n\t"); // Indentation before closing </field>
             xmlWriter.writeEndElement(); // End field
+            xmlWriter.writeCharacters("\n"); // Indentation before closing </header>
             xmlWriter.writeEndElement(); // End header
             xmlWriter.writeCharacters("\n");
             xmlWriter.writeStartElement("body");
