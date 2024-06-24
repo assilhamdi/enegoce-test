@@ -10,12 +10,12 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface DealCommentRepository extends JpaRepository<DealComment, Integer> {
+public interface DealCommentRepository extends JpaRepository<DealComment, Long> {
 
     @Query("SELECT dc FROM DealComment dc WHERE dc.id.deal.id = :dealId")
-    List<DealComment> findCommentsByDealId(@Param("dealId") Integer dealId);
+    List<DealComment> findCommentsByDealId(@Param("dealId") Long dealId);
 
     @Query("SELECT dc FROM DealComment dc WHERE dc.id.deal.id = :dealId AND dc.typeComt LIKE :type")
-    DealComment findCommentByDealAndType(@Param("dealId") Integer dealId,@Param("type") String type);
+    DealComment findCommentByDealAndType(@Param("dealId") Long dealId,@Param("type") String type);
 
 }

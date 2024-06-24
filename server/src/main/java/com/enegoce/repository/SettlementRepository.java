@@ -9,9 +9,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SettlementRepository extends JpaRepository<Settlement, Integer> {
+public interface SettlementRepository extends JpaRepository<Settlement, Long> {
 
     @Query("SELECT s FROM Settlement s WHERE s.deal.id = :dealId")
-    List<Settlement> findSettlementsByDealId(@Param("dealId") Integer dealId);
+    List<Settlement> findSettlementsByDealId(@Param("dealId") Long dealId);
 
 }

@@ -2,26 +2,20 @@ package com.enegoce.graphcontroller;
 
 import com.enegoce.entities.MtFieldMapping;
 import com.enegoce.entities.MtFieldMappingInput;
-import com.enegoce.service.MtMappingService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.enegoce.service.MtFieldMappingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Controller
-public class MtMappingController {
+public class MtFieldMappingController {
 
     @Autowired
-    private MtMappingService service;
+    private MtFieldMappingService service;
 
     @QueryMapping
     public List<MtFieldMapping> getAllMappings() {

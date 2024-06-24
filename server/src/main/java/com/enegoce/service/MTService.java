@@ -1,7 +1,6 @@
 package com.enegoce.service;
 
 import com.enegoce.entities.*;
-import com.enegoce.repository.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -31,7 +30,7 @@ import java.util.List;
 public class MTService {
 
     @Autowired
-    private MtFieldMappingRepository mappingRepo;
+    private MtFieldMappingService mappingService;
 
     @Autowired
     private DealService dealService;
@@ -43,8 +42,8 @@ public class MTService {
     ////////////////////MT Generation////////////////////
     /////////////////////////////////////////////////////
 
-    public boolean generateAndExportMtMessage(Integer dealId, String mt, String filePath, boolean generateXml) {
-        List<MtFieldMapping> mappings = mappingRepo.findByMt(mt);
+    public boolean generateAndExportMtMessage(Long dealId, String mt, String filePath, boolean generateXml) {
+        List<MtFieldMapping> mappings = mappingService.mappingsByMt(mt);
         if (mappings.isEmpty()) {
             logger.error("No mappings found for mt: " + mt);
             return false;
@@ -90,17 +89,13 @@ public class MTService {
                 xmlWriter.writeCharacters("\n"); // Ensure new line after XML declaration
             }
 
-            if ("700".equalsIgnoreCase(mt)) {
-                xmlWriter.writeStartElement("MT700");
-            } else if ("701".equalsIgnoreCase(mt)) {
-                xmlWriter.writeStartElement("MT701");
-            }
-            xmlWriter.writeCharacters("\n"); // Ensure new line after <MT700>
+            xmlWriter.writeStartElement("MT" + mt);
+            xmlWriter.writeCharacters("\n"); // Ensure new line after <MT>
 
             processInfoDealForXml(xmlWriter, infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, mappings);
 
             xmlWriter.writeEndElement(); // End MT700 or MT701
-            xmlWriter.writeCharacters("\n"); // Ensure new line after </MT700>
+            xmlWriter.writeCharacters("\n"); // Ensure new line after </MT>
             if (includeXmlHeader) {
                 xmlWriter.writeEndDocument();
             }
@@ -124,7 +119,7 @@ public class MTService {
                 processMappingRuleForXml(xmlWriter, mappingRule, mtTag, infoDeal, dealPartiesList, settlementList, dealCommentsList);
             } else {
                 if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
-                    continue;
+                    continue; //Temporary skip
                 }
 
                 String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
@@ -287,7 +282,7 @@ public class MTService {
                 }
 
                 if (!combinedValue.isEmpty()) {
-                    writer.write(mtTag + ":" + combinedValue.toString() + "\r\n");
+                    writer.write(mtTag + ":" + combinedValue + "\r\n");
                 }
             }
         } catch (JSONException e) {
@@ -324,8 +319,10 @@ public class MTService {
     }
 
     private Object getDealGoodsFieldValue(String fieldName, String getterMethodName, List<DealGoods> dealGoodsList) throws Exception {
+
+        StringBuilder goodsValues = new StringBuilder();
+
         if ("goodsDesc".equals(fieldName)) {
-            StringBuilder goodsValues = new StringBuilder();
             for (DealGoods dealGoods : dealGoodsList) {
                 Object goodsValue = dealGoods.getClass().getMethod(getterMethodName).invoke(dealGoods);
                 if (goodsValue != null) {
@@ -337,20 +334,18 @@ public class MTService {
                     goodsValues.append(formatFieldValue(goodsValue));
                 }
             }
-            return !goodsValues.isEmpty() ? goodsValues.toString() : null;
         } else {
-            StringBuilder goodsValues = new StringBuilder();
             for (DealGoods dealGoods : dealGoodsList) {
                 Object goodsValue = dealGoods.getClass().getMethod(getterMethodName).invoke(dealGoods);
                 if (goodsValue != null) {
                     if (!goodsValues.isEmpty()) {
-                        goodsValues.append(", ");  // Adjust delimiter as needed
+                        goodsValues.append(", ");  // Adjustable delimiter
                     }
                     goodsValues.append(formatFieldValue(goodsValue));
                 }
             }
-            return !goodsValues.isEmpty() ? goodsValues.toString() : null;
         }
+        return !goodsValues.isEmpty() ? goodsValues.toString() : null;
     }
 
     private String formatFieldValue(Object fieldValue) {
@@ -363,13 +358,13 @@ public class MTService {
         }
     }
 
-    public boolean generateAndExportMt798Message(Integer dealId, String mt, String filePath, String format) {
+    public boolean generateAndExportMt798Message(Long dealId, String mt, String filePath, String format) {
         if (!"700".equals(mt) && !"701".equals(mt)) {
             logger.error("Unsupported MT for MT798: " + mt);
             return false;
         }
 
-        List<MtFieldMapping> mappings = mappingRepo.findByMt(mt);
+        List<MtFieldMapping> mappings = mappingService.mappingsByMt(mt);
         if (mappings.isEmpty()) {
             logger.error("No mappings found for mt: " + mt);
             return false;
@@ -450,6 +445,7 @@ public class MTService {
 
     /////////////////////TXT/XMLto Database////////////////
     //////////////////////////////////////////////////////
+
 
     //TODO: XML/TXT to database
 

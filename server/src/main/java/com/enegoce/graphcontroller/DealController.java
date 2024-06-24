@@ -35,7 +35,7 @@ public class DealController {
     }
 
     @QueryMapping
-    public InfoDeal getInfoDealById(@Argument Integer id) {
+    public InfoDeal getInfoDealById(@Argument Long id) {
         return dealService.dealById(id);
     }
 
@@ -50,12 +50,12 @@ public class DealController {
     }
 
     @QueryMapping
-    public DealGoods dealGoodsById(@Argument Integer id) {
+    public DealGoods dealGoodsById(@Argument Long id) {
         return dealService.dealGoodsById(id);
     }
 
     @QueryMapping
-    public List<DealGoods> goodsByDealId(@Argument Integer id) {
+    public List<DealGoods> goodsByDealId(@Argument Long id) {
         return dealService.goodsByDealId(id);
     }
 
@@ -68,17 +68,17 @@ public class DealController {
     }
 
     @QueryMapping
-    public DealParty dealPartyById(@Argument Integer id) {
+    public DealParty dealPartyById(@Argument Long id) {
         return dealService.dealPartyById(id);
     }
 
     @QueryMapping
-    public List<DealParty> partiesByDealId(@Argument Integer id) {
+    public List<DealParty> partiesByDealId(@Argument Long id) {
         return dealService.partiesByDealId(id);
     }
 
     @QueryMapping
-    public DealParty partyByDealIdAndCode(@Argument Integer id, @Argument String code) {
+    public DealParty partyByDealIdAndCode(@Argument Long id, @Argument String code) {
         return dealService.partyByDealIdAndCode(id, code);
     }
 
@@ -91,12 +91,12 @@ public class DealController {
     }
 
     @QueryMapping
-    public Settlement settlementById(@Argument Integer id) {
+    public Settlement settlementById(@Argument Long id) {
         return dealService.settlementById(id);
     }
 
     @QueryMapping
-    public List<Settlement> settlementsByDealId(@Argument Integer id) {
+    public List<Settlement> settlementsByDealId(@Argument Long id) {
         return dealService.settlementsByDealId(id);
     }
 

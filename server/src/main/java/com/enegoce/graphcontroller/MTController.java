@@ -20,18 +20,19 @@ public class MTController {
 
     @Autowired
     private MTService mtService;
-
     private static final Logger logger = LogManager.getLogger(DealController.class);
+    private final String userHome = System.getenv("USERPROFILE"); //Temporary for local export
+    private final String basePath = userHome + "/IdeaProjects/enegoce/server/src/test/output"; //Temporary for local export
 
     @MutationMapping
-    public String exportMT(@Argument Integer id, @Argument String mt, @Argument String format) {
+    public String exportMT(@Argument Long id, @Argument String mt, @Argument String format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String mtFilePath;
 
         if ("xml".equalsIgnoreCase(format)) {
-            mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT" + mt + "_" + timestamp + ".xml";
+            mtFilePath = basePath + "/MT" + mt + "_" + timestamp + ".xml";
         } else {
-            mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT" + mt + "_" + timestamp + ".txt";
+            mtFilePath = basePath + "/MT" + mt + "_" + timestamp + ".txt";
         }
 
         boolean conversionSuccessful = mtService.generateAndExportMtMessage(id, mt, mtFilePath, "xml".equalsIgnoreCase(format));
@@ -46,15 +47,15 @@ public class MTController {
     }
 
     @MutationMapping
-    public String exportMT798(@Argument Integer dealId, @Argument String mt, @Argument String format) {
+    public String exportMT798(@Argument Long dealId, @Argument String mt, @Argument String format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String mtFilePath;
         String response = null;
 
         if ("txt".equalsIgnoreCase(format)) {
-            mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT798" + "_With_" + mt + "_" + timestamp + ".txt";
+            mtFilePath = basePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".txt";
         } else if ("xml".equalsIgnoreCase(format)) {
-            mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/MT798" + "_With_" + mt + "_" + timestamp + ".xml";
+            mtFilePath = basePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".xml";
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
         }
@@ -77,7 +78,7 @@ public class MTController {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String outputFilePath;
 
-        outputFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/XML" + "_" + timestamp + ".xml";
+        outputFilePath = basePath + "/XML_" + timestamp + ".xml";
 
         File textFile = new File(filePath);
         if (!textFile.exists() || !textFile.isFile()) {

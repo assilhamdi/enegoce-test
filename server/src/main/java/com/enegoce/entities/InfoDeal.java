@@ -15,7 +15,7 @@ public class InfoDeal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; //20 //Documentary Credit Number
+    private Long id; //20 //Documentary Credit Number
 
     @Column(length = 24)
     private String formLC; //40A
@@ -72,11 +72,11 @@ public class InfoDeal {
     public InfoDeal() {
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -240,7 +240,7 @@ public class InfoDeal {
         this.dealComments = dealComments;
     }
 
-    public InfoDeal(Integer id, String formLC, LocalDate dueDate, LocalDate expiryDate, String expiryPlace, String bankISSRef, String currencyID, BigDecimal lcAmount, BigDecimal varAmountTolerance, String partialTranshipment, String transhipment, Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt, String draft, String document, List<DealParty> dealParties, List<DealGoods> dealGoods, List<Settlement> settlements, List<DealComment> dealComments) {
+    public InfoDeal(Long id, String formLC, LocalDate dueDate, LocalDate expiryDate, String expiryPlace, String bankISSRef, String currencyID, BigDecimal lcAmount, BigDecimal varAmountTolerance, String partialTranshipment, String transhipment, Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt, String draft, String document, List<DealParty> dealParties, List<DealGoods> dealGoods, List<Settlement> settlements, List<DealComment> dealComments) {
         this.id = id;
         this.formLC = formLC;
         this.dueDate = dueDate;

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class MtMappingService {
+public class MtFieldMappingService {
 
     @Autowired
     private MtFieldMappingRepository mappingRepo;
