@@ -1,6 +1,7 @@
 package com.enegoce.service;
 
 import com.enegoce.entities.*;
+import com.engoce.deal.dto.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONArray;
@@ -10,21 +11,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class MTService {
@@ -36,8 +45,10 @@ public class MTService {
     private DealService dealService;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyMMdd");
-
+    private static final DateTimeFormatter REVERSE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final Logger logger = LogManager.getLogger(DealService.class);
+    private AtomicLong idGenerator = new AtomicLong(100);
+
 
     ////////////////////MT Generation////////////////////
     /////////////////////////////////////////////////////
@@ -443,80 +454,343 @@ public class MTService {
     }
 
 
-    /////////////////////TXT/XMLto Database////////////////
+    ///////////////////// XML to Database ////////////////
     //////////////////////////////////////////////////////
 
-
-    //TODO: XML/TXT to database
-
-    //////////////////////TXT to XML///////////////////////
-    ///////////////////////////////////////////////////////
-
-    public File convertTextToXml(File textFile, String outputFilePath) throws IOException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder;
-        Document doc;
+    public Map<String, String> parseMtMessage(String mtMessage, String mt) {
+        Map<String, String> fieldsMap = new HashMap<>();
 
         try {
-            builder = factory.newDocumentBuilder();
-            doc = builder.newDocument();
-        } catch (Exception e) {
-            throw new IOException("Error initializing XML document", e);
-        }
+            // Convert mtMessage to XML
+            String mtXml = convertTextToXml(mtMessage, mt);
 
-        Element rootElement = doc.createElement("MT700");
-        doc.appendChild(rootElement);
+            // Parse the XML document
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(new InputSource(new StringReader(mtXml)));
 
-        try (BufferedReader br = new BufferedReader(new FileReader(textFile))) {
-            String line;
-            StringBuilder valueBuilder = new StringBuilder();
-            String currentTag = null;
-            while ((line = br.readLine()) != null) {
-                if (line.contains(":") && !line.startsWith(" ")) {
-                    if (currentTag != null) {
-                        addField(doc, rootElement, currentTag, valueBuilder.toString());
-                    }
-                    String[] parts = line.split(":", 2);
-                    currentTag = parts[0];
-                    valueBuilder.setLength(0); // Clear the builder
-                    valueBuilder.append(parts[1]);
-                } else if (currentTag != null) {
-                    valueBuilder.append("\n").append(line);
-                }
+            // Extract fields from XML
+            NodeList fieldNodes = doc.getElementsByTagName("field");
+            for (int i = 0; i < fieldNodes.getLength(); i++) {
+                Element fieldElement = (Element) fieldNodes.item(i);
+                String tag = fieldElement.getElementsByTagName("tag").item(0).getTextContent().trim();
+                String value = fieldElement.getElementsByTagName("value").item(0).getTextContent().trim();
+
+                logger.info("tag : " + tag);
+                logger.info("value : " + value);
+
+                // Directly put value in fieldsMap assuming each tag is unique
+                fieldsMap.put(tag, value);
             }
-            if (currentTag != null) {
-                addField(doc, rootElement, currentTag, valueBuilder.toString());
-            }
-        } catch (IOException e) {
-            throw new IOException("Error reading text file", e);
-        }
 
-        File outputFile = new File(outputFilePath);
-        try (FileWriter writer = new FileWriter(outputFile)) {
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
-            transformer.setOutputProperty(javax.xml.transform.OutputKeys.INDENT, "yes");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-            transformer.transform(new DOMSource(doc), new StreamResult(writer));
         } catch (Exception e) {
-            throw new IOException("Error writing XML file", e);
+            e.printStackTrace();
+            // Handle parsing exceptions
         }
 
-        return outputFile;
+        return fieldsMap;
     }
 
-    private void addField(Document doc, Element rootElement, String tag, String value) {
-        Element field = doc.createElement("field");
+    public void importMT(String mtMessage, String mt) {
+        Map<String, String> parsedMessage = parseMtMessage(mtMessage, mt);
 
-        Element tagElement = doc.createElement("tag");
-        tagElement.appendChild(doc.createTextNode(tag));
-        field.appendChild(tagElement);
+        List<MtFieldMapping> mappings = mappingService.mappingsByMt(mt);
+        if (mappings.isEmpty()) {
+            logger.error("No mappings found for mt: " + mt);
+            return;
+        }
 
-        Element valueElement = doc.createElement("value");
-        valueElement.appendChild(doc.createTextNode(value.trim()));
-        field.appendChild(valueElement);
+        if (mt.equals("700")) {
+            InfoDealDto infoDealDto = new InfoDealDto();
+            List<DealCommentDto> comments = new ArrayList<>();
+            List<DealGoodsDto> goods = new ArrayList<>();
+            List<DealPartyDto> parties = new ArrayList<>();
+            List<SettlementDto> settlements = new ArrayList<>();
 
-        rootElement.appendChild(field);
+            for (Map.Entry<String, String> entry : parsedMessage.entrySet()) {
+                String tag = entry.getKey();
+                String value = entry.getValue();
+
+                switch (tag) {
+                    case "20":
+                        // Handle reference number
+                        infoDealDto.setFormLC(value);
+                        break;
+                    case "31C":
+                        if (!value.isEmpty()) {
+                            LocalDate localDate = LocalDate.parse(value, DATE_FORMATTER);
+                            String formattedDate = localDate.format(REVERSE_DATE_FORMATTER);
+                            infoDealDto.setDueDate(LocalDate.parse(formattedDate));  // Assuming InfoDealDto has a setDueDate method
+                            logger.info("31C dueDate set to: " + formattedDate);
+                        }
+                        break;
+                    case "31D":
+                        // Extract expiryDate and expiryPlace
+                        String expiryDateStr = value.substring(0, 6); // First 6 characters for expiryDate
+                        String expiryPlace = value.substring(6); // Remainder for expiryPlace
+
+                        // Parse expiryDate from yyMMdd to yyyy-MM-dd
+                        LocalDate localDate = LocalDate.parse(expiryDateStr, DATE_FORMATTER);
+                        String formattedDate = localDate.format(REVERSE_DATE_FORMATTER);
+                        infoDealDto.setExpiryDate(LocalDate.parse(formattedDate));
+                        infoDealDto.setExpiryPlace(expiryPlace);
+                        break;
+                    case "51a":
+                        infoDealDto.setBankISSRef(value);
+                        break;
+                    case "50":
+                    case "59":
+                    case "58a":
+                    case "53a":
+                    case "57a":
+                        // Split concatenated fields by ",\n"
+                        String[] fields = value.split(", ");
+                        if (fields.length >= 6) {
+                            DealPartyDto dealPartyDto = new DealPartyDto();
+                            String codPrt = getCodPrtForTag(tag); // Replace with your logic to determine codPrt
+                            dealPartyDto.setId(new DealPartyPKID(infoDealDto.getId(), idGenerator.getAndIncrement(), codPrt));
+                            dealPartyDto.setNom(fields[0]);
+                            dealPartyDto.setStreet1(fields[1]);
+                            dealPartyDto.setStreet2(fields[2]);
+                            dealPartyDto.setStreet3(fields[3]);
+                            dealPartyDto.setTown(fields[4]);
+                            dealPartyDto.setCountry(fields[5]);
+
+                            // Add dealPartyDto to your list or process as needed
+                            parties.add(dealPartyDto);
+                        } else {
+                            logger.warn("Insufficient fields for tag 50: " + value);
+                        }
+                        break;
+                    case "47A":
+                    case "46G":
+                    case "49H":
+                    case "71D":
+                    case "78":
+                    case "72Z":
+                        DealCommentDto commentDto = new DealCommentDto();
+                        commentDto.setId(new DealCommentPKID(infoDealDto.getId(), idGenerator.getAndIncrement()));
+                        commentDto.setComment(value);
+                        commentDto.setTypeComt(tag);
+                        comments.add(commentDto);
+                        break;
+                    case "32B":
+                        // Concatenated fields without delimiter
+                        if (value.length() >= 3) {
+                            String currencyID = value.substring(0, 3);
+                            String lcAmountStr = value.substring(3);
+                            infoDealDto.setCurrencyID(currencyID);
+                            logger.info("CurrencyID set to: " + currencyID);
+
+                            // Convert lcAmount to BigDecimal
+                            BigDecimal lcAmount = new BigDecimal(lcAmountStr);
+                            infoDealDto.setLcAmount(lcAmount);
+                            logger.info("LcAmount set to: " + lcAmount);
+                        } else {
+                            logger.warn("Insufficient fields for tag 32B: " + value);
+                        }
+                        break;
+                    case "39A":
+                        BigDecimal varAmountTolerance = new BigDecimal(value.replaceAll("[^\\d.,]", ""));
+                        infoDealDto.setVarAmountTolerance(varAmountTolerance);
+                        break;
+                    case "39C":
+                        infoDealDto.setAddAmtCovered(value);
+                        break;
+                    case "41A":
+                        String[] fields2 = value.split(", ");
+                        if (fields2.length >= 2) {
+                            SettlementDto settDto = new SettlementDto();
+                            settDto.setAvailableWithBank(fields2[0]);
+                            settDto.setAvailableWithOther(fields2[1]);
+                            settlements.add(settDto);
+                            break;
+
+                        } else {
+                            logger.warn("Insufficient fields for tag 50: " + value);
+                        }
+                        break;
+                    case "42C":
+                        infoDealDto.setDraftAt(value);
+                        break;
+                    case "42a":
+                        infoDealDto.setDraft(value);
+                        break;
+                    case "43P":
+                        infoDealDto.setPartialTranshipment(value);
+                        break;
+                    case "43T":
+                        infoDealDto.setTranshipment(value);
+                        break;
+                    case "45A":
+                        // Concatenated goods descriptions starting with "+"
+                        String[] goodsDescs = value.split("\\+");
+                        for (String goodsDesc : goodsDescs) {
+                            DealGoodsDto goodDto = new DealGoodsDto();
+                            if (!goodsDesc.trim().isEmpty()) {
+                                String trimmedDesc = goodsDesc.trim();
+                                goodDto.setGoodsDesc(trimmedDesc);
+                                goods.add(goodDto);
+                            }
+                        }
+                        break;
+                    case "44A":
+                    case "44E":
+                    case "44F":
+                    case "44B":
+                        // Concatenated values separated by ", "
+                        String[] splitValues = value.split(", ");
+                        if (splitValues.length > 0) {
+                            for (int j = 0; j < splitValues.length; j++) {
+                                if (j < goods.size()) {
+                                    // Set the corresponding value in the existing DealGoodsDto
+                                    switch (tag) {
+                                        case "44A":
+                                            goods.get(j).setPlaceOfTakingCharge(splitValues[j]);
+                                            break;
+                                        case "44E":
+                                            goods.get(j).setPortOfLoading(splitValues[j]);
+                                            break;
+                                        case "44F":
+                                            goods.get(j).setPortOfDischarge(splitValues[j]);
+                                            break;
+                                        case "44B":
+                                            goods.get(j).setPlaceOfFinalDestination(splitValues[j]);
+                                            break;
+                                    }
+                                } else {
+                                    logger.warn("More split values than DealGoodsDto objects for tag " + tag);
+                                    break; // Exit loop or handle as appropriate
+                                }
+                            }
+                        } else {
+                            logger.warn("No split values found for tag " + tag);
+                        }
+                        break;
+
+                    case "44C":
+                        // Concatenated values separated by ", "
+                        String[] splitValuesC = value.split(", ");
+                        if (splitValuesC.length > 0) {
+                            for (int j = 0; j < splitValuesC.length; j++) {
+                                if (j < goods.size()) {
+                                    // Convert to Date using SimpleDateFormat
+                                    try {
+                                        Date shipmentDate = new SimpleDateFormat("yyyyMMdd").parse(splitValuesC[j]);
+                                        goods.get(j).setShipmentDateLast(shipmentDate);
+                                    } catch (ParseException e) {
+                                        logger.error("Error parsing shipment date for tag " + tag + ": " + splitValuesC[j]);
+                                        // Handle parsing error as needed
+                                    }
+                                } else {
+                                    logger.warn("More split values than DealGoodsDto objects for tag " + tag);
+                                    break;
+                                }
+                            }
+                        } else {
+                            logger.warn("No split values found for tag " + tag);
+                        }
+                        break;
+
+                    case "44D":
+                        // Concatenated values separated by ", "
+                        String[] splitValuesD = value.split(", ");
+                        if (splitValuesD.length > 0) {
+                            for (int j = 0; j < splitValuesD.length; j++) {
+                                if (j < goods.size()) {
+                                    // Convert to Integer
+                                    try {
+                                        Integer shipmentPeriod = Integer.parseInt(splitValuesD[j]);
+                                        goods.get(j).setShipmentPeriod(shipmentPeriod);
+                                    } catch (NumberFormatException e) {
+                                        logger.error("Invalid integer format for tag " + tag + ": " + splitValuesD[j]);
+                                        // Handle error or skip if necessary
+                                    }
+                                } else {
+                                    logger.warn("More split values than DealGoodsDto objects for tag " + tag);
+                                    break;
+                                }
+                            }
+                        } else {
+                            logger.warn("No split values found for tag " + tag);
+                        }
+                        break;
+                    case "46A":
+                        infoDealDto.setDocument(value);
+                        break;
+                    case "48":
+                        try {
+                            Integer presDay = Integer.parseInt((value));
+                            infoDealDto.setPresDay(presDay);
+                        } catch (NumberFormatException e) {
+                            logger.error("Invalid integer format for tag " + tag + ": " + value);
+                        }
+                        break;
+                    case "49":
+                        infoDealDto.setConfirmationCharge(value);
+                        break;
+                }
+            }
+            dealService.saveInfoDeal(infoDealDto);
+            dealService.saveDealGoodsList(goods);
+            dealService.saveDealPartyList(parties);
+            dealService.saveDealCommentList(comments);
+            dealService.saveSettlementList(settlements);
+        }
+    }
+
+    private String getCodPrtForTag(String tag) {
+        return switch (tag) {
+            case "50" -> "APP";
+            case "59" -> "BNE";
+            case "58a" -> "CONF";
+            case "53a" -> "RMB";
+            case "57a" -> "ADT";
+            default -> ""; // Default case
+        };
+    }
+
+    public String test(String m, String mt) {
+        Map<String, String> map = parseMtMessage(m, mt);
+        return "test";
+    }
+
+    //TODO: XML to database
+
+    //////////////////////String to Valid XML///////////////
+    ///////////////////////////////////////////////////////
+
+    public String convertTextToXml(String message, String mt) throws IOException {
+        StringBuilder xmlBuilder = new StringBuilder();
+
+        // Append root element
+        xmlBuilder.append("<MT").append(mt).append(">");
+
+        String[] lines = message.split("\n");
+        for (String line : lines) {
+            if (!line.trim().isEmpty()) {
+                String[] keyValuePairs = line.split("\\s+(?=[0-9A-Za-z]+:)"); // Split by whitespace before a tag
+                for (String pair : keyValuePairs) {
+                    String[] parts = pair.split(":", 2);
+                    String tag = parts[0].trim();
+                    String value = parts[1].trim();
+
+                    appendField(xmlBuilder, tag, value);
+                }
+            }
+        }
+
+        // Close root element
+        xmlBuilder.append("</MT").append(mt).append(">");
+
+        return xmlBuilder.toString();
+    }
+
+    private void appendField(StringBuilder xmlBuilder, String tag, String value) {
+        xmlBuilder.append("<field>");
+        xmlBuilder.append("<tag>").append(tag).append("</tag>");
+        xmlBuilder.append("<value>").append(value).append("</value>");
+        xmlBuilder.append("</field>");
     }
 
 }
