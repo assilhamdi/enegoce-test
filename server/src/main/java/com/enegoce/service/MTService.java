@@ -19,19 +19,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -47,10 +42,23 @@ public class MTService {
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyMMdd");
     private static final DateTimeFormatter REVERSE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final Logger logger = LogManager.getLogger(DealService.class);
-    private AtomicLong idGenerator = new AtomicLong(100);
 
 
-    ////////////////////MT Generation////////////////////
+    ///////////Temp for populating composite PK////////
+    //////////////////////////////////////////////////
+    private static final AtomicLong idGenerator = new AtomicLong(100);
+
+    public static synchronized String generateString() {
+        // Generate a unique string ID based on the current value of idGenerator
+        return "S_" + idGenerator.getAndIncrement();
+    } //Temp for populating composite PK
+
+    public static synchronized Long generateLong() {
+        // Generate a unique string ID based on the current value of idGenerator
+        return idGenerator.getAndIncrement();
+    } //Temp for populating composite PK
+
+    ////////////////////MT Export ///////////////////////
     /////////////////////////////////////////////////////
 
     public boolean generateAndExportMtMessage(Long dealId, String mt, String filePath, boolean generateXml) {
@@ -453,8 +461,7 @@ public class MTService {
         }
     }
 
-
-    ///////////////////// XML to Database ////////////////
+    ///////////////////// MT Import //////////////////////
     //////////////////////////////////////////////////////
 
     public Map<String, String> parseMtMessage(String mtMessage, String mt) {
@@ -479,25 +486,23 @@ public class MTService {
                 logger.info("tag : " + tag);
                 logger.info("value : " + value);
 
-                // Directly put value in fieldsMap assuming each tag is unique
+                // Directly put value in fieldsMap
                 fieldsMap.put(tag, value);
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            // Handle parsing exceptions
         }
-
         return fieldsMap;
     }
 
-    public void importMT(String mtMessage, String mt) {
+    public boolean importMT(String mtMessage, String mt) {
         Map<String, String> parsedMessage = parseMtMessage(mtMessage, mt);
 
         List<MtFieldMapping> mappings = mappingService.mappingsByMt(mt);
         if (mappings.isEmpty()) {
             logger.error("No mappings found for mt: " + mt);
-            return;
+            return false;
         }
 
         if (mt.equals("700")) {
@@ -506,6 +511,9 @@ public class MTService {
             List<DealGoodsDto> goods = new ArrayList<>();
             List<DealPartyDto> parties = new ArrayList<>();
             List<SettlementDto> settlements = new ArrayList<>();
+
+            // Initialize an index for iterating through goodsDescs
+            int goodsIndex = 0;
 
             for (Map.Entry<String, String> entry : parsedMessage.entrySet()) {
                 String tag = entry.getKey();
@@ -548,7 +556,7 @@ public class MTService {
                         if (fields.length >= 6) {
                             DealPartyDto dealPartyDto = new DealPartyDto();
                             String codPrt = getCodPrtForTag(tag); // Replace with your logic to determine codPrt
-                            dealPartyDto.setId(new DealPartyPKID(infoDealDto.getId(), idGenerator.getAndIncrement(), codPrt));
+                            dealPartyDto.setId(new DealPartyPKID(infoDealDto.getId(), generateLong(), codPrt));
                             dealPartyDto.setNom(fields[0]);
                             dealPartyDto.setStreet1(fields[1]);
                             dealPartyDto.setStreet2(fields[2]);
@@ -559,17 +567,17 @@ public class MTService {
                             // Add dealPartyDto to your list or process as needed
                             parties.add(dealPartyDto);
                         } else {
-                            logger.warn("Insufficient fields for tag 50: " + value);
+                            logger.warn("Insufficient fields for tag " + tag + ": " + value);
                         }
                         break;
                     case "47A":
-                    case "46G":
+                    case "49G":
                     case "49H":
                     case "71D":
                     case "78":
                     case "72Z":
                         DealCommentDto commentDto = new DealCommentDto();
-                        commentDto.setId(new DealCommentPKID(infoDealDto.getId(), idGenerator.getAndIncrement()));
+                        commentDto.setId(new DealCommentPKID(infoDealDto.getId(), generateLong()));
                         commentDto.setComment(value);
                         commentDto.setTypeComt(tag);
                         comments.add(commentDto);
@@ -616,6 +624,43 @@ public class MTService {
                     case "42a":
                         infoDealDto.setDraft(value);
                         break;
+                    case "42M":
+                    case "42P":
+                        String[] mixed = value.split(",");
+
+                        // Ensure settlements list has enough DTOs
+                        while (settlements.size() < mixed.length) {
+                            SettlementDto settDto = new SettlementDto();
+                            settDto.setId(infoDealDto.getId());
+                            settlements.add(settDto);
+                        }
+
+                        for (int j = 0; j < mixed.length; j++) {
+                            SettlementDto dto = settlements.get(j);
+                            switch (tag) {
+                                case "42M":
+                                    String setterMethodNamePay = "setMixedPay" + (j + 1);
+                                    try {
+                                        Method setterMethod = dto.getClass().getMethod(setterMethodNamePay, String.class);
+                                        setterMethod.invoke(dto, mixed[j]);
+                                    } catch (NoSuchMethodException | IllegalAccessException |
+                                             InvocationTargetException e) {
+                                        e.printStackTrace(); // Handle exceptions appropriately
+                                    }
+                                    break;
+                                case "42P":
+                                    String setterMethodNameNeg = "setNegDefPay" + (j + 1);
+                                    try {
+                                        Method setterMethod = dto.getClass().getMethod(setterMethodNameNeg, String.class);
+                                        setterMethod.invoke(dto, mixed[j]);
+                                    } catch (NoSuchMethodException | IllegalAccessException |
+                                             InvocationTargetException e) {
+                                        e.printStackTrace(); // Handle exceptions appropriately
+                                    }
+                                    break;
+                            }
+                        }
+                        break;
                     case "43P":
                         infoDealDto.setPartialTranshipment(value);
                         break;
@@ -623,14 +668,25 @@ public class MTService {
                         infoDealDto.setTranshipment(value);
                         break;
                     case "45A":
-                        // Concatenated goods descriptions starting with "+"
-                        String[] goodsDescs = value.split("\\+");
+                        // Reset goodsIndex to start from 0
+                        goodsIndex = 0;
+                        // Process goods descriptions (assuming value is a single string separated by '+')
+                        String[] goodsDescs = value.split("\\s*\\+\\s*");
+                        goodsDescs = Arrays.stream(goodsDescs)
+                                .filter(desc -> !desc.trim().isEmpty())
+                                .toArray(String[]::new);
+                        System.out.println(Arrays.toString(goodsDescs));
+
                         for (String goodsDesc : goodsDescs) {
-                            DealGoodsDto goodDto = new DealGoodsDto();
-                            if (!goodsDesc.trim().isEmpty()) {
-                                String trimmedDesc = goodsDesc.trim();
-                                goodDto.setGoodsDesc(trimmedDesc);
-                                goods.add(goodDto);
+                            if (goodsIndex < goods.size()) {
+                                // Update existing DealGoodsDto with goodsDesc
+                                DealGoodsDto dto = goods.get(goodsIndex);
+                                dto.setGoodsDesc(goodsDesc.trim()); // Trim to remove any leading/trailing whitespace
+                                logger.info("Updated DealGoodsDto with goodsDesc at index " + goodsIndex);
+                                goodsIndex++; // Move to the next DealGoodsDto
+                            } else {
+                                logger.warn("More goods descriptions provided than expected. Current goodsIndex: " + goodsIndex + ", goods.size(): " + goods.size());
+                                break;
                             }
                         }
                         break;
@@ -638,81 +694,64 @@ public class MTService {
                     case "44E":
                     case "44F":
                     case "44B":
-                        // Concatenated values separated by ", "
-                        String[] splitValues = value.split(", ");
-                        if (splitValues.length > 0) {
-                            for (int j = 0; j < splitValues.length; j++) {
-                                if (j < goods.size()) {
-                                    // Set the corresponding value in the existing DealGoodsDto
-                                    switch (tag) {
-                                        case "44A":
-                                            goods.get(j).setPlaceOfTakingCharge(splitValues[j]);
-                                            break;
-                                        case "44E":
-                                            goods.get(j).setPortOfLoading(splitValues[j]);
-                                            break;
-                                        case "44F":
-                                            goods.get(j).setPortOfDischarge(splitValues[j]);
-                                            break;
-                                        case "44B":
-                                            goods.get(j).setPlaceOfFinalDestination(splitValues[j]);
-                                            break;
-                                    }
-                                } else {
-                                    logger.warn("More split values than DealGoodsDto objects for tag " + tag);
-                                    break; // Exit loop or handle as appropriate
-                                }
-                            }
-                        } else {
-                            logger.warn("No split values found for tag " + tag);
-                        }
-                        break;
-
                     case "44C":
-                        // Concatenated values separated by ", "
-                        String[] splitValuesC = value.split(", ");
-                        if (splitValuesC.length > 0) {
-                            for (int j = 0; j < splitValuesC.length; j++) {
-                                if (j < goods.size()) {
-                                    // Convert to Date using SimpleDateFormat
-                                    try {
-                                        Date shipmentDate = new SimpleDateFormat("yyyyMMdd").parse(splitValuesC[j]);
-                                        goods.get(j).setShipmentDateLast(shipmentDate);
-                                    } catch (ParseException e) {
-                                        logger.error("Error parsing shipment date for tag " + tag + ": " + splitValuesC[j]);
-                                        // Handle parsing error as needed
-                                    }
-                                } else {
-                                    logger.warn("More split values than DealGoodsDto objects for tag " + tag);
-                                    break;
-                                }
-                            }
-                        } else {
-                            logger.warn("No split values found for tag " + tag);
-                        }
-                        break;
-
                     case "44D":
-                        // Concatenated values separated by ", "
-                        String[] splitValuesD = value.split(", ");
-                        if (splitValuesD.length > 0) {
-                            for (int j = 0; j < splitValuesD.length; j++) {
-                                if (j < goods.size()) {
-                                    // Convert to Integer
-                                    try {
-                                        Integer shipmentPeriod = Integer.parseInt(splitValuesD[j]);
-                                        goods.get(j).setShipmentPeriod(shipmentPeriod);
-                                    } catch (NumberFormatException e) {
-                                        logger.error("Invalid integer format for tag " + tag + ": " + splitValuesD[j]);
-                                        // Handle error or skip if necessary
-                                    }
-                                } else {
-                                    logger.warn("More split values than DealGoodsDto objects for tag " + tag);
-                                    break;
+                        String[] splitValues = value.split(", ");
+
+                        // Ensure goods list is long enough to update
+                        while (goods.size() < splitValues.length) {
+                            DealGoodsDto goodDto = new DealGoodsDto();
+                            goodDto.setId(new DealGoodsPKID(infoDealDto.getId(), generateString(), generateLong()));
+                            goods.add(goodDto);
+                            logger.info("Added new DealGoodsDto. Current goods.size(): " + goods.size());
+                        }
+
+                        // Iterate through split values and update goods list
+                        for (int j = 0; j < splitValues.length; j++) {
+                            if (j < goods.size()) {
+                                DealGoodsDto dto = goods.get(j);
+                                logger.info("Updating DealGoodsDto at index " + j + " for tag " + tag);
+
+                                switch (tag) {
+                                    case "44A":
+                                        dto.setPlaceOfTakingCharge(splitValues[j]);
+                                        break;
+                                    case "44E":
+                                        dto.setPortOfLoading(splitValues[j]);
+                                        break;
+                                    case "44F":
+                                        dto.setPortOfDischarge(splitValues[j]);
+                                        break;
+                                    case "44B":
+                                        dto.setPlaceOfFinalDestination(splitValues[j]);
+                                        break;
+                                    case "44C":
+                                        String shipmentDateString = splitValues[j].trim(); // Trim to remove any leading/trailing whitespace
+                                        try {
+                                            Date shipmentDate = new SimpleDateFormat("yyMMdd").parse(shipmentDateString);
+                                            dto.setShipmentDateLast(shipmentDate);
+                                        } catch (ParseException e) {
+                                            logger.error("Error parsing shipment date for tag " + tag + ": " + shipmentDateString);
+                                            // Handle parsing error as needed
+                                        }
+                                        break;
+                                    case "44D":
+                                        try {
+                                            Integer shipmentPeriod = Integer.parseInt(splitValues[j]);
+                                            dto.setShipmentPeriod(shipmentPeriod);
+                                        } catch (NumberFormatException e) {
+                                            logger.error("Invalid integer format for tag " + tag + ": " + splitValues[j]);
+                                            // Handle error or skip if necessary
+                                        }
+                                        break;
+                                    default:
+                                        logger.warn("Unhandled tag " + tag + " in switch statement");
+                                        break;
                                 }
+                            } else {
+                                logger.warn("More values provided than expected for tag " + tag + ". Current index: " + j + ", goods.size(): " + goods.size());
+                                break;
                             }
-                        } else {
-                            logger.warn("No split values found for tag " + tag);
                         }
                         break;
                     case "46A":
@@ -731,12 +770,57 @@ public class MTService {
                         break;
                 }
             }
-            dealService.saveInfoDeal(infoDealDto);
-            dealService.saveDealGoodsList(goods);
-            dealService.saveDealPartyList(parties);
-            dealService.saveDealCommentList(comments);
-            dealService.saveSettlementList(settlements);
+
+            while (goodsIndex < goods.size()) {
+                DealGoodsDto dto = goods.get(goodsIndex);
+                logger.warn("No corresponding goods description found for DealGoodsDto ID: " + dto.getId());
+                goodsIndex++;
+            }
+
+            Long infoDealId = dealService.saveInfoDeal(infoDealDto);
+            dealService.saveDealCommentList(comments, infoDealId);
+            dealService.saveSettlementList(settlements, infoDealId);
+            dealService.saveDealGoodsList(goods, infoDealId);
+            dealService.saveDealPartyList(parties, infoDealId);
+
+
+            return true;
+        } else if (mt.equals("701")) {
+            InfoDealDto infoDealDto = new InfoDealDto();
+            List<DealCommentDto> comments = new ArrayList<>();
+
+            for (Map.Entry<String, String> entry : parsedMessage.entrySet()) {
+                String tag = entry.getKey();
+                String value = entry.getValue();
+
+                if ("45B".equals(tag) || "46B".equals(tag) || "47B".equals(tag)) {
+                    DealCommentDto commentDto = new DealCommentDto();
+                    commentDto.setId(new DealCommentPKID(infoDealDto.getId(), generateLong()));
+                    commentDto.setComment(value);
+
+                    switch (tag) {
+                        case "45B":
+                            commentDto.setTypeComt("47A");
+                            break;
+                        case "46B":
+                            commentDto.setTypeComt("46B");
+                            break;
+                        case "47B":
+                            commentDto.setTypeComt("46B");
+                            break;
+                    }
+
+                    comments.add(commentDto);
+                }
+            }
+
+            // Save InfoDealDto and its comments outside of the loop
+            Long infoDealId = dealService.saveInfoDeal(infoDealDto);
+            dealService.saveDealCommentList(comments, infoDealId);
+
+            return true;
         }
+        return false;
     }
 
     private String getCodPrtForTag(String tag) {
@@ -749,13 +833,6 @@ public class MTService {
             default -> ""; // Default case
         };
     }
-
-    public String test(String m, String mt) {
-        Map<String, String> map = parseMtMessage(m, mt);
-        return "test";
-    }
-
-    //TODO: XML to database
 
     //////////////////////String to Valid XML///////////////
     ///////////////////////////////////////////////////////
@@ -779,7 +856,6 @@ public class MTService {
                 }
             }
         }
-
         // Close root element
         xmlBuilder.append("</MT").append(mt).append(">");
 

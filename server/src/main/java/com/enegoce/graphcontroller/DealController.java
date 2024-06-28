@@ -39,20 +39,8 @@ public class DealController {
         return dealService.dealById(id);
     }
 
-
-
-    //////////////////////////////DealGoods//////////////////////////////
-    /////////////////////////////////////////////////////////////////////
-
-    @QueryMapping
-    public List<DealGoods> getAllDealGoods() {
-        return dealService.goods();
-    }
-
-    @QueryMapping
-    public DealGoods dealGoodsById(@Argument Long id) {
-        return dealService.dealGoodsById(id);
-    }
+    /////////////////////DealGoods//////////////////////
+    ////////////////////////////////////////////////////
 
     @QueryMapping
     public List<DealGoods> goodsByDealId(@Argument Long id) {
@@ -61,16 +49,6 @@ public class DealController {
 
     ////////////////////DealParty////////////////////
     /////////////////////////////////////////////////
-
-    @QueryMapping
-    public List<DealParty> getAllDealParties() {
-        return dealService.parties();
-    }
-
-    @QueryMapping
-    public DealParty dealPartyById(@Argument Long id) {
-        return dealService.dealPartyById(id);
-    }
 
     @QueryMapping
     public List<DealParty> partiesByDealId(@Argument Long id) {
@@ -82,13 +60,8 @@ public class DealController {
         return dealService.partyByDealIdAndCode(id, code);
     }
 
-    ////////////////////Settlement////////////////////
+    ////////////////////Settlement///////////////////
     /////////////////////////////////////////////////
-
-    @QueryMapping
-    public List<Settlement> getAllSettlements() {
-        return dealService.settlements();
-    }
 
     @QueryMapping
     public Settlement settlementById(@Argument Long id) {

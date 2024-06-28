@@ -5,18 +5,13 @@ extend type Query {
     getInfoDealById(id: Int!): InfoDeal
 
     ###DealGoods
-    getAllDealGoods: [DealGoods]
-    dealGoodsById(id: Int!): DealGoods
     goodsByDealId(id: Int!): [DealGoods]
 
     ###DealParty
-    getAllDealParties: [DealParty]
-    dealPartyById(id: Int!): DealParty
     partiesByDealId(id: Int!): [DealParty]
     partyByDealIdAndCode(id: Int!, code: String): DealParty
 
     ###Settlement
-    getAllSettlements: [Settlement]
     settlementById(id: Int!): Settlement
     settlementsByDealId(id: Int!): [Settlement]
 }
@@ -44,42 +39,10 @@ type InfoDeal {
     dealComments: [DealComment]
 }
 
-type InfoDealInput {
-    formLC: String
-    dueDate: String
-    expiryDate: String
-    expiryPlace: String
-    bankISSRef: String
-    currencyID: String
-    lcAmount: String
-    varAmountTolerance: String
-    partialTranshipment: String
-    transhipment: String
-    presDay: Int
-    confirmationCharge: String
-    addAmtCovered: String
-}
-
 ###DealGoods
 
 type DealGoods {
     id: DealGoodsPK!
-    productCode: String
-    productName: String
-    productOrigine: String
-    goodsDesc: String
-    unitPrice: String
-    quantity: Int
-    totalAmount: String
-    placeOfTakingCharge: String
-    portOfLoading: String
-    portOfDischarge: String
-    placeOfFinalDestination: String
-    shipmentDateLast: String
-    shipmentPeriod: Int
-}
-
-type DealGoodsInput {
     productCode: String
     productName: String
     productOrigine: String
@@ -124,45 +87,10 @@ type DealParty {
     stepId: String
 }
 
-type DealPartyInput {
-    nom: String
-    street1: String
-    street2: String
-    street3: String
-    town: String
-    cp: String
-    country: String
-    iban: String
-    dev: String
-    dynamicData1: String
-    dynamicData2: String
-    dynamicData3: String
-    nidn: String
-    compCheck: String
-    userCreated: String
-    dateCreation: String
-    userUpdated: String
-    dateUpdated: String
-    stepId: String
-}
-
-type DealPartyPK {
-    codPrt: String
-    seq: Int
-}
-
 ###DealComment
 
 type DealComment {
     id: DealCommentPK!
-    comment: String
-    dateCreation: String
-    useName: String
-    typeComt: String
-    stepId: String
-}
-
-type DealCommentInput {
     comment: String
     dateCreation: String
     useName: String
@@ -178,20 +106,6 @@ type DealCommentPK {
 
 type Settlement {
     id: ID!
-    paymentType: String
-    availableWithBank: String
-    availableWithOther: String
-    mixedPay1: String
-    mixedPay2: String
-    mixedPay3: String
-    mixedPay4: String
-    negDefPay1: String
-    negDefPay2: String
-    negDefPay3: String
-    negDefPay4: String
-}
-
-type SettlementInput {
     paymentType: String
     availableWithBank: String
     availableWithOther: String
