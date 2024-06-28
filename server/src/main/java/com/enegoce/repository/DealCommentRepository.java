@@ -1,7 +1,6 @@
 package com.enegoce.repository;
 
 import com.enegoce.entities.DealComment;
-import com.enegoce.entities.DealParty;
 import com.enegoce.entities.InfoDeal;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

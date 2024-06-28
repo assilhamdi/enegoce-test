@@ -1,13 +1,10 @@
 package com.enegoce.entities;
 
 import jakarta.persistence.*;
-import org.hibernate.validator.constraints.Length;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
