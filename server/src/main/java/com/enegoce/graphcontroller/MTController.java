@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 public class MTController {
@@ -73,23 +75,24 @@ public class MTController {
     }
 
     @MutationMapping
-    public String convertTextToXml(@Argument String filePath) {
+    public ResponseEntity<String> importMT(@Argument String mtMessage, @Argument String mt) {
 
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String outputFilePath;
+        boolean importSuccessful = mtService.importMT(mtMessage, mt);
 
-        outputFilePath = basePath + "/XML_" + timestamp + ".xml";
-
-        File textFile = new File(filePath);
-        if (!textFile.exists() || !textFile.isFile()) {
-            return "Invalid file path: " + filePath;
+        if (importSuccessful) {
+            return ResponseEntity.ok("Import Successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Import Failed");
         }
+    }
+
+    @MutationMapping
+    public String convertTextToXml(@Argument String mtMessage, @Argument String mt) {
 
         try {
-            File outputFile = mtService.convertTextToXml(textFile, outputFilePath);
-            return "XML file successfully generated at: " + outputFile.getAbsolutePath();
+            return mtService.convertTextToXml(mtMessage, mt);
         } catch (IOException e) {
-            return "Error generating XML file: " + e.getMessage();
+            return "Error generating XML: " + e.getMessage();
         }
     }
 }

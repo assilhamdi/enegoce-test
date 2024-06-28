@@ -63,11 +63,6 @@ public class DealController {
     /////////////////////////////////////////////////
 
     @QueryMapping
-    public List<DealParty> getAllDealParties() {
-        return dealService.parties();
-    }
-
-    @QueryMapping
     public DealParty dealPartyById(@Argument Long id) {
         return dealService.dealPartyById(id);
     }
@@ -84,11 +79,6 @@ public class DealController {
 
     ////////////////////Settlement////////////////////
     /////////////////////////////////////////////////
-
-    @QueryMapping
-    public List<Settlement> getAllSettlements() {
-        return dealService.settlements();
-    }
 
     @QueryMapping
     public Settlement settlementById(@Argument Long id) {

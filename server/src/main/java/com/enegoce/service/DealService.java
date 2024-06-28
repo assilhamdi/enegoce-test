@@ -3,7 +3,7 @@ package com.enegoce.service;
 import com.enegoce.entities.*;
 import com.enegoce.repository.*;
 import com.engoce.deal.dto.*;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,20 +42,33 @@ public class DealService {
         return deal.orElse(null);
     }
 
-    public void saveInfoDeal(InfoDealDto infoDealDto) {
-        InfoDeal infoDeal = mapDtoToEntity(infoDealDto);
-        dealRepo.save(infoDeal);
+    public Long saveInfoDeal(InfoDealDto infoDealDto) {
+        InfoDeal infoDeal = infoDealToEntity(infoDealDto);
+        InfoDeal savedInfoDeal = dealRepo.save(infoDeal);
+        return savedInfoDeal.getId(); // Assuming getId() returns the ID of InfoDeal entity
     }
 
-    public InfoDeal updateInfoDeal(Long id, InfoDealDto infoDealDto) {
-        Optional<InfoDeal> optionalInfoDeal = dealRepo.findById(id);
-        if (optionalInfoDeal.isPresent()) {
-            InfoDeal infoDeal = optionalInfoDeal.get();
-            updateSettEntityFromDto(infoDeal, infoDealDto);
-            return dealRepo.save(infoDeal);
-        } else {
-            throw new EntityNotFoundException("Deal with id " + id + " not found");
-        }
+    private InfoDeal infoDealToEntity(InfoDealDto dto) {
+        InfoDeal infoDeal = new InfoDeal();
+
+        infoDeal.setLcAmount(dto.getLcAmount());
+        infoDeal.setCurrencyID(dto.getCurrencyID());
+        infoDeal.setExpiryPlace(dto.getExpiryPlace());
+        infoDeal.setExpiryDate(dto.getExpiryDate());
+        infoDeal.setVarAmountTolerance(dto.getVarAmountTolerance());
+        infoDeal.setAddAmtCovered(dto.getAddAmtCovered());
+        infoDeal.setDueDate(dto.getDueDate());
+        infoDeal.setDraft(dto.getDraft());
+        infoDeal.setDraftAt(dto.getDraftAt());
+        infoDeal.setPresDay(dto.getPresDay());
+        infoDeal.setTranshipment(dto.getTranshipment());
+        infoDeal.setConfirmationCharge(dto.getConfirmationCharge());
+        infoDeal.setFormLC(dto.getFormLC());
+        infoDeal.setDocument(dto.getDocument());
+        infoDeal.setPartialTranshipment(dto.getPartialTranshipment());
+        infoDeal.setBankISSRef(dto.getBankISSRef());
+
+        return infoDeal;
     }
 
 
@@ -75,26 +88,32 @@ public class DealService {
         return goodsRepo.findGoodsByDealId(id);
     }
 
-    public DealGoods saveDealGoods(DealGoodsDto dealGoodsDTO) {
-        DealGoods dealGoods = convertGoodsToEntity(dealGoodsDTO);
-        return goodsRepo.save(dealGoods);
+    @Transactional
+    public void saveDealGoodsList(List<DealGoodsDto> dealGoodsDtoList, Long infoDealId) {
+        for (DealGoodsDto goodDto : dealGoodsDtoList) {
+            DealGoods dealGoods = convertGoodsToEntity(goodDto, infoDealId);
+            goodsRepo.save(dealGoods);
+        }
     }
 
-    public void saveDealGoodsList(List<DealGoodsDto> dealGoodsDtoList) {
-        List<DealGoods> dealGoodsList = dealGoodsDtoList.stream()
-                .map(this::convertGoodsToEntity)
-                .collect(Collectors.toList());
-        goodsRepo.saveAll(dealGoodsList);
-    }
-
-    private DealGoods convertGoodsToEntity(DealGoodsDto dealGoodsDTO) {
-        DealGoodsPK dealGoodsPK = new DealGoodsPK();
-        InfoDeal deal = dealRepo.findById(dealGoodsDTO.getId().idDeal())
+    private DealGoods convertGoodsToEntity(DealGoodsDto dealGoodsDTO, Long infoDealId) {
+        // Find the InfoDeal entity
+        InfoDeal deal = dealRepo.findById(infoDealId)
                 .orElseThrow(() -> new RuntimeException(String.format("Deal %s not found", dealGoodsDTO.getId().idDeal())));
+
+        // Find the max sequence number for the given InfoDeal
+        Long maxSeq = goodsRepo.findMaxSeqByDeal(deal);
+
+        // Generate the new sequence number
+        Long newSeq = (maxSeq == null) ? 1L : maxSeq + 1L;
+
+        // Create the primary key
+        DealGoodsPK dealGoodsPK = new DealGoodsPK();
         dealGoodsPK.setDeal(deal);
         dealGoodsPK.setSeq(dealGoodsDTO.getId().seq());
         dealGoodsPK.setStepId(dealGoodsDTO.getId().stepId());
 
+        // Create and return the DealGoods entity
         return DealGoods.builder()
                 .id(dealGoodsPK)
                 .goodsDesc(dealGoodsDTO.getGoodsDesc())
@@ -128,50 +147,46 @@ public class DealService {
         return partiesRepo.findPartyByDealIdAndCode(id, code);
     }
 
-    public DealParty saveDealParty(DealPartyDto dealPartyDTO) {
-        DealParty dealParty = convertPartyToEntity(dealPartyDTO);
-        return partiesRepo.save(dealParty);
+    @Transactional
+    public void saveDealPartyList(List<DealPartyDto> dealPartyDtoList, Long infoDealId) {
+       for (DealPartyDto partyDto : dealPartyDtoList) {
+           DealParty dealParty = convertPartyToEntity(partyDto, infoDealId);
+           partiesRepo.save(dealParty);
+       }
     }
 
-    public void saveDealPartyList(List<DealPartyDto> dealPartyDtoList) {
-        List<DealParty> dealPartyList = dealPartyDtoList.stream()
-                .map(this::convertPartyToEntity)
-                .collect(Collectors.toList());
-        partiesRepo.saveAll(dealPartyList);
-    }
+    private DealParty convertPartyToEntity(DealPartyDto dealPartyDto, Long infoDealId) {
+        // Find the InfoDeal entity
+        InfoDeal deal = dealRepo.findById(infoDealId)
+                .orElseThrow(() -> new RuntimeException(String.format("Deal %s not found", dealPartyDto.getId().idDeal())));
 
-    private DealParty convertPartyToEntity(DealPartyDto dealPartyDTO) {
+        // Find the max sequence number for the given InfoDeal
+        Long maxSeq = partiesRepo.findMaxSeqByDeal(deal);
+
+        // Generate the new sequence number
+        Long newSeq = (maxSeq == null) ? 1L : maxSeq + 1L;
+
+        // Create the primary key
         DealPartyPK dealPartyPK = new DealPartyPK();
-        InfoDeal deal = dealRepo.findById(dealPartyDTO.getId().idDeal())
-                .orElseThrow(() -> new RuntimeException(String.format("DealParty %s not found", dealPartyDTO.getId().idDeal())));
         dealPartyPK.setDeal(deal);
-        dealPartyPK.setSeq(dealPartyDTO.getId().seq());
-        dealPartyPK.setCodPrt(dealPartyDTO.getId().codPrt());
+        dealPartyPK.setSeq(newSeq);
+        dealPartyPK.setCodPrt(dealPartyDto.getId().codPrt());
 
+        // Create and return the DealParty entity
         return DealParty.builder()
                 .id(dealPartyPK)
-                .nom(dealPartyDTO.getNom())
-                .street1(dealPartyDTO.getStreet1())
-                .street2(dealPartyDTO.getStreet2())
-                .town(dealPartyDTO.getTown())
-                .country(dealPartyDTO.getCountry())
-                .dateCreation(LocalDate.now())
-                .dateUpdated(LocalDate.now())
-                .stepId("DRAFT")
+                .nom(dealPartyDto.getNom())
+                .street1(dealPartyDto.getStreet1())
+                .street2(dealPartyDto.getStreet2())
+                .street3(dealPartyDto.getStreet3())
+                .town(dealPartyDto.getTown())
+                .country(dealPartyDto.getCountry())
                 .build();
     }
 
+
     ////////////////////Comment//////////////////////
     /////////////////////////////////////////////////
-
-    public List<DealComment> comments() {
-        return commRepo.findAll();
-    }
-
-    public DealComment commentById(Long id) {
-        Optional<DealComment> comment = commRepo.findById(id);
-        return comment.orElse(null);
-    }
 
     public List<DealComment> commentsByDealId(Long id) {
         return commRepo.findCommentsByDealId(id);
@@ -181,40 +196,44 @@ public class DealService {
         return commRepo.findCommentByDealAndType(id, type);
     }
 
-    public DealComment saveDealComment(DealCommentDto dealCommentDTO) {
-        DealComment dealComment = convertCommToEntity(dealCommentDTO);
-        return commRepo.save(dealComment);
+    @Transactional
+    public void saveDealCommentList(List<DealCommentDto> dealCommentDtoList, Long infoDealId) {
+        // Iterate through each DealCommentDto and save it individually
+        for (DealCommentDto dealCommentDto : dealCommentDtoList) {
+            DealComment dealComment = convertCommToEntity(dealCommentDto, infoDealId);
+            commRepo.save(dealComment); // Save each DealComment entity
+        }
     }
 
-    public void saveDealCommentList(List<DealCommentDto> dealCommentDtoList) {
-        List<DealComment> dealCommentList = dealCommentDtoList.stream()
-                .map(this::convertCommToEntity)
-                .collect(Collectors.toList());
-        commRepo.saveAll(dealCommentList);
-    }
+    private DealComment convertCommToEntity(DealCommentDto dealCommentDto, Long infoDealId) {
+        // Find the InfoDeal entity
+        InfoDeal deal = dealRepo.findById(infoDealId)
+                .orElseThrow(() -> new RuntimeException(String.format("Deal %s not found", dealCommentDto.getId().idDeal())));
 
-    private DealComment convertCommToEntity(DealCommentDto dealCommentDTO) {
+        // Find the max sequence number for the given InfoDeal
+        Long maxSeq = commRepo.findMaxSeqByDeal(deal);
+
+        // Generate the new sequence number
+        Long newSeq = (maxSeq == null) ? 1L : maxSeq + 1L;
+
+        // Create the primary key
         DealCommentPK dealCommentPK = new DealCommentPK();
-        InfoDeal deal = dealRepo.findById(dealCommentDTO.getId().idDeal())
-                .orElseThrow(() -> new RuntimeException(String.format("Deal %s not found", dealCommentDTO.getId().idDeal())));
         dealCommentPK.setDeal(deal);
-        dealCommentPK.setSeq(dealCommentDTO.getId().seq());
+        dealCommentPK.setSeq(newSeq);
 
+        // Create and return the DealComment entity
         return DealComment.builder()
                 .id(dealCommentPK)
-                .typeComt(dealCommentDTO.getTypeComt())
-                .comment(dealCommentDTO.getComment())
+                .typeComt(dealCommentDto.getTypeComt())
+                .comment(dealCommentDto.getComment())
                 .dateCreation(LocalDate.now())
-                .stepId("DRAFT")
+                .useName("defaultUser") // Set this accordingly
+                .stepId("DRAFT") // Set this accordingly
                 .build();
     }
 
     ////////////////////Settlement////////////////////
     /////////////////////////////////////////////////
-
-    public List<Settlement> settlements() {
-        return settRepo.findAll();
-    }
 
     public Settlement settlementById(Long id) {
         Optional<Settlement> settlement = settRepo.findById(id);
@@ -225,97 +244,15 @@ public class DealService {
         return settRepo.findSettlementsByDealId(id);
     }
 
-    public Settlement saveSettlement(SettlementDto settlementDto) {
-        Settlement settlment = SettToEntity(settlementDto);
-        settlment = settRepo.save(settlment);
-        return settlment;
-    }
-
-    public void saveSettlementList(List<SettlementDto> settlementDtoList) {
-        List<Settlement> settlementList = settlementDtoList.stream()
-                .map(this::SettToEntity)
-                .collect(Collectors.toList());
-        settRepo.saveAll(settlementList);
-    }
-
-    public SettlementDto updateSettlement(Long id, SettlementDto settlmentDto) {
-        Optional<Settlement> existingSettlement = settRepo.findById(id);
-        if (existingSettlement.isPresent()) {
-            Settlement settlment = existingSettlement.get();
-            updateSettEntityFromDto(settlmentDto, settlment);
-            settlment = settRepo.save(settlment);
-            return settToDto(settlment);
-        } else {
-            return null; // Or throw an exception
+    @Transactional
+    public void saveSettlementList(List<SettlementDto> settlementDtoList, Long infoDealId) {
+        for (SettlementDto settlementDto : settlementDtoList) {
+            Settlement sett = settToEntity(settlementDto, infoDealId);
+            settRepo.save(sett);
         }
     }
 
-
-    ///////////////////////////DTO TO ENTITY MAPPING////////////////
-    ///////////////////////////////////////////////////////////////
-
-    private InfoDeal mapDtoToEntity(InfoDealDto dto) {
-        InfoDeal infoDeal = new InfoDeal();
-
-        infoDeal.setLcAmount(dto.getLcAmount());
-        infoDeal.setCurrencyID(dto.getCurrencyID());
-        infoDeal.setExpiryPlace(dto.getExpiryPlace());
-        infoDeal.setExpiryDate(dto.getExpiryDate());
-        infoDeal.setVarAmountTolerance(dto.getVarAmountTolerance());
-        infoDeal.setAddAmtCovered(dto.getAddAmtCovered());
-        infoDeal.setDueDate(dto.getDueDate());
-        infoDeal.setDraft(dto.getDraft());
-        infoDeal.setDraftAt(dto.getDraftAt());
-        infoDeal.setPresDay(dto.getPresDay());
-        infoDeal.setTranshipment(dto.getTranshipment());
-        infoDeal.setConfirmationCharge(dto.getConfirmationCharge());
-        infoDeal.setFormLC(dto.getFormLC());
-        infoDeal.setDocument(dto.getDocument());
-        infoDeal.setPartialTranshipment(dto.getPartialTranshipment());
-
-        return infoDeal;
-    }
-
-    private InfoDeal updateSettEntityFromDto(InfoDeal infoDeal, InfoDealDto dto) {
-        infoDeal.setLcAmount(dto.getLcAmount());
-        infoDeal.setCurrencyID(dto.getCurrencyID());
-        infoDeal.setExpiryPlace(dto.getExpiryPlace());
-        infoDeal.setExpiryDate(dto.getExpiryDate());
-        infoDeal.setVarAmountTolerance(dto.getVarAmountTolerance());
-        infoDeal.setAddAmtCovered(dto.getAddAmtCovered());
-        infoDeal.setDueDate(dto.getDueDate());
-        infoDeal.setDraft(dto.getDraft());
-        infoDeal.setDraftAt(dto.getDraftAt());
-        infoDeal.setPresDay(dto.getPresDay());
-        infoDeal.setTranshipment(dto.getTranshipment());
-        infoDeal.setConfirmationCharge(dto.getConfirmationCharge());
-        infoDeal.setFormLC(dto.getFormLC());
-        infoDeal.setDocument(dto.getDocument());
-        infoDeal.setPartialTranshipment(dto.getPartialTranshipment());
-
-        return infoDeal;
-
-    }
-
-    private SettlementDto settToDto(Settlement settlment) {
-        SettlementDto dto = new SettlementDto();
-        dto.setId(settlment.getId());
-        dto.setAvailableWithBank(settlment.getAvailableWithBank());
-        dto.setAvailableWithOther(settlment.getAvailableWithOther());
-        dto.setMixedPay1(settlment.getMixedPay1());
-        dto.setMixedPay2(settlment.getMixedPay2());
-        dto.setMixedPay3(settlment.getMixedPay3());
-        dto.setMixedPay4(settlment.getMixedPay4());
-        dto.setNegDefPay1(settlment.getNegDefPay1());
-        dto.setNegDefPay2(settlment.getNegDefPay2());
-        dto.setNegDefPay3(settlment.getNegDefPay3());
-        dto.setNegDefPay4(settlment.getNegDefPay4());
-        dto.setIdDeal(settlment.getDeal().getId());
-        return dto;
-    }
-
-
-    private Settlement SettToEntity(SettlementDto dto) {
+    private Settlement settToEntity(SettlementDto dto, Long infoDealId) {
         Settlement settlement = new Settlement();
         settlement.setAvailableWithBank(dto.getAvailableWithBank());
         settlement.setAvailableWithOther(dto.getAvailableWithOther());
@@ -327,130 +264,13 @@ public class DealService {
         settlement.setNegDefPay2(dto.getNegDefPay2());
         settlement.setNegDefPay3(dto.getNegDefPay3());
         settlement.setNegDefPay4(dto.getNegDefPay4());
-        InfoDeal deal = this.dealById(dto.getIdDeal());
+
+        // Find the InfoDeal entity by ID
+        InfoDeal deal = dealRepo.findById(infoDealId)
+                .orElseThrow(() -> new RuntimeException(String.format("Deal %d not found", infoDealId)));
+
         settlement.setDeal(deal);
         return settlement;
-    }
-
-    private void updateSettEntityFromDto(SettlementDto dto, Settlement settlment) {
-        settlment.setAvailableWithBank(dto.getAvailableWithBank());
-        settlment.setAvailableWithOther(dto.getAvailableWithOther());
-        settlment.setMixedPay1(dto.getMixedPay1());
-        settlment.setMixedPay2(dto.getMixedPay2());
-        settlment.setMixedPay3(dto.getMixedPay3());
-        settlment.setMixedPay4(dto.getMixedPay4());
-        settlment.setNegDefPay1(dto.getNegDefPay1());
-        settlment.setNegDefPay2(dto.getNegDefPay2());
-        settlment.setNegDefPay3(dto.getNegDefPay3());
-        settlment.setNegDefPay4(dto.getNegDefPay4());
-        InfoDeal deal = this.dealById(dto.getIdDeal());
-        settlment.setDeal(deal);
-    }
-
-    //////////////////////////////////////////////////
-    //////////////////////////////////////////////////
-
-
-    public DealGoodsDto getOrCreateDealGoods(List<DealGoodsDto> dealGoodsList, Long dealId) {
-        Optional<DealGoodsDto> existing = dealGoodsList.stream()
-                .filter(goods -> goods.getId().idDeal().equals(dealId))
-                .findFirst();
-
-        if (existing.isPresent()) {
-            return existing.get();
-        } else {
-            DealGoodsDto newDealGoods = new DealGoodsDto();
-            newDealGoods.setId(new DealGoodsPKID(dealId, "", 0L));
-            newDealGoods.setGoodsDesc("");
-            newDealGoods.setPlaceOfTakingCharge("");
-            newDealGoods.setPortOfLoading("");
-            newDealGoods.setPortOfDischarge("");
-            newDealGoods.setPlaceOfFinalDestination("");
-            newDealGoods.setShipmentDateLast(new Date());
-            newDealGoods.setShipmentPeriod(0);
-            return newDealGoods;
-        }
-    }
-
-    public DealPartyDto getOrCreateDealParty(List<DealPartyDto> dealPartiesList, Long dealId, String codPrt) {
-        Optional<DealPartyDto> existing = dealPartiesList.stream()
-                .filter(party -> party.getId().idDeal().equals(dealId) && party.getId().codPrt().equals(codPrt))
-                .findFirst();
-
-        if (existing.isPresent()) {
-            return existing.get();
-        } else {
-            DealPartyDto newDealParty = new DealPartyDto();
-            newDealParty.setId(new DealPartyPKID(dealId, 0L, codPrt));
-            newDealParty.setNom("");
-            newDealParty.setStreet1("");
-            newDealParty.setStreet2("");
-            newDealParty.setStreet3("");
-            newDealParty.setTown("");
-            newDealParty.setCountry("");
-            return newDealParty;
-        }
-    }
-
-    public SettlementDto getOrCreateSettlement(List<SettlementDto> settlementList, Long id) {
-        Optional<SettlementDto> existing = settlementList.stream()
-                .filter(settlement -> settlement.getId().equals(id))
-                .findFirst();
-
-        if (existing.isPresent()) {
-            return existing.get();
-        } else {
-            SettlementDto newSettlement = new SettlementDto();
-            newSettlement.setId(id);
-            newSettlement.setAvailableWithBank("");
-            newSettlement.setAvailableWithOther("");
-            newSettlement.setMixedPay1("");
-            newSettlement.setMixedPay2("");
-            newSettlement.setMixedPay3("");
-            newSettlement.setMixedPay4("");
-            newSettlement.setNegDefPay1("");
-            newSettlement.setNegDefPay2("");
-            newSettlement.setNegDefPay3("");
-            newSettlement.setNegDefPay4("");
-            newSettlement.setIdDeal(0L);
-            return newSettlement;
-        }
-    }
-
-    public DealCommentDto getOrCreateDealComment(List<DealCommentDto> dealCommentsList, Long dealId, String type) {
-        Optional<DealCommentDto> existing = dealCommentsList.stream()
-                .filter(comment -> comment.getId().idDeal().equals(dealId) && comment.getTypeComt().equals(type))
-                .findFirst();
-
-        if (existing.isPresent()) {
-            return existing.get();
-        } else {
-            DealCommentDto newDealComment = new DealCommentDto();
-            newDealComment.setId(new DealCommentPKID(dealId, 0L));
-            newDealComment.setComment("");
-            newDealComment.setTypeComt(type);
-            return newDealComment;
-        }
-    }
-
-    public void saveEntityList(List<Object> entityDtoList) throws Exception {
-        for (Object entityDto : entityDtoList) {
-            if (entityDto instanceof DealGoodsDto) {
-                List<DealGoods> dealGoodsList = Collections.singletonList(convertGoodsToEntity((DealGoodsDto) entityDto));
-                goodsRepo.saveAll(dealGoodsList);
-            } else if (entityDto instanceof DealPartyDto) {
-                List<DealParty> dealPartyList = Collections.singletonList(convertPartyToEntity((DealPartyDto) entityDto));
-                partiesRepo.saveAll(dealPartyList);
-            } else if (entityDto instanceof DealCommentDto) {
-                List<DealComment> dealCommentList = Collections.singletonList(convertCommToEntity((DealCommentDto) entityDto));
-                commRepo.saveAll(dealCommentList);
-            } else if (entityDto instanceof SettlementDto) {
-                List<Settlement> settlementList = Collections.singletonList(SettToEntity((SettlementDto) entityDto));
-                settRepo.saveAll(settlementList);
-            } else {
-                throw new Exception("Unsupported entity type: " + entityDto.getClass().getSimpleName());
-            }
-        }
     }
 
 }
