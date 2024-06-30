@@ -464,12 +464,11 @@ public class MTService {
     ///////////////////// MT Import //////////////////////
     //////////////////////////////////////////////////////
 
-    public Map<String, String> parseMtMessage(String mtMessage, String mt) {
+    public Map<String, String> parseMtMessage(File file, String mt) {
         Map<String, String> fieldsMap = new HashMap<>();
 
         try {
-            // Convert mtMessage to XML
-            String mtXml = convertTextToXml(mtMessage, mt);
+            String mtXml = parseFile(file, mt);
 
             // Parse the XML document
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -496,8 +495,8 @@ public class MTService {
         return fieldsMap;
     }
 
-    public boolean importMT(String mtMessage, String mt) {
-        Map<String, String> parsedMessage = parseMtMessage(mtMessage, mt);
+    public boolean importMT(File file, String mt) {
+        Map<String, String> parsedMessage = parseMtMessage(file, mt);
 
         List<MtFieldMapping> mappings = mappingService.mappingsByMt(mt);
         if (mappings.isEmpty()) {
@@ -520,7 +519,7 @@ public class MTService {
                 String value = entry.getValue();
 
                 switch (tag) {
-                    case "20":
+                    case "40A":
                         // Handle reference number
                         infoDealDto.setFormLC(value);
                         break;
@@ -814,7 +813,6 @@ public class MTService {
                 }
             }
 
-            // Save InfoDealDto and its comments outside of the loop
             Long infoDealId = dealService.saveInfoDeal(infoDealDto);
             dealService.saveDealCommentList(comments, infoDealId);
 
@@ -837,25 +835,52 @@ public class MTService {
     //////////////////////String to Valid XML///////////////
     ///////////////////////////////////////////////////////
 
-    public String convertTextToXml(String message, String mt) throws IOException {
+    public String parseFile(File file, String mt) throws IOException {
+        StringBuilder contentBuilder = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String currentLine;
+            while ((currentLine = br.readLine()) != null) {
+                contentBuilder.append(currentLine).append("\n");
+            }
+        }
+        return convertTextToXml(contentBuilder.toString(), mt);
+    }
+
+    public String convertTextToXml(String message, String mt) {
         StringBuilder xmlBuilder = new StringBuilder();
 
         // Append root element
         xmlBuilder.append("<MT").append(mt).append(">");
 
         String[] lines = message.split("\n");
+        String currentTag = null;
+        StringBuilder currentValue = new StringBuilder();
+
         for (String line : lines) {
             if (!line.trim().isEmpty()) {
-                String[] keyValuePairs = line.split("\\s+(?=[0-9A-Za-z]+:)"); // Split by whitespace before a tag
-                for (String pair : keyValuePairs) {
-                    String[] parts = pair.split(":", 2);
-                    String tag = parts[0].trim();
-                    String value = parts[1].trim();
-
-                    appendField(xmlBuilder, tag, value);
+                if (line.matches("^[0-9A-Za-z]+:.*")) { // Line starts with a tag
+                    if (currentTag != null) {
+                        // Append previous tag and value
+                        appendField(xmlBuilder, currentTag, currentValue.toString());
+                    }
+                    // Split the line into tag and value
+                    String[] parts = line.split(":", 2);
+                    if (parts.length == 2) { // Ensure there are two parts
+                        currentTag = parts[0].trim();
+                        currentValue.setLength(0); // Clear the current value
+                        currentValue.append(parts[1].trim());
+                    }
+                } else if (currentTag != null) { // Continuation of the previous value
+                    currentValue.append(" ").append(line.trim());
                 }
             }
         }
+
+        // Append the last tag and value
+        if (currentTag != null) {
+            appendField(xmlBuilder, currentTag, currentValue.toString());
+        }
+
         // Close root element
         xmlBuilder.append("</MT").append(mt).append(">");
 

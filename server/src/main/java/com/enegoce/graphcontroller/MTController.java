@@ -14,8 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
 
 @Controller
 public class MTController {
@@ -23,18 +21,17 @@ public class MTController {
     @Autowired
     private MTService mtService;
     private static final Logger logger = LogManager.getLogger(DealController.class);
-    private final String userHome = System.getenv("USERPROFILE"); //Temporary for local export
-    private final String basePath = userHome + "/IdeaProjects/enegoce/server/src/test/output"; //Temporary for local export
+
+    private static String mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/"; //Update Accordingly
 
     @MutationMapping
     public String exportMT(@Argument Long id, @Argument String mt, @Argument String format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String mtFilePath;
 
         if ("xml".equalsIgnoreCase(format)) {
-            mtFilePath = basePath + "/MT" + mt + "_" + timestamp + ".xml";
+            mtFilePath = mtFilePath + "MT" + mt + "_" + timestamp + ".xml";
         } else {
-            mtFilePath = basePath + "/MT" + mt + "_" + timestamp + ".txt";
+            mtFilePath = mtFilePath + "MT" + mt + "_" + timestamp + ".txt";
         }
 
         boolean conversionSuccessful = mtService.generateAndExportMtMessage(id, mt, mtFilePath, "xml".equalsIgnoreCase(format));
@@ -51,13 +48,12 @@ public class MTController {
     @MutationMapping
     public String exportMT798(@Argument Long dealId, @Argument String mt, @Argument String format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        String mtFilePath;
         String response = null;
 
         if ("txt".equalsIgnoreCase(format)) {
-            mtFilePath = basePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".txt";
+            mtFilePath = mtFilePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".txt";
         } else if ("xml".equalsIgnoreCase(format)) {
-            mtFilePath = basePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".xml";
+            mtFilePath = mtFilePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".xml";
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
         }
@@ -75,9 +71,10 @@ public class MTController {
     }
 
     @MutationMapping
-    public ResponseEntity<String> importMT(@Argument String mtMessage, @Argument String mt) {
+    public ResponseEntity<String> importMT(@Argument File file, @Argument String mt) {
+        // Accepts any *.txt file that has this structure tag:value
 
-        boolean importSuccessful = mtService.importMT(mtMessage, mt);
+        boolean importSuccessful = mtService.importMT(file, mt);
 
         if (importSuccessful) {
             return ResponseEntity.ok("Import Successful");
@@ -87,10 +84,10 @@ public class MTController {
     }
 
     @MutationMapping
-    public String convertTextToXml(@Argument String mtMessage, @Argument String mt) {
+    public String parseFile(@Argument File file, @Argument String mt) {
 
         try {
-            return mtService.convertTextToXml(mtMessage, mt);
+            return mtService.parseFile(file, mt);
         } catch (IOException e) {
             return "Error generating XML: " + e.getMessage();
         }

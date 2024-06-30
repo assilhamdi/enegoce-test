@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 public class InfoDeal {
@@ -53,18 +51,6 @@ public class InfoDeal {
     private String draft; //42a
 
     private String document; //46A
-
-    @OneToMany(mappedBy = "id.deal", cascade = CascadeType.ALL)
-    private List<DealParty> dealParties = new ArrayList<>();
-
-    @OneToMany(mappedBy = "id.deal", cascade = CascadeType.ALL)
-    private List<DealGoods> dealGoods = new ArrayList<>();
-
-    @OneToMany(mappedBy = "id.deal", cascade = CascadeType.ALL)
-    private List<DealComment> dealComments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "deal", cascade = CascadeType.ALL)
-    private List<Settlement> settlements = new ArrayList<>();
 
     public InfoDeal() {
     }
@@ -205,39 +191,7 @@ public class InfoDeal {
         this.document = document;
     }
 
-    public List<DealParty> getDealParties() {
-        return dealParties;
-    }
-
-    public void setDealParties(List<DealParty> dealParties) {
-        this.dealParties = dealParties;
-    }
-
-    public List<DealGoods> getDealGoods() {
-        return dealGoods;
-    }
-
-    public void setDealGoods(List<DealGoods> dealGoods) {
-        this.dealGoods = dealGoods;
-    }
-
-    public List<Settlement> getSettlements() {
-        return settlements;
-    }
-
-    public void setSettlements(List<Settlement> settlements) {
-        this.settlements = settlements;
-    }
-
-    public List<DealComment> getDealComments() {
-        return dealComments;
-    }
-
-    public void setDealComments(List<DealComment> dealComments) {
-        this.dealComments = dealComments;
-    }
-
-    public InfoDeal(Long id, String formLC, LocalDate dueDate, LocalDate expiryDate, String expiryPlace, String bankISSRef, String currencyID, BigDecimal lcAmount, BigDecimal varAmountTolerance, String partialTranshipment, String transhipment, Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt, String draft, String document, List<DealParty> dealParties, List<DealGoods> dealGoods, List<Settlement> settlements, List<DealComment> dealComments) {
+    public InfoDeal(Long id, String formLC, LocalDate dueDate, LocalDate expiryDate, String expiryPlace, String bankISSRef, String currencyID, BigDecimal lcAmount, BigDecimal varAmountTolerance, String partialTranshipment, String transhipment, Integer presDay, String confirmationCharge, String addAmtCovered, String draftAt, String draft, String document) {
         this.id = id;
         this.formLC = formLC;
         this.dueDate = dueDate;
@@ -255,9 +209,5 @@ public class InfoDeal {
         this.draftAt = draftAt;
         this.draft = draft;
         this.document = document;
-        this.dealParties = dealParties;
-        this.dealGoods = dealGoods;
-        this.settlements = settlements;
-        this.dealComments = dealComments;
     }
 }

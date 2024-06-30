@@ -2,9 +2,9 @@ extend type Mutation {
 
     exportMT(id: Int!, mt:String, format: String): String
     exportMT798(dealId: Int!, mt: String, format:String): String
-    importMT(mtMessage: String, mt:String): String
+    importMT(file: String, mt:String): String
 
     ###String to XML
-    convertTextToXml(mtMessage: String, mt: String): String
+    parseFile(file: String, mt: String): String
 }
 

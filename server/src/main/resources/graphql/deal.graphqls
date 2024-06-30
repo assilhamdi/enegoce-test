@@ -33,10 +33,6 @@ type InfoDeal {
     presDay: Int
     confirmationCharge: String
     addAmtCovered: String
-    dealGoods: [DealGoods]
-    dealParties: [DealParty]
-    settlements: [Settlement]
-    dealComments: [DealComment]
 }
 
 ###DealGoods
