@@ -785,16 +785,25 @@ public class MTService {
 
             return true;
         } else if (mt.equals("701")) {
-            InfoDealDto infoDealDto = new InfoDealDto();
+            Long idDeal = null; // Initialize idDeal
             List<DealCommentDto> comments = new ArrayList<>();
 
+            // Iterate over parsedMessage to find tag 20 and extract idDeal
             for (Map.Entry<String, String> entry : parsedMessage.entrySet()) {
                 String tag = entry.getKey();
                 String value = entry.getValue();
 
-                if ("45B".equals(tag) || "46B".equals(tag) || "47B".equals(tag)) {
+                if ("20".equals(tag)) {
+                    // Parse value of tag 20 to Long
+                    try {
+                        idDeal = Long.parseLong(value);
+                    } catch (NumberFormatException e) {
+                        logger.error("Error parsing idDeal from tag 20: {}", e.getMessage());
+                        return false; // or handle error appropriately
+                    }
+                } else if ("45B".equals(tag) || "46B".equals(tag) || "47B".equals(tag)) {
                     DealCommentDto commentDto = new DealCommentDto();
-                    commentDto.setId(new DealCommentPKID(infoDealDto.getId(), generateLong()));
+                    commentDto.setId(new DealCommentPKID(idDeal, generateLong()));
                     commentDto.setComment(value);
 
                     switch (tag) {
@@ -802,21 +811,25 @@ public class MTService {
                             commentDto.setTypeComt("47A");
                             break;
                         case "46B":
-                            commentDto.setTypeComt("46B");
-                            break;
                         case "47B":
                             commentDto.setTypeComt("46B");
                             break;
                     }
 
                     comments.add(commentDto);
+                } else {
+                    logger.error("Unsupported Message");
                 }
             }
 
-            Long infoDealId = dealService.saveInfoDeal(infoDealDto);
-            dealService.saveDealCommentList(comments, infoDealId);
-
-            return true;
+            // Save the comments with associated idDeal
+            if (idDeal != null) {
+                dealService.saveDealCommentList(comments, idDeal);
+                return true;
+            } else {
+                logger.error("No idDeal found in message");
+                return false; // or handle the case where idDeal is not found
+            }
         }
         return false;
     }
