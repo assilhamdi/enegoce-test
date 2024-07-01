@@ -90,6 +90,8 @@ public class MTService {
 
     private boolean generateAndExportMtMessageWithWriter(InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings) {
         try {
+            //TODO: Add Header
+            writer.write("---------------------------- Message Text ----------------------------\r\n");
             processInfoDeal(writer, infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, mappings);
             return true;
         } catch (Exception e) {
@@ -237,9 +239,10 @@ public class MTService {
             String fieldName = mapping.getDatabaseField();
             String mtTag = mapping.getTag();
             String mappingRule = mapping.getMappingRule();
+            String fieldDescription = mapping.getFieldDescription();
 
             if (mappingRule != null && !mappingRule.isEmpty()) {
-                processMappingRule(writer, mappingRule, mtTag, infoDeal, dealPartiesList, settlementList, dealCommentsList);
+                processMappingRule(writer, mappingRule, mtTag, fieldDescription, infoDeal, dealPartiesList, settlementList, dealCommentsList);
             } else {
                 if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
                     continue;
@@ -259,13 +262,14 @@ public class MTService {
                 }
 
                 if (fieldValue != null) {
-                    writer.write(mtTag + ":" + formatFieldValue(fieldValue) + "\r\n");
+                    writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                    writer.write(formatFieldValue(fieldValue) + "\r\n");
                 }
             }
         }
     }
 
-    private void processMappingRule(BufferedWriter writer, String mappingRule, String mtTag, InfoDeal infoDeal, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList) {
+    private void processMappingRule(BufferedWriter writer, String mappingRule, String mtTag, String fieldDescription, InfoDeal infoDeal, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList) {
         try {
             JSONObject ruleJson = new JSONObject(mappingRule);
             JSONArray fieldsArray = ruleJson.optJSONArray("fields");
@@ -293,7 +297,11 @@ public class MTService {
                     Object fieldValue = getFieldValue(entity, getterMethodName, infoDeal, dealPartiesList, settlementList, dealCommentsList, party, comment);
 
                     if (fieldValue != null) {
-                        if (!combinedValue.isEmpty()) {
+                        if ("DealParty".equals(entity) && "country".equals(field)) {
+                            fieldValue = convertCountryCodeToFullName((String) fieldValue);
+                        }
+
+                        if (combinedValue.length() > 0) {
                             combinedValue.append(delimiter);
                         }
                         combinedValue.append(formatFieldValue(fieldValue));
@@ -301,7 +309,8 @@ public class MTService {
                 }
 
                 if (!combinedValue.isEmpty()) {
-                    writer.write(mtTag + ":" + combinedValue + "\r\n");
+                    writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                    writer.write(combinedValue + "\r\n");
                 }
             }
         } catch (JSONException e) {
@@ -376,6 +385,12 @@ public class MTService {
             return fieldValue.toString();
         }
     }
+
+    private String convertCountryCodeToFullName(String countryCode) {
+        Locale locale = new Locale("", countryCode);
+        return locale.getDisplayCountry(Locale.ENGLISH);
+    }
+
 
     public boolean generateAndExportMt798Message(Long dealId, String mt, String filePath, String format) {
         if (!"700".equals(mt) && !"701".equals(mt)) {
