@@ -29,6 +29,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class MTService {
@@ -391,7 +393,6 @@ public class MTService {
         return locale.getDisplayCountry(Locale.ENGLISH);
     }
 
-
     public boolean generateAndExportMt798Message(Long dealId, String mt, String filePath, String format) {
         if (!"700".equals(mt) && !"701".equals(mt)) {
             logger.error("Unsupported MT for MT798: " + mt);
@@ -557,16 +558,14 @@ public class MTService {
                         infoDealDto.setExpiryDate(LocalDate.parse(formattedDate));
                         infoDealDto.setExpiryPlace(expiryPlace);
                         break;
-                    case "51a":
-                        infoDealDto.setBankISSRef(value);
-                        break;
                     case "50":
+                    case "51a":
                     case "59":
                     case "58a":
                     case "53a":
                     case "57a":
                         // Split concatenated fields by ",\n"
-                        String[] fields = value.split(", ");
+                        String[] fields = value.split(",");
                         if (fields.length >= 6) {
                             DealPartyDto dealPartyDto = new DealPartyDto();
                             String codPrt = getCodPrtForTag(tag); // Replace with your logic to determine codPrt
@@ -576,9 +575,14 @@ public class MTService {
                             dealPartyDto.setStreet2(fields[2]);
                             dealPartyDto.setStreet3(fields[3]);
                             dealPartyDto.setTown(fields[4]);
-                            dealPartyDto.setCountry(fields[5]);
 
-                            // Add dealPartyDto to your list or process as needed
+                            // Convert country name to ISO code
+                            String countryCode = getCountryCode(fields[5].trim());
+                            if (countryCode != null) {
+                                dealPartyDto.setCountry(countryCode);
+                            } else {
+                                logger.warn("Country code not found for country: " + fields[5]);
+                            }
                             parties.add(dealPartyDto);
                         } else {
                             logger.warn("Insufficient fields for tag " + tag + ": " + value);
@@ -852,12 +856,23 @@ public class MTService {
     private String getCodPrtForTag(String tag) {
         return switch (tag) {
             case "50" -> "APP";
+            case "51a" -> "ISB";
             case "59" -> "BNE";
             case "58a" -> "CONF";
             case "53a" -> "RMB";
             case "57a" -> "ADT";
             default -> ""; // Default case
         };
+    }
+
+    public String getCountryCode(String countryName) {
+        Locale[] locales = Locale.getAvailableLocales();
+        for (Locale locale : locales) {
+            if (countryName.equalsIgnoreCase(locale.getDisplayCountry(Locale.ENGLISH))) {
+                return locale.getCountry();
+            }
+        }
+        return null;
     }
 
     //////////////////////String to Valid XML///////////////
@@ -869,6 +884,7 @@ public class MTService {
             String currentLine;
             while ((currentLine = br.readLine()) != null) {
                 contentBuilder.append(currentLine).append("\n");
+                logger.info(contentBuilder.toString());
             }
         }
         return convertTextToXml(contentBuilder.toString(), mt);
@@ -883,30 +899,37 @@ public class MTService {
         String[] lines = message.split("\n");
         String currentTag = null;
         StringBuilder currentValue = new StringBuilder();
+        boolean tagFound = false;
 
         for (String line : lines) {
             if (!line.trim().isEmpty()) {
-                if (line.matches("^[0-9A-Za-z]+:.*")) { // Line starts with a tag
+                line = line.trim();
+                if (line.startsWith(":")) {
+                    // Found a tag line
                     if (currentTag != null) {
                         // Append previous tag and value
-                        appendField(xmlBuilder, currentTag, currentValue.toString());
-                    }
-                    // Split the line into tag and value
-                    String[] parts = line.split(":", 2);
-                    if (parts.length == 2) { // Ensure there are two parts
-                        currentTag = parts[0].trim();
+                        appendField(xmlBuilder, currentTag, currentValue.toString().trim());
                         currentValue.setLength(0); // Clear the current value
-                        currentValue.append(parts[1].trim());
+                        tagFound = false; // Reset tagFound
                     }
-                } else if (currentTag != null) { // Continuation of the previous value
-                    currentValue.append(" ").append(line.trim());
+                    // Extract tag (2 or 3 characters until the next ':')
+                    int endIndex = line.indexOf(':', 1);
+                    if (endIndex > 0) {
+                        currentTag = line.substring(1, endIndex).trim();
+                        tagFound = true; // Set tagFound to true
+                    } else {
+                        currentTag = line.substring(1).trim();
+                    }
+                } else if (tagFound) {
+                    // Accumulate value after tag line
+                    currentValue.append(line);
                 }
             }
         }
 
         // Append the last tag and value
-        if (currentTag != null) {
-            appendField(xmlBuilder, currentTag, currentValue.toString());
+        if (currentTag != null && currentValue.length() > 0) {
+            appendField(xmlBuilder, currentTag, currentValue.toString().trim());
         }
 
         // Close root element
