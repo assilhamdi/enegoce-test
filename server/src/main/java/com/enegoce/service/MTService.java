@@ -29,8 +29,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class MTService {
@@ -74,15 +72,15 @@ public class MTService {
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             InfoDeal infoDeal = dealService.dealById(dealId);
-            List<DealGoods> dealGoodsList = dealService.goodsByDealId(dealId);
+            Settlment settlment = dealService.latestSettlementByDealId(dealId);
+            Transport transport = dealService.latestTransportByDealId(dealId);
             List<DealParty> dealPartiesList = dealService.partiesByDealId(dealId);
-            List<Settlement> settlementList = dealService.settlementsByDealId(dealId);
             List<DealComment> dealCommentsList = dealService.commentsByDealId(dealId);
 
             if (generateXml) {
-                return generateAndExportMtMessageWithXml(infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, writer, mappings, mt, true);
+                return generateAndExportMtMessageWithXml(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings, mt, true);
             } else {
-                return generateAndExportMtMessageWithWriter(infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, writer, mappings);
+                return generateAndExportMtMessageWithWriter(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings);
             }
         } catch (Exception e) {
             logger.error("Error generating MT message: " + e);
@@ -90,11 +88,11 @@ public class MTService {
         }
     }
 
-    private boolean generateAndExportMtMessageWithWriter(InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings) {
+    private boolean generateAndExportMtMessageWithWriter(InfoDeal infoDeal, Settlment settlment, Transport transport, List<DealParty> dealPartiesList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings) {
         try {
             //TODO: Add Header
             writer.write("---------------------------- Message Text ----------------------------\r\n");
-            processInfoDeal(writer, infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, mappings);
+            processInfoDeal(writer, infoDeal, dealPartiesList, settlment, transport, dealCommentsList, mappings);
             return true;
         } catch (Exception e) {
             logger.error("Error processing data: " + e);
@@ -102,7 +100,7 @@ public class MTService {
         }
     }
 
-    private boolean generateAndExportMtMessageWithXml(InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings, String mt, boolean includeXmlHeader) {
+    private boolean generateAndExportMtMessageWithXml(InfoDeal infoDeal, Settlment settlment, Transport transport, List<DealParty> dealPartiesList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings, String mt, boolean includeXmlHeader) {
         try {
             XMLOutputFactory factory = XMLOutputFactory.newInstance();
             XMLStreamWriter xmlWriter = factory.createXMLStreamWriter(writer);
@@ -115,9 +113,9 @@ public class MTService {
             xmlWriter.writeStartElement("MT" + mt);
             xmlWriter.writeCharacters("\n"); // Ensure new line after <MT>
 
-            processInfoDealForXml(xmlWriter, infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, mappings);
+            processInfoDealForXml(xmlWriter, infoDeal, dealPartiesList, settlment, transport, dealCommentsList, mappings);
 
-            xmlWriter.writeEndElement(); // End MT700 or MT701
+            xmlWriter.writeEndElement(); // End MT
             xmlWriter.writeCharacters("\n"); // Ensure new line after </MT>
             if (includeXmlHeader) {
                 xmlWriter.writeEndDocument();
@@ -131,7 +129,7 @@ public class MTService {
         }
     }
 
-    private void processInfoDealForXml(XMLStreamWriter xmlWriter, InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList, List<MtFieldMapping> mappings) throws XMLStreamException {
+    private void processInfoDealForXml(XMLStreamWriter xmlWriter, InfoDeal infoDeal, List<DealParty> dealPartiesList, Settlment latestSettlment, Transport latestTransport, List<DealComment> dealCommentsList, List<MtFieldMapping> mappings) throws XMLStreamException {
         for (MtFieldMapping mapping : mappings) {
             String entityName = mapping.getEntityName();
             String fieldName = mapping.getDatabaseField();
@@ -139,21 +137,17 @@ public class MTService {
             String mappingRule = mapping.getMappingRule();
 
             if (mappingRule != null && !mappingRule.isEmpty()) {
-                processMappingRuleForXml(xmlWriter, mappingRule, mtTag, infoDeal, dealPartiesList, settlementList, dealCommentsList);
+                processMappingRuleForXml(xmlWriter, mappingRule, mtTag, infoDeal, dealPartiesList, latestSettlment, latestTransport, dealCommentsList);
             } else {
                 if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
-                    continue; //Temporary skip
+                    continue; // Temporary skip
                 }
 
                 String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
                 Object fieldValue = null;
 
                 try {
-                    if ("DealGoods".equals(entityName)) {
-                        fieldValue = getDealGoodsFieldValue(fieldName, getterMethodName, dealGoodsList);
-                    } else {
-                        fieldValue = getFieldValue(entityName, getterMethodName, infoDeal, dealPartiesList, settlementList, dealCommentsList, null, null);
-                    }
+                    fieldValue = getFieldValue(entityName, getterMethodName, infoDeal, dealPartiesList, latestSettlment, latestTransport, dealCommentsList, null, null);
                 } catch (Exception e) {
                     logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
                 }
@@ -177,7 +171,7 @@ public class MTService {
         }
     }
 
-    private void processMappingRuleForXml(XMLStreamWriter xmlWriter, String mappingRule, String mtTag, InfoDeal infoDeal, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList) {
+    private void processMappingRuleForXml(XMLStreamWriter xmlWriter, String mappingRule, String mtTag, InfoDeal infoDeal, List<DealParty> dealPartiesList, Settlment latestSettlment, Transport latestTransport, List<DealComment> dealCommentsList) {
         try {
             JSONObject ruleJson = new JSONObject(mappingRule);
             JSONArray fieldsArray = ruleJson.optJSONArray("fields");
@@ -202,7 +196,7 @@ public class MTService {
                     String field = parts[1];
                     String getterMethodName = "get" + Character.toUpperCase(field.charAt(0)) + field.substring(1);
 
-                    Object fieldValue = getFieldValue(entity, getterMethodName, infoDeal, dealPartiesList, settlementList, dealCommentsList, party, comment);
+                    Object fieldValue = getFieldValue(entity, getterMethodName, infoDeal, dealPartiesList, latestSettlment, latestTransport, dealCommentsList, party, comment);
 
                     if (fieldValue != null) {
                         if (!combinedValue.isEmpty()) {
@@ -235,7 +229,7 @@ public class MTService {
         }
     }
 
-    private void processInfoDeal(BufferedWriter writer, InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList, List<MtFieldMapping> mappings) throws IOException {
+    private void processInfoDeal(BufferedWriter writer, InfoDeal infoDeal, List<DealParty> dealPartiesList, Settlment latestSettlment, Transport latestTransport, List<DealComment> dealCommentsList, List<MtFieldMapping> mappings) throws IOException {
         for (MtFieldMapping mapping : mappings) {
             String entityName = mapping.getEntityName();
             String fieldName = mapping.getDatabaseField();
@@ -244,7 +238,7 @@ public class MTService {
             String fieldDescription = mapping.getFieldDescription();
 
             if (mappingRule != null && !mappingRule.isEmpty()) {
-                processMappingRule(writer, mappingRule, mtTag, fieldDescription, infoDeal, dealPartiesList, settlementList, dealCommentsList);
+                processMappingRule(writer, mappingRule, mtTag, fieldDescription, infoDeal, dealPartiesList, latestSettlment, latestTransport, dealCommentsList);
             } else {
                 if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
                     continue;
@@ -254,11 +248,7 @@ public class MTService {
                 Object fieldValue = null;
 
                 try {
-                    if ("DealGoods".equals(entityName)) {
-                        fieldValue = getDealGoodsFieldValue(fieldName, getterMethodName, dealGoodsList);
-                    } else {
-                        fieldValue = getFieldValue(entityName, getterMethodName, infoDeal, dealPartiesList, settlementList, dealCommentsList, null, null);
-                    }
+                    fieldValue = getFieldValue(entityName, getterMethodName, infoDeal, dealPartiesList, latestSettlment, latestTransport, dealCommentsList, null, null);
                 } catch (Exception e) {
                     logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
                 }
@@ -271,7 +261,7 @@ public class MTService {
         }
     }
 
-    private void processMappingRule(BufferedWriter writer, String mappingRule, String mtTag, String fieldDescription, InfoDeal infoDeal, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList) {
+    private void processMappingRule(BufferedWriter writer, String mappingRule, String mtTag, String fieldDescription, InfoDeal infoDeal, List<DealParty> dealPartiesList, Settlment settlment, Transport transport, List<DealComment> dealCommentsList) {
         try {
             JSONObject ruleJson = new JSONObject(mappingRule);
             JSONArray fieldsArray = ruleJson.optJSONArray("fields");
@@ -283,11 +273,12 @@ public class MTService {
                 DealParty party = code != null ? dealService.partyByDealIdAndCode(infoDeal.getId(), code) : null;
                 DealComment comment = code != null ? dealService.commentByDealAndType(infoDeal.getId(), code) : null;
 
-                if (party == null && code != null) {
-                    logger.warn("No DealParty found for code: " + code);
-                }
-                if (comment == null && code != null) {
-                    logger.warn("No DealComment found for code: " + code);
+                if (code != null) {
+                    if (party == null) {
+                        logger.warn("No DealParty found for code: " + code);
+                    } else {
+                        logger.warn("No DealComment found for code: " + code);
+                    }
                 }
 
                 for (int i = 0; i < fieldsArray.length(); i++) {
@@ -296,14 +287,14 @@ public class MTService {
                     String field = parts[1];
                     String getterMethodName = "get" + Character.toUpperCase(field.charAt(0)) + field.substring(1);
 
-                    Object fieldValue = getFieldValue(entity, getterMethodName, infoDeal, dealPartiesList, settlementList, dealCommentsList, party, comment);
+                    Object fieldValue = getFieldValue(entity, getterMethodName, infoDeal, dealPartiesList, settlment, transport, dealCommentsList, party, comment);
 
                     if (fieldValue != null) {
                         if ("DealParty".equals(entity) && "country".equals(field)) {
                             fieldValue = convertCountryCodeToFullName((String) fieldValue);
                         }
 
-                        if (combinedValue.length() > 0) {
+                        if (!combinedValue.isEmpty()) {
                             combinedValue.append(delimiter);
                         }
                         combinedValue.append(formatFieldValue(fieldValue));
@@ -311,8 +302,8 @@ public class MTService {
                 }
 
                 if (!combinedValue.isEmpty()) {
-                    writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
-                    writer.write(combinedValue + "\r\n");
+                    writer.write(mtTag + " " + fieldDescription + ":" + " " + combinedValue.toString());
+                    writer.write("\r\n");
                 }
             }
         } catch (JSONException e) {
@@ -322,16 +313,20 @@ public class MTService {
         }
     }
 
-    private Object getFieldValue(String entityName, String getterMethodName, InfoDeal infoDeal, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList, DealParty party, DealComment comment) throws Exception {
+    private Object getFieldValue(String entityName, String getterMethodName, InfoDeal infoDeal, List<DealParty> dealPartiesList, Settlment settlment, Transport transport, List<DealComment> dealCommentsList, DealParty party, DealComment comment) throws Exception {
+
+
         return switch (entityName) {
             case "InfoDeal" -> infoDeal.getClass().getMethod(getterMethodName).invoke(infoDeal);
-            case "Settlement" -> getFieldValueFromList(settlementList, getterMethodName);
+            case "Settlement" -> Settlment.class.getMethod(getterMethodName).invoke(settlment);
+            case "Transport" -> Settlment.class.getMethod(getterMethodName).invoke(transport);
             case "DealParty" ->
                     party != null ? party.getClass().getMethod(getterMethodName).invoke(party) : getFieldValueFromList(dealPartiesList, getterMethodName);
             case "DealComment" ->
                     comment != null ? comment.getClass().getMethod(getterMethodName).invoke(comment) : getFieldValueFromList(dealCommentsList, getterMethodName);
             default -> null;
         };
+
     }
 
     private Object getFieldValueFromList(List<?> list, String getterMethodName) {
@@ -346,36 +341,6 @@ public class MTService {
             }
         }
         return null;
-    }
-
-    private Object getDealGoodsFieldValue(String fieldName, String getterMethodName, List<DealGoods> dealGoodsList) throws Exception {
-
-        StringBuilder goodsValues = new StringBuilder();
-
-        if ("goodsDesc".equals(fieldName)) {
-            for (DealGoods dealGoods : dealGoodsList) {
-                Object goodsValue = dealGoods.getClass().getMethod(getterMethodName).invoke(dealGoods);
-                if (goodsValue != null) {
-                    if (!goodsValues.isEmpty()) {
-                        goodsValues.append("\n+");
-                    } else {
-                        goodsValues.append("+");
-                    }
-                    goodsValues.append(formatFieldValue(goodsValue));
-                }
-            }
-        } else {
-            for (DealGoods dealGoods : dealGoodsList) {
-                Object goodsValue = dealGoods.getClass().getMethod(getterMethodName).invoke(dealGoods);
-                if (goodsValue != null) {
-                    if (!goodsValues.isEmpty()) {
-                        goodsValues.append(", ");  // Adjustable delimiter
-                    }
-                    goodsValues.append(formatFieldValue(goodsValue));
-                }
-            }
-        }
-        return !goodsValues.isEmpty() ? goodsValues.toString() : null;
     }
 
     private String formatFieldValue(Object fieldValue) {
@@ -411,17 +376,17 @@ public class MTService {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
 
             InfoDeal infoDeal = dealService.dealById(dealId);
-            List<DealGoods> dealGoodsList = dealService.goodsByDealId(dealId);
+            Settlment settlment = dealService.latestSettlementByDealId(dealId);
+            Transport transport = dealService.latestTransportByDealId(dealId);
             List<DealParty> dealPartiesList = dealService.partiesByDealId(dealId);
-            List<Settlement> settlementList = dealService.settlementsByDealId(dealId);
             List<DealComment> dealCommentsList = dealService.commentsByDealId(dealId);
 
             if ("txt".equalsIgnoreCase(format)) {
                 writer.write("12:" + mt + "\r\n");
                 writer.write("=========================\r\n");
-                return generateAndExportMtMessageWithWriter(infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, writer, mappings);
+                return generateAndExportMtMessageWithWriter(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings);
             } else if ("xml".equalsIgnoreCase(format)) {
-                return generateAndExportMt798MessageWithXml(infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, writer, mappings, mt);
+                return generateAndExportMt798MessageWithXml(infoDeal,settlment,transport,dealPartiesList,dealCommentsList,writer,mappings,mt );
             } else {
                 logger.error("Unsupported output format: " + format);
                 return false;
@@ -432,7 +397,7 @@ public class MTService {
         }
     }
 
-    private boolean generateAndExportMt798MessageWithXml(InfoDeal infoDeal, List<DealGoods> dealGoodsList, List<DealParty> dealPartiesList, List<Settlement> settlementList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings, String mt) {
+    private boolean generateAndExportMt798MessageWithXml(InfoDeal infoDeal, Settlment settlment, Transport transport, List<DealParty>dealPartiesList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings, String mt) {
         try {
             XMLOutputFactory factory = XMLOutputFactory.newInstance();
             XMLStreamWriter xmlWriter = factory.createXMLStreamWriter(writer);
@@ -461,7 +426,8 @@ public class MTService {
             xmlWriter.writeCharacters("\n");
 
             // Call existing XML generation logic
-            generateAndExportMtMessageWithXml(infoDeal, dealGoodsList, dealPartiesList, settlementList, dealCommentsList, writer, mappings, mt, false);
+            generateAndExportMtMessageWithXml(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings, mt, false);
+
 
             xmlWriter.writeEndElement(); // End body
             xmlWriter.writeCharacters("\n");
