@@ -3,7 +3,7 @@ package com.enegoce.entities;
 import jakarta.persistence.*;
 
 @Entity
-public class Settlement {
+public class Settlment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,7 +35,7 @@ public class Settlement {
     @JoinColumn(name = "deal_id")
     private InfoDeal deal;
 
-    public Settlement() {
+    public Settlment() {
     }
 
     public Long getId() {

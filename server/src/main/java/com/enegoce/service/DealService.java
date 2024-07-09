@@ -28,6 +28,9 @@ public class DealService {
     @Autowired
     private SettlementRepository settRepo;
 
+    @Autowired
+    private TransportRepository transRepo;
+
     ////////////////////InfoDeal/////////////////////
     /////////////////////////////////////////////////00.
 
@@ -206,43 +209,53 @@ public class DealService {
     ////////////////////Settlement////////////////////
     /////////////////////////////////////////////////
 
-    public Settlement settlementById(Long id) {
-        Optional<Settlement> settlement = settRepo.findById(id);
+    public Settlment settlementById(Long id) {
+        Optional<Settlment> settlement = settRepo.findById(id);
         return settlement.orElse(null);
     }
 
-    public List<Settlement> settlementsByDealId(Long id) {
-        return settRepo.findSettlementsByDealId(id);
+    public Settlment latestSettlementByDealId(Long id) {
+        Optional <Settlment> sett = settRepo.findLatestSettlementByDealId(id);
+        return sett.orElse(null);
     }
 
     @Transactional
     public void saveSettlementList(List<SettlementDto> settlementDtoList, Long infoDealId) {
         for (SettlementDto settlementDto : settlementDtoList) {
-            Settlement sett = settToEntity(settlementDto, infoDealId);
+            Settlment sett = settToEntity(settlementDto, infoDealId);
             settRepo.save(sett);
         }
     }
 
-    private Settlement settToEntity(SettlementDto dto, Long infoDealId) {
-        Settlement settlement = new Settlement();
-        settlement.setAvailableWithBank(dto.getAvailableWithBank());
-        settlement.setAvailableWithOther(dto.getAvailableWithOther());
-        settlement.setMixedPay1(dto.getMixedPay1());
-        settlement.setMixedPay2(dto.getMixedPay2());
-        settlement.setMixedPay3(dto.getMixedPay3());
-        settlement.setMixedPay4(dto.getMixedPay4());
-        settlement.setNegDefPay1(dto.getNegDefPay1());
-        settlement.setNegDefPay2(dto.getNegDefPay2());
-        settlement.setNegDefPay3(dto.getNegDefPay3());
-        settlement.setNegDefPay4(dto.getNegDefPay4());
+    private Settlment settToEntity(SettlementDto dto, Long infoDealId) {
+        Settlment settlment = new Settlment();
+        settlment.setAvailableWithBank(dto.getAvailableWithBank());
+        settlment.setAvailableWithOther(dto.getAvailableWithOther());
+        settlment.setMixedPay1(dto.getMixedPay1());
+        settlment.setMixedPay2(dto.getMixedPay2());
+        settlment.setMixedPay3(dto.getMixedPay3());
+        settlment.setMixedPay4(dto.getMixedPay4());
+        settlment.setNegDefPay1(dto.getNegDefPay1());
+        settlment.setNegDefPay2(dto.getNegDefPay2());
+        settlment.setNegDefPay3(dto.getNegDefPay3());
+        settlment.setNegDefPay4(dto.getNegDefPay4());
 
         InfoDeal deal = dealRepo.findById(infoDealId)
                 .orElseThrow(() -> new RuntimeException(String.format("Deal %d not found", infoDealId)));
-        settlement.setDeal(deal);
+        settlment.setDeal(deal);
 
-        return settlement;
+        return settlment;
     }
-}
 
+
+    ////////////Transport////////////
+    ////////////////////////////////
+
+    public Transport latestTransportByDealId(Long id) {
+        Optional <Transport> trans = transRepo.findLatestTransportByDealId(id);
+        return trans.orElse(null);
+    }
+
+}
 
 

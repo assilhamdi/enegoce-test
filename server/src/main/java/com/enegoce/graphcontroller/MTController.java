@@ -22,16 +22,15 @@ public class MTController {
     private MTService mtService;
     private static final Logger logger = LogManager.getLogger(DealController.class);
 
-    private  String mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce/server/src/test/output/"; //Update Accordingly
-
     @MutationMapping
     public String exportMT(@Argument Long id, @Argument String mt, @Argument String format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce-test/server/src/test/output/"; //Update Accordingly
 
         if ("xml".equalsIgnoreCase(format)) {
-            mtFilePath = this.mtFilePath + "MT" + mt + "_" + timestamp + ".xml";
+            mtFilePath = mtFilePath + "MT" + mt + "_" + timestamp + ".xml";
         } else {
-            mtFilePath = this.mtFilePath + "MT" + mt + "_" + timestamp + ".txt";
+            mtFilePath = mtFilePath + "MT" + mt + "_" + timestamp + ".txt";
         }
 
         boolean conversionSuccessful = mtService.generateAndExportMtMessage(id, mt, mtFilePath, "xml".equalsIgnoreCase(format));
@@ -48,12 +47,13 @@ public class MTController {
     @MutationMapping
     public String exportMT798(@Argument Long dealId, @Argument String mt, @Argument String format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String mtFilePath = "C:/Users/Assil/IdeaProjects/enegoce-test/server/src/test/output/"; //Update Accordingly
         String response = null;
 
         if ("txt".equalsIgnoreCase(format)) {
-            mtFilePath = this.mtFilePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".txt";
+            mtFilePath = mtFilePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".txt";
         } else if ("xml".equalsIgnoreCase(format)) {
-            mtFilePath = this.mtFilePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".xml";
+            mtFilePath = mtFilePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".xml";
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
         }

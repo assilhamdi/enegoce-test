@@ -1,19 +1,7 @@
 extend type Query {
 
-    ###InfoDeal
     getAllInfoDeals: [InfoDeal]
-    getInfoDealById(id: Int!): InfoDeal
 
-    ###DealGoods
-    goodsByDealId(id: Int!): [DealGoods]
-
-    ###DealParty
-    partiesByDealId(id: Int!): [DealParty]
-    partyByDealIdAndCode(id: Int!, code: String): DealParty
-
-    ###Settlement
-    settlementById(id: Int!): Settlement
-    settlementsByDealId(id: Int!): [Settlement]
 }
 
 ###InfoDeal

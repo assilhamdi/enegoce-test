@@ -199,6 +199,10 @@ public class MTService {
                     Object fieldValue = getFieldValue(entity, getterMethodName, infoDeal, dealPartiesList, latestSettlment, latestTransport, dealCommentsList, party, comment);
 
                     if (fieldValue != null) {
+                        if ("DealParty".equals(entity) && "country".equals(field)) {
+                            fieldValue = convertCountryCodeToFullName((String) fieldValue);
+                        }
+
                         if (!combinedValue.isEmpty()) {
                             combinedValue.append(delimiter);
                         }
@@ -302,8 +306,8 @@ public class MTService {
                 }
 
                 if (!combinedValue.isEmpty()) {
-                    writer.write(mtTag + " " + fieldDescription + ":" + " " + combinedValue.toString());
-                    writer.write("\r\n");
+                    writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                    writer.write(formatFieldValue(combinedValue) + "\r\n");
                 }
             }
         } catch (JSONException e) {
@@ -318,8 +322,8 @@ public class MTService {
 
         return switch (entityName) {
             case "InfoDeal" -> infoDeal.getClass().getMethod(getterMethodName).invoke(infoDeal);
-            case "Settlement" -> Settlment.class.getMethod(getterMethodName).invoke(settlment);
-            case "Transport" -> Settlment.class.getMethod(getterMethodName).invoke(transport);
+            case "Settlment" -> settlment.getClass().getMethod(getterMethodName).invoke(settlment);
+            case "Transport" -> transport.getClass().getMethod(getterMethodName).invoke(transport);
             case "DealParty" ->
                     party != null ? party.getClass().getMethod(getterMethodName).invoke(party) : getFieldValueFromList(dealPartiesList, getterMethodName);
             case "DealComment" ->
