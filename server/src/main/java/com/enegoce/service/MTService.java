@@ -80,7 +80,7 @@ public class MTService {
             if (generateXml) {
                 return generateAndExportMtMessageWithXml(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings, mt, true);
             } else {
-                return generateAndExportMtMessageWithWriter(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings);
+                return generateAndExportMtMessageWithWriter(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings, mt);
             }
         } catch (Exception e) {
             logger.error("Error generating MT message: " + e);
@@ -88,11 +88,27 @@ public class MTService {
         }
     }
 
-    private boolean generateAndExportMtMessageWithWriter(InfoDeal infoDeal, Settlment settlment, Transport transport, List<DealParty> dealPartiesList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings) {
+    private boolean generateAndExportMtMessageWithWriter(InfoDeal infoDeal, Settlment settlment, Transport transport, List<DealParty> dealPartiesList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings, String mt) {
         try {
             //TODO: Add Header
             writer.write("---------------------------- Message Text ----------------------------\r\n");
-            processInfoDeal(writer, infoDeal, dealPartiesList, settlment, transport, dealCommentsList, mappings);
+
+/*            DealComment comment1 = dealService.commentByDealAndType(infoDeal.getId(), "47A");
+            DealComment comment2 = dealService.commentByDealAndType(infoDeal.getId(), "46B");
+            //Dynamic Sequence total
+            writer.write(":27: Sequence of Total\r\n");
+            if (mt.equals("700")) {
+                if (comment1 == null || comment2 == null) {
+                    writer.write("1/1" + "\r\n");
+                } else {
+                    writer.write("1/2" + "\r\n");
+                }
+            }
+            if (mt.equals("701")) {
+                writer.write("2/2" + "\r\n");
+            }*/
+
+            processInfoDeal(writer, infoDeal, dealPartiesList, settlment, transport, dealCommentsList, mappings, mt);
             return true;
         } catch (Exception e) {
             logger.error("Error processing data: " + e);
@@ -183,13 +199,6 @@ public class MTService {
                 DealParty party = code != null ? dealService.partyByDealIdAndCode(infoDeal.getId(), code) : null;
                 DealComment comment = code != null ? dealService.commentByDealAndType(infoDeal.getId(), code) : null;
 
-                if (party == null && code != null) {
-                    logger.warn("No DealParty found for code: " + code);
-                }
-                if (comment == null && code != null) {
-                    logger.warn("No DealComment found for code: " + code);
-                }
-
                 for (int i = 0; i < fieldsArray.length(); i++) {
                     String[] parts = fieldsArray.getString(i).split("\\.");
                     String entity = parts[0];
@@ -233,7 +242,7 @@ public class MTService {
         }
     }
 
-    private void processInfoDeal(BufferedWriter writer, InfoDeal infoDeal, List<DealParty> dealPartiesList, Settlment latestSettlment, Transport latestTransport, List<DealComment> dealCommentsList, List<MtFieldMapping> mappings) throws IOException {
+    private void processInfoDeal(BufferedWriter writer, InfoDeal infoDeal, List<DealParty> dealPartiesList, Settlment latestSettlment, Transport latestTransport, List<DealComment> dealCommentsList, List<MtFieldMapping> mappings, String mt) throws IOException {
         for (MtFieldMapping mapping : mappings) {
             String entityName = mapping.getEntityName();
             String fieldName = mapping.getDatabaseField();
@@ -243,7 +252,30 @@ public class MTService {
 
             if (mappingRule != null && !mappingRule.isEmpty()) {
                 processMappingRule(writer, mappingRule, mtTag, fieldDescription, infoDeal, dealPartiesList, latestSettlment, latestTransport, dealCommentsList);
-            } else {
+            }
+            //Specific fields handling//
+            else if (mtTag.equals("27")) {
+                DealComment comment1 = dealService.commentByDealAndType(infoDeal.getId(), "47A");
+                DealComment comment2 = dealService.commentByDealAndType(infoDeal.getId(), "46B");
+                //Dynamic Sequence total
+                writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                if (mt.equals("700")) {
+                    if (comment1 == null || comment2 == null) {
+                        writer.write("1/1" + "\r\n");
+                    } else {
+                        writer.write("1/2" + "\r\n");
+                    }
+                }
+                if (mt.equals("701")) {
+                    writer.write("2/2" + "\r\n");
+                }
+            } else if (mtTag.equals("40E")) {
+                writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                writer.write("UCP URR LATEST VERSION" + "\r\n");
+
+            }
+            /////////////////////////////
+            else {
                 if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
                     continue;
                 }
@@ -256,6 +288,7 @@ public class MTService {
                 } catch (Exception e) {
                     logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
                 }
+
 
                 if (fieldValue != null) {
                     writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
@@ -276,14 +309,6 @@ public class MTService {
                 StringBuilder combinedValue = new StringBuilder();
                 DealParty party = code != null ? dealService.partyByDealIdAndCode(infoDeal.getId(), code) : null;
                 DealComment comment = code != null ? dealService.commentByDealAndType(infoDeal.getId(), code) : null;
-
-                if (code != null) {
-                    if (party == null) {
-                        logger.warn("No DealParty found for code: " + code);
-                    } else {
-                        logger.warn("No DealComment found for code: " + code);
-                    }
-                }
 
                 for (int i = 0; i < fieldsArray.length(); i++) {
                     String[] parts = fieldsArray.getString(i).split("\\.");
@@ -387,10 +412,9 @@ public class MTService {
 
             if ("txt".equalsIgnoreCase(format)) {
                 writer.write("12:" + mt + "\r\n");
-                writer.write("=========================\r\n");
-                return generateAndExportMtMessageWithWriter(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings);
+                return generateAndExportMtMessageWithWriter(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings, mt);
             } else if ("xml".equalsIgnoreCase(format)) {
-                return generateAndExportMt798MessageWithXml(infoDeal,settlment,transport,dealPartiesList,dealCommentsList,writer,mappings,mt );
+                return generateAndExportMt798MessageWithXml(infoDeal, settlment, transport, dealPartiesList, dealCommentsList, writer, mappings, mt);
             } else {
                 logger.error("Unsupported output format: " + format);
                 return false;
@@ -401,7 +425,7 @@ public class MTService {
         }
     }
 
-    private boolean generateAndExportMt798MessageWithXml(InfoDeal infoDeal, Settlment settlment, Transport transport, List<DealParty>dealPartiesList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings, String mt) {
+    private boolean generateAndExportMt798MessageWithXml(InfoDeal infoDeal, Settlment settlment, Transport transport, List<DealParty> dealPartiesList, List<DealComment> dealCommentsList, BufferedWriter writer, List<MtFieldMapping> mappings, String mt) {
         try {
             XMLOutputFactory factory = XMLOutputFactory.newInstance();
             XMLStreamWriter xmlWriter = factory.createXMLStreamWriter(writer);
@@ -492,14 +516,18 @@ public class MTService {
 
         if (mt.equals("700")) {
             InfoDealDto infoDealDto = new InfoDealDto();
+            SettlementDto settlement = new SettlementDto();
+            TransportDto transport = new TransportDto();
             List<DealCommentDto> comments = new ArrayList<>();
-            List<DealGoodsDto> goods = new ArrayList<>();
             List<DealPartyDto> parties = new ArrayList<>();
-            List<SettlementDto> settlements = new ArrayList<>();
 
             // Initialize an index for iterating through goodsDescs
             int goodsIndex = 0;
 
+            List<SettlementDto> settlements = new ArrayList<>();
+            ;
+            List<DealGoodsDto> goods = new ArrayList<>();
+            ;
             for (Map.Entry<String, String> entry : parsedMessage.entrySet()) {
                 String tag = entry.getKey();
                 String value = entry.getValue();
