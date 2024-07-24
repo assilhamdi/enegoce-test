@@ -260,10 +260,10 @@ public class MTService {
                 //Dynamic Sequence total
                 writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
                 if (mt.equals("700")) {
-                    if (comment1 == null || comment2 == null) {
-                        writer.write("1/1" + "\r\n");
-                    } else {
+                    if (comment1 != null || comment2 != null) {
                         writer.write("1/2" + "\r\n");
+                    } else {
+                        writer.write("1/1" + "\r\n");
                     }
                 }
                 if (mt.equals("701")) {
@@ -308,8 +308,7 @@ public class MTService {
             if (fieldsArray != null) {
                 StringBuilder combinedValue = new StringBuilder();
                 DealParty party = code != null ? dealService.partyByDealIdAndCode(infoDeal.getId(), code) : null;
-                DealComment comment = code != null ? dealService.commentByDealAndType(infoDeal.getId(), code) : null;
-
+                DealComment comment = code != null ? dealService.commentByDealAndType(infoDeal.getId(), code) : null; //TODO: MT701
                 for (int i = 0; i < fieldsArray.length(); i++) {
                     String[] parts = fieldsArray.getString(i).split("\\.");
                     String entity = parts[0];
@@ -350,26 +349,12 @@ public class MTService {
             case "Settlment" -> settlment.getClass().getMethod(getterMethodName).invoke(settlment);
             case "Transport" -> transport.getClass().getMethod(getterMethodName).invoke(transport);
             case "DealParty" ->
-                    party != null ? party.getClass().getMethod(getterMethodName).invoke(party) : getFieldValueFromList(dealPartiesList, getterMethodName);
+                    party != null ? party.getClass().getMethod(getterMethodName).invoke(party) : null;
             case "DealComment" ->
-                    comment != null ? comment.getClass().getMethod(getterMethodName).invoke(comment) : getFieldValueFromList(dealCommentsList, getterMethodName);
+                    comment != null ? comment.getClass().getMethod(getterMethodName).invoke(comment) : null;
             default -> null;
         };
 
-    }
-
-    private Object getFieldValueFromList(List<?> list, String getterMethodName) {
-        for (Object obj : list) {
-            try {
-                Object value = obj.getClass().getMethod(getterMethodName).invoke(obj);
-                if (value != null) {
-                    return value;
-                }
-            } catch (Exception e) {
-                logger.error("Error accessing field using method " + getterMethodName + " in list element", e);
-            }
-        }
-        return null;
     }
 
     private String formatFieldValue(Object fieldValue) {

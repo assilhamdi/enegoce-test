@@ -170,7 +170,8 @@ public class DealService {
     }
 
     public DealComment commentByDealAndType(Long id, String type) {
-        return commRepo.findCommentByDealAndType(id, type);
+        Optional<DealComment> comm = commRepo.findCommentByDealAndType(id, type);
+        return comm.orElse(null);
     }
 
     @Transactional
