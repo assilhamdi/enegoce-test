@@ -16,6 +16,11 @@ export class MappingTableManagementDrawerComponent implements OnInit {
   @Output() mappingAdded = new EventEmitter<void>();
   @Output() mappingUpdated = new EventEmitter<void>();
 
+  entities = ['DealComment', 'DealParty', 'InfoDeal', 'Settlement', 'Transport'];
+  mts = ['700', '701', '760', '798'];
+  selectedEntity: string = "";
+  fields: string[] = [];
+
   newMapping: MtFieldMappingInput = {
     status: '',
     tag: '',
@@ -39,6 +44,16 @@ export class MappingTableManagementDrawerComponent implements OnInit {
     if (changes['mappingToUpdate'] && !changes['mappingToUpdate'].firstChange) {
       // Re-initialize form fields if mappingToUpdate changes
       this.initializeForm();
+    }
+  }
+
+  onEntityChange(event: Event): void {
+    const target = event.target as HTMLSelectElement | null;
+    if (target) {
+      this.selectedEntity = target.value;
+      this.mappingService.getFieldByEntity(this.selectedEntity).subscribe(fields => {
+        this.fields = fields;
+      });
     }
   }
 

@@ -90,5 +90,11 @@ public class MtFieldMappingController {
         return service.deleteMtFieldMapping(id);
     }
 
+    //////////////////////Inputs handling////////////////////////
+
+    @QueryMapping
+    public List<String> getFieldsForEntity(@Argument String entityName) {
+        return service.getFieldsForEntity(entityName);
+    }
 
 }

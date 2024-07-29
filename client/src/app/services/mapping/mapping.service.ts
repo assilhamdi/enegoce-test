@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, map } from 'rxjs';
 import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
-import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_ST, MAPPINGS_BY_FD } from '../../graphql/graphql.queries_mapping';
+import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_ST, MAPPINGS_BY_FD, FIELD_BY_ENTITY } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
   providedIn: 'root'
@@ -24,6 +24,17 @@ export class MappingService {
       query: MTS
     }).valueChanges.pipe(
       map(result => result.data.mts)
+    );
+  }
+
+  getFieldByEntity(entityName: String): Observable<string[]> {
+    return this.apollo.watchQuery<any>({
+      query: FIELD_BY_ENTITY,
+      variables: {
+        entityName: entityName
+      }
+    }).valueChanges.pipe(
+      map(result => result.data.getFieldsForEntity)
     );
   }
 
@@ -70,6 +81,8 @@ export class MappingService {
       map(result => result.data?.deleteFieldMapping ?? false)
     );
   }
+
+
 
   ////////////////// FILTERING ////////////////
   /////////////////////////////////////////////

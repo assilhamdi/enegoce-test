@@ -53,6 +53,7 @@
           &darr; <!-- Down arrow symbol -->
         </button>
       </th>
+      <th>Mapping Rules</th>
       <th>Operations</th>
     </tr>
   </thead>
@@ -65,9 +66,10 @@
       <td>{{ mapping.entityName }}</td>
       <td>{{ mapping.mt }}</td>
       <td>{{ mapping.fieldOrder }}</td>
+      <td>{{ mapping.mappingRule }}</td>
       <td>
-        <button (click)="openDrawer(mapping)">Edit</button> <!-- Pass mapping to update -->
-        <!--<button (click)="deleteMapping(mapping.id)">Delete</button> -->
+        <button (click)="openDrawer(mapping)" disabled>Edit</button>
+        <button (click)="deleteMapping(mapping.id)" disabled>Delete</button>
       </td>
     </tr>
   </tbody>

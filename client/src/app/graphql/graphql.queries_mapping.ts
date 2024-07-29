@@ -22,6 +22,14 @@ const MTS = gql`
   }
 `;
 
+const FIELD_BY_ENTITY = gql`
+  query GetFieldsForEntity($entityName: String!){
+    getFieldsForEntity (entityName: $entityName)    
+  }
+`;
+
+/////////////////// SORTING /////////////////
+/////////////////////////////////////////////
 
 const SORT_MAPPINGS_BY_ORDER = gql`
   query OrderMappingsByFO($order: Boolean!) {
@@ -75,10 +83,8 @@ const DELETE_MT_MAPPING = gql`
   }
 `;
 
-
 ////////////////// FILTERING ////////////////
 /////////////////////////////////////////////
-
 
 const MAPPINGS_BY_MT = gql`
   query MappingsByMT($mt: String!) {
@@ -128,9 +134,4 @@ const MAPPINGS_BY_FD = gql`
   }
 `;
 
-
-
-
-
-
-export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_FD, MAPPINGS_BY_ST }
+export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_FD, MAPPINGS_BY_ST, FIELD_BY_ENTITY }

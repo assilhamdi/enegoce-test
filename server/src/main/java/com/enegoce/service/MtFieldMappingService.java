@@ -1,15 +1,19 @@
 package com.enegoce.service;
 
 
+import com.enegoce.entities.EntityField;
 import com.enegoce.entities.MtFieldMapping;
 import com.enegoce.entities.MtFieldMappingInput;
 import com.enegoce.repository.MtFieldMappingRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MtFieldMappingService {
@@ -128,6 +132,15 @@ public class MtFieldMappingService {
         } else {
             throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
         }
+    }
+
+    //////////////////////Inputs handling////////////////////////
+
+    public List<String> getFieldsForEntity(String entityName) {
+        return Arrays.stream(EntityField.values())
+                .filter(e -> e.getEntity().equals(entityName))
+                .map(EntityField::getField)
+                .collect(Collectors.toList());
     }
 
 

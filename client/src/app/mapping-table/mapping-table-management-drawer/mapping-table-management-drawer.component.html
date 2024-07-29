@@ -1,55 +1,61 @@
 <div class="drawer" [class.open]="isOpen">
-    <div class="drawer" [class.open]="isOpen">
-        <h2>{{ mappingToUpdate ? 'Update Mapping' : 'Add New Mapping' }}</h2>
-        <!-- Conditional message based on mappingToUpdate -->
-        <p *ngIf="mappingToUpdate">Updating mapping for "{{mappingToUpdate.databaseField}}"" from "{{mappingToUpdate.entityName}}"</p>
-        <p *ngIf="!mappingToUpdate">Please fill in the details for the new mapping</p>
+    <h2>{{ mappingToUpdate ? 'Update Mapping' : 'Add New Mapping' }}</h2>
+    <!-- Conditional message based on mappingToUpdate -->
+    <p *ngIf="mappingToUpdate">Updating mapping for "{{mappingToUpdate.databaseField}}" from
+        "{{mappingToUpdate.entityName}}"</p>
+    <p *ngIf="!mappingToUpdate">Please fill in the details for the new mapping</p>
 
-        <form (ngSubmit)="onSubmit()" class="form">
-            <!-- Status -->
-            <div class="form-group">
-                <label for="status">Status</label>
-                <select id="status" name="status" [(ngModel)]="newMapping.status" required>
-                    <option value="M">M</option>
-                    <option value="O">O</option>
-                </select>
-            </div>
-            <!-- Tag -->
-            <div class="form-group">
-                <label for="tag">Tag</label>
-                <input type="text" id="tag" name="tag" [(ngModel)]="newMapping.tag" required>
-            </div>
-            <!-- Field Description -->
-            <div class="form-group">
-                <label for="fieldDescription">Field Description</label>
-                <input type="text" id="fieldDescription" name="fieldDescription"
-                    [(ngModel)]="newMapping.fieldDescription" required>
-            </div>
-            <!-- Database Field -->
-            <div class="form-group">
-                <label for="databaseField">Database Field</label>
-                <input type="text" id="databaseField" name="databaseField" [(ngModel)]="newMapping.databaseField"
-                    required>
-            </div>
-            <!-- Entity Name -->
-            <div class="form-group">
-                <label for="entityName">Entity Name</label>
-                <input type="text" id="entityName" name="entityName" [(ngModel)]="newMapping.entityName" required>
-            </div>
-            <!-- MT -->
-            <div class="form-group">
-                <label for="mt">MT</label>
-                <input type="text" id="mt" name="mt" [(ngModel)]="newMapping.mt" required>
-            </div>
-            <!-- Field Order -->
-            <div class="form-group">
-                <label for="fieldOrder">Field Order</label>
-                <input type="number" id="fieldOrder" name="fieldOrder" [(ngModel)]="newMapping.fieldOrder" required>
-            </div>
-            <!-- Buttons -->
-            <div class="buttons-container">
-                <button type="submit" class="submit-btn">{{ mappingToUpdate ? 'Update' : 'Submit' }}</button>
-                <button type="button" (click)="closeDrawer()" class="back-btn">Back</button>
-            </div>
-        </form>
-    </div>
+    <form (ngSubmit)="onSubmit()" class="form">
+        <!-- Status -->
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" [(ngModel)]="newMapping.status" required>
+                <option value="M">M</option>
+                <option value="O">O</option>
+            </select>
+        </div>
+        <!-- Tag -->
+        <div class="form-group">
+            <label for="tag">Tag</label>
+            <input type="text" id="tag" name="tag" [(ngModel)]="newMapping.tag" required>
+        </div>
+        <!-- Field Description -->
+        <div class="form-group">
+            <label for="fieldDescription">Field Description</label>
+            <input type="text" id="fieldDescription" name="fieldDescription" [(ngModel)]="newMapping.fieldDescription"
+                required>
+        </div>
+        <!-- Entity Name -->
+        <div class="form-group">
+            <label for="entityName">Entity Name</label>
+            <select id="entityName" [(ngModel)]="newMapping.entityName" (change)="onEntityChange($event)"
+                name="entityName">
+                <option *ngFor="let entity of entities" [value]="entity">{{ entity }}</option>
+            </select>
+        </div>
+        <!-- Database Field -->
+        <div class="form-group">
+            <label for="databaseField">Database Field</label>
+            <select id="databaseField" [(ngModel)]="newMapping.databaseField" name="databaseField">
+                <option *ngFor="let field of fields" [value]="field">{{ field }}</option>
+            </select>
+        </div>
+        <!-- MT -->
+        <div class="form-group">
+            <label for="mt">MT</label>
+            <select type="text" id="mt" name="mt" [(ngModel)]="newMapping.mt" required>
+                <option *ngFor="let mt of mts" [value]="mt">{{ mt }}</option>
+            </select>
+        </div>
+        <!-- Field Order -->
+        <div class="form-group">
+            <label for="fieldOrder">Field Order</label>
+            <input type="number" id="fieldOrder" name="fieldOrder" [(ngModel)]="newMapping.fieldOrder" required>
+        </div>
+        <!-- Buttons -->
+        <div class="buttons-container">
+            <button type="submit" class="submit-btn">{{ mappingToUpdate ? 'Update' : 'Submit' }}</button>
+            <button type="button" (click)="closeDrawer()" class="back-btn">Back</button>
+        </div>
+    </form>
+</div>

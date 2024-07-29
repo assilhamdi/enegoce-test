@@ -2,6 +2,7 @@ extend type Query {
 
     getAllMappings: [MtFieldMapping]
     mts:[String]
+    getFieldsForEntity(entityName: String!): [String]
 
     ###Filtering
     mappingsByMt(mt: String!): [MtFieldMapping]
