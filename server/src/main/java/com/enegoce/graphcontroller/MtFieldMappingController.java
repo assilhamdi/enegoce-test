@@ -86,6 +86,11 @@ public class MtFieldMappingController {
     }
 
     @MutationMapping
+    public MtFieldMapping updateMappingRule(@Argument Integer id, @Argument List<String> fields, @Argument String delimiter, @Argument String code) {
+        return service.updateMappingRule(id, fields, delimiter, code);
+    }
+
+    @MutationMapping
     public boolean deleteFieldMapping(@Argument Integer id) {
         return service.deleteMtFieldMapping(id);
     }
@@ -96,5 +101,6 @@ public class MtFieldMappingController {
     public List<String> getFieldsForEntity(@Argument String entityName) {
         return service.getFieldsForEntity(entityName);
     }
+
 
 }

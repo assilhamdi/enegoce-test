@@ -87,13 +87,12 @@ public class MtFieldMappingService {
     /////////////////////////////////////////////////////////////
 
     public MtFieldMapping createMtFieldMapping(MtFieldMappingInput input) {
-
         MtFieldMapping mtFieldMapping = new MtFieldMapping();
 
         mtFieldMapping.setStatus(input.status());
         mtFieldMapping.setTag(input.tag());
         mtFieldMapping.setFieldDescription(input.fieldDescription());
-        mtFieldMapping.setMappingRule(input.mappingRule());
+        mtFieldMapping.setMappingRule(null);
         mtFieldMapping.setDatabaseField(input.databaseField());
         mtFieldMapping.setEntityName(input.entityName());
         mtFieldMapping.setMt(input.mt());
@@ -143,5 +142,45 @@ public class MtFieldMappingService {
                 .collect(Collectors.toList());
     }
 
+    //////////////////////Mapping rule handling////////////////////////
+
+    public MtFieldMapping updateMappingRule(Integer id, List<String> fields, String delimiter, String code) {
+        Optional<MtFieldMapping> optionalMapping = mappingRepo.findById(id);
+
+        if (optionalMapping.isPresent()) {
+            MtFieldMapping mtFieldMapping = optionalMapping.get();
+            mtFieldMapping.setMappingRule(constructMappingRule(fields, delimiter, code));
+            return mappingRepo.save(mtFieldMapping);
+        } else {
+            throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
+        }
+    }
+
+    public String constructMappingRule(List<String> fields, String delimiter, String code) {
+        StringBuilder mappingRule = new StringBuilder();
+
+        mappingRule.append("{\"fields\": [");
+
+        for (int i = 0; i < fields.size(); i++) {
+            mappingRule.append("\"").append(fields.get(i)).append("\"");
+            if (i < fields.size() - 1) {
+                mappingRule.append(",");
+            }
+        }
+
+        mappingRule.append("]");
+
+        if (delimiter != null && !delimiter.isEmpty()) {
+            mappingRule.append(",\"delimiter\": \"").append(delimiter).append("\"");
+        }
+
+        if (code != null && !code.isEmpty()) {
+            mappingRule.append(",\"code\": \"").append(code).append("\"");
+        }
+
+        mappingRule.append("}");
+
+        return mappingRule.toString();
+    }
 
 }

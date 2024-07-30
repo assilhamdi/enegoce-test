@@ -23,6 +23,7 @@ extend type Mutation {
     addMtFieldMapping(input: MtFieldMappingInput!): MtFieldMapping
     updateFieldMapping(id :Int!, input: MtFieldMappingInput!): MtFieldMapping
     deleteFieldMapping(id: Int!): Boolean
+    updateMappingRule(id: Int!, fields: [String], delimiter: String, code: String): MtFieldMapping
 
 }
 
@@ -42,9 +43,11 @@ input MtFieldMappingInput {
     status: String
     tag: String
     fieldDescription: String
-    mappingRule: String
     databaseField: String
     entityName: String
     mt: String
     fieldOrder: Int
+    fields: [String]
+    delimiter: String
+    code: String
 }
