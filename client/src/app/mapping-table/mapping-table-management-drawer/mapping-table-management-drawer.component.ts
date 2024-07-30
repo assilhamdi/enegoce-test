@@ -17,9 +17,9 @@ export class MappingTableManagementDrawerComponent implements OnInit {
   @Output() mappingUpdated = new EventEmitter<void>();
 
   entities = ['DealComment', 'DealParty', 'InfoDeal', 'Settlement', 'Transport'];
-  mts = ['700', '701', '760', '798'];
-  selectedEntity: string = "";
   fields: string[] = [];
+  mts = ['700', '701', '760', '798'];
+  
 
   newMapping: MtFieldMappingInput = {
     status: '',
@@ -50,8 +50,8 @@ export class MappingTableManagementDrawerComponent implements OnInit {
   onEntityChange(event: Event): void {
     const target = event.target as HTMLSelectElement | null;
     if (target) {
-      this.selectedEntity = target.value;
-      this.mappingService.getFieldByEntity(this.selectedEntity).subscribe(fields => {
+      this.newMapping.entityName = target.value;
+      this.mappingService.getFieldByEntity(this.newMapping.entityName).subscribe(fields => {
         this.fields = fields;
       });
     }
@@ -60,18 +60,24 @@ export class MappingTableManagementDrawerComponent implements OnInit {
   initializeForm(): void {
     if (this.mappingToUpdate) {
       // Populate form fields with mappingToUpdate data
-      this.newMapping.status = this.mappingToUpdate.status;
-      this.newMapping.tag = this.mappingToUpdate.tag;
-      this.newMapping.fieldDescription = this.mappingToUpdate.fieldDescription;
-      this.newMapping.databaseField = this.mappingToUpdate.databaseField;
-      this.newMapping.entityName = this.mappingToUpdate.entityName;
-      this.newMapping.mt = this.mappingToUpdate.mt;
-      this.newMapping.fieldOrder = this.mappingToUpdate.fieldOrder;
+      this.newMapping.status = this.mappingToUpdate.status ?? '';
+      this.newMapping.tag = this.mappingToUpdate.tag ?? '';
+      this.newMapping.fieldDescription = this.mappingToUpdate.fieldDescription ?? '';
+      this.newMapping.entityName = this.mappingToUpdate.entityName ?? '';
+      this.newMapping.mt = this.mappingToUpdate.mt ?? '';
+      this.newMapping.fieldOrder = this.mappingToUpdate.fieldOrder ?? 0;
+  
+      // Fetch fields for the entity and set the databaseField
+      this.mappingService.getFieldByEntity(this.newMapping.entityName).subscribe(fields => {
+        this.fields = fields;
+        this.newMapping.databaseField = this.mappingToUpdate?.databaseField ?? '';
+      });
     } else {
       // Reset form fields if mappingToUpdate is null
       this.resetForm();
     }
   }
+  
 
   openDrawer() {
     this.isOpen = true;
