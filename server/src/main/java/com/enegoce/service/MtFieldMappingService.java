@@ -183,4 +183,14 @@ public class MtFieldMappingService {
         return mappingRule.toString();
     }
 
+    public String getMappingRuleById(Integer id) {
+        Optional<MtFieldMapping> optionalMapping = mappingRepo.findById(id);
+        if (optionalMapping.isPresent()) {
+            return optionalMapping.get().getMappingRule();
+        } else {
+            throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
+        }
+    }
+
+
 }

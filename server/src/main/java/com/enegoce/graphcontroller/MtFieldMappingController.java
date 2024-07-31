@@ -22,6 +22,31 @@ public class MtFieldMappingController {
         return service.mappings();
     }
 
+    @MutationMapping
+    public MtFieldMapping addMtFieldMapping(@Argument MtFieldMappingInput input) {
+        return service.createMtFieldMapping(input);
+    }
+
+    @MutationMapping
+    public MtFieldMapping updateFieldMapping(@Argument Integer id, @Argument MtFieldMapping input) {
+        return service.updateMtFieldMapping(id, input);
+    }
+
+    @MutationMapping
+    public MtFieldMapping updateMappingRule(@Argument Integer id, @Argument List<String> fields, @Argument String delimiter, @Argument String code) {
+        return service.updateMappingRule(id, fields, delimiter, code);
+    }
+
+    @MutationMapping
+    public boolean deleteFieldMapping(@Argument Integer id) {
+        return service.deleteMtFieldMapping(id);
+    }
+
+    @QueryMapping
+    public String getMappingRule(@Argument Integer id) {
+        return service.getMappingRuleById(id);
+    }
+
     ///////////////////////Filtering methods///////////////////////
     /////////////////////////////////////////////////////////////
 
@@ -71,28 +96,6 @@ public class MtFieldMappingController {
     @QueryMapping
     public List<MtFieldMapping> orderMappingsByFD(@Argument boolean order) {
         return service.orderMappingsByFD(order);
-    }
-
-    /////////////////////////////////////////////////////////////
-
-    @MutationMapping
-    public MtFieldMapping addMtFieldMapping(@Argument MtFieldMappingInput input) {
-        return service.createMtFieldMapping(input);
-    }
-
-    @MutationMapping
-    public MtFieldMapping updateFieldMapping(@Argument Integer id, @Argument MtFieldMapping input) {
-        return service.updateMtFieldMapping(id, input);
-    }
-
-    @MutationMapping
-    public MtFieldMapping updateMappingRule(@Argument Integer id, @Argument List<String> fields, @Argument String delimiter, @Argument String code) {
-        return service.updateMappingRule(id, fields, delimiter, code);
-    }
-
-    @MutationMapping
-    public boolean deleteFieldMapping(@Argument Integer id) {
-        return service.deleteMtFieldMapping(id);
     }
 
     //////////////////////Inputs handling////////////////////////
