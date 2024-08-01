@@ -35,6 +35,7 @@
 (mappingUpdated)="refreshMappings()">
 </app-mapping-table-management-drawer>
 
+<app-mapping-rules [mappingRule]="mappingRule" [tag]="tag" [mt]="mt"></app-mapping-rules>
 
 <table class="finance-table">
   <thead>
@@ -53,7 +54,6 @@
           &darr; <!-- Down arrow symbol -->
         </button>
       </th>
-      <th>Mapping Rules</th>
       <th>Operations</th>
     </tr>
   </thead>
@@ -66,10 +66,10 @@
       <td>{{ mapping.entityName }}</td>
       <td>{{ mapping.mt }}</td>
       <td>{{ mapping.fieldOrder }}</td>
-      <td>{{ mapping.mappingRule }}</td>
       <td>
         <button (click)="openDrawer(mapping)" >Edit</button>
         <button (click)="deleteMapping(mapping.id)" disabled>Delete</button>
+        <button *ngIf="mapping.mappingRule" (click)="display(mapping.id)">Display Mapping Rules</button>
       </td>
     </tr>
   </tbody>

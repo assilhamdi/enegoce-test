@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { Observable, map } from 'rxjs';
 import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
-import { GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_ST, MAPPINGS_BY_FD, FIELD_BY_ENTITY } from '../../graphql/graphql.queries_mapping';
+import {
+  GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING,
+  DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_ST, MAPPINGS_BY_FD,
+  FIELD_BY_ENTITY, GET_MAPPING_RULE, UPDATE_MT_MAPPING_RULE,
+  GET_MAPPING_BY_ID
+} from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +21,17 @@ export class MappingService {
       query: GET_MAPPINGS
     }).valueChanges.pipe(
       map(result => result.data.getAllMappings)
+    );
+  }
+
+  getMappingById(id: Number):Observable<MtFieldMapping>{
+    return this.apollo.watchQuery<any>({
+      query: GET_MAPPING_BY_ID,
+      variables: {
+        id: id
+      }
+    }).valueChanges.pipe(
+      map(result => result.data.getMappingById)
     );
   }
 
@@ -72,6 +88,20 @@ export class MappingService {
     );
   }
 
+  updateMtFieldMappingRule(id: Number, fields: [String], delimiter: String, code: String): Observable<MtFieldMapping> {
+    return this.apollo.mutate<any>({
+      mutation: UPDATE_MT_MAPPING_RULE,
+      variables: {
+        id: id,
+        fields: fields,
+        delimiter: delimiter,
+        code: code
+      }
+    }).pipe(
+      map(result => result.data.updateMtFieldMappingRule)
+    );
+  }
+
   deleteFieldMapping(id: Number): Observable<boolean> {
     return this.apollo.mutate<{ deleteFieldMapping: boolean }>({
       mutation: DELETE_MT_MAPPING,
@@ -82,7 +112,16 @@ export class MappingService {
     );
   }
 
-
+  getMappingRule(id: Number): Observable<any> {
+    return this.apollo.watchQuery<any>({
+      query: GET_MAPPING_RULE,
+      variables: { id }
+    })
+      .valueChanges
+      .pipe(
+        map(({ data }) => JSON.parse(data.getMappingRule))
+      );
+  }
 
   ////////////////// FILTERING ////////////////
   /////////////////////////////////////////////
@@ -119,8 +158,5 @@ export class MappingService {
       map(result => result.data.mappingsByDF)
     );
   }
-
-
-
 
 }

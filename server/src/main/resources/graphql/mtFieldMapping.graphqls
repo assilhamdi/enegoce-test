@@ -1,6 +1,7 @@
 extend type Query {
 
     getAllMappings: [MtFieldMapping]
+    getMappingById(id: Int!): MtFieldMapping
     mts:[String]
     getFieldsForEntity(entityName: String!): [String]
     getMappingRule(id: Int!): String

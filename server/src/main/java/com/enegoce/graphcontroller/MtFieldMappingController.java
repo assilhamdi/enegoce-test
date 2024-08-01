@@ -22,6 +22,11 @@ public class MtFieldMappingController {
         return service.mappings();
     }
 
+    @QueryMapping
+    public MtFieldMapping getMappingById (@Argument Integer id) {
+        return service.mappingById(id);
+    }
+
     @MutationMapping
     public MtFieldMapping addMtFieldMapping(@Argument MtFieldMappingInput input) {
         return service.createMtFieldMapping(input);

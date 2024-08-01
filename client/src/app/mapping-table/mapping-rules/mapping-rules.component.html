@@ -1,0 +1,10 @@
+<div *ngIf="mappingRule">
+    <h2>Mapping Rules of Tag {{ tag }} for MT {{ mt }}</h2>
+    <div *ngFor="let key of getKeys(mappingRule)">
+      <strong>{{ key }}:</strong> {{ mappingRule[key] }}
+    </div>
+  </div>
+  <div *ngIf="!mappingRule">
+    <p>No mapping rule selected</p>
+  </div>
+  <button (click)="clear()">Clear</button>

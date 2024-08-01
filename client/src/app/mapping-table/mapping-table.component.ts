@@ -17,6 +17,13 @@ export class MappingTableComponent implements OnInit {
   order: boolean = true;
   isOpen: boolean = false;
   mappingToUpdate: MtFieldMapping | null = null; // Holds the mapping to update
+  mappingRule: any;
+  tag: String = "";
+  mt: String = "";
+
+  @Output() mappingRuleFetched = new EventEmitter<any>();
+  @Output() tagFetched = new EventEmitter<String>();
+  @Output() mtFetched = new EventEmitter<String>();
 
 
   constructor(private mappingService: MappingService) { }
@@ -112,23 +119,6 @@ export class MappingTableComponent implements OnInit {
   ////////////////// FILTERING ////////////////
   /////////////////////////////////////////////
 
-
-
-  /*filterMappingsByMt(): void {
-    if (this.selectedMt) {
-      this.mappingService.MappingsByMT(this.selectedMt).subscribe(
-        mappings => {
-          this.mappings = mappings;
-        },
-        error => {
-          console.error('Error fetching filtered mappings:', error);
-        }
-      );
-    } else {
-      this.fetchMappings();
-    }
-  }*/
-
   filterMappingsByMt(): void {
     if (this.selectedMt !== 'All') {
       this.mappingService.MappingsByMT(this.selectedMt).subscribe(
@@ -170,6 +160,38 @@ export class MappingTableComponent implements OnInit {
     // Reset the selected MT and show all mappings
     this.selectedMt = 'All';
     this.fetchMappings();
+  }
+  
+  fetchMappingRule(id: Number) {
+    this.mappingService.getMappingRule(id).subscribe(
+      (rule) => {
+        this.mappingRule = rule; // Set the fetched rule
+        this.mappingRuleFetched.emit(rule); // Emit the fetched rule
+        console.log(rule);
+      },
+      (error) => {
+        console.error('Error fetching mapping rule:', error);
+      }
+    );
+  }
+
+  fetchDetails(id: Number) {
+    this.mappingService.getMappingById(id).subscribe(
+      (mapping) => {
+        this.tag = mapping.tag;
+        this.mt = mapping.mt;
+        this.tagFetched.emit(this.tag);
+        this.mtFetched.emit(this.mt);
+      },
+      (error) => {
+        console.error('Error fetching mapping:', error);
+      }
+    )
+  }
+
+  display(id: Number) {
+    this.fetchMappingRule(id);
+    this.fetchDetails(id);
   }
 
 }

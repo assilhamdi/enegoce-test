@@ -25,6 +25,10 @@ public class MtFieldMappingService {
         return mappingRepo.findAll();
     }
 
+    public MtFieldMapping mappingById(Integer id) {
+        Optional<MtFieldMapping> mapping = mappingRepo.findById(id);
+        return mapping.orElse(null);
+    }
     ///////////////////////Filtering methods///////////////////////
     /////////////////////////////////////////////////////////////
 

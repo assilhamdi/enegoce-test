@@ -16,24 +16,9 @@ const GET_MAPPINGS = gql`
   }
 `;
 
-const MTS = gql`
-  query {
-    mts
-  }
-`;
-
-const FIELD_BY_ENTITY = gql`
-  query GetFieldsForEntity($entityName: String!){
-    getFieldsForEntity (entityName: $entityName)    
-  }
-`;
-
-/////////////////// SORTING /////////////////
-/////////////////////////////////////////////
-
-const SORT_MAPPINGS_BY_ORDER = gql`
-  query OrderMappingsByFO($order: Boolean!) {
-    orderMappingsByFO(order: $order) {
+const GET_MAPPING_BY_ID = gql`
+  query GetMappingById($id: Int!) {
+    getMappingById(id: $id) {
       id
       status
       databaseField
@@ -77,9 +62,61 @@ const UPDATE_MT_MAPPING = gql`
   }
 `;
 
+const UPDATE_MT_MAPPING_RULE = gql`
+  mutation UpdateMappingRule($id: Int!, $fields: [String], $delimiter: String, $code: String) {
+    updateMappingRule(id: $id, fields: $fields, delimiter: $delimiter, code: $code) {
+      status
+      databaseField
+      tag
+      fieldDescription
+      entityName
+      mappingRule
+      mt
+      fieldOrder
+    }
+  }
+`;
+
 const DELETE_MT_MAPPING = gql`
   mutation DeleteMtMapping($id: Int!) {
     deleteFieldMapping(id: $id)
+  }
+`;
+
+const MTS = gql`
+  query {
+    mts
+  }
+`;
+
+const FIELD_BY_ENTITY = gql`
+  query GetFieldsForEntity($entityName: String!){
+    getFieldsForEntity (entityName: $entityName)    
+  }
+`;
+
+const GET_MAPPING_RULE = gql`
+  query GetMappingRule($id: Int!) {
+    getMappingRule(id: $id)
+  }
+`;
+
+/////////////////// SORTING /////////////////
+/////////////////////////////////////////////
+
+const SORT_MAPPINGS_BY_ORDER = gql`
+  query OrderMappingsByFO($order: Boolean!) {
+    orderMappingsByFO(order: $order) {
+      id
+      status
+      databaseField
+      tag
+      fieldDescription
+      entityName
+      mappingRule
+      mt
+      fieldOrder
+    }
   }
 `;
 
@@ -134,4 +171,9 @@ const MAPPINGS_BY_FD = gql`
   }
 `;
 
-export { GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER, UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_FD, MAPPINGS_BY_ST, FIELD_BY_ENTITY }
+export {
+  GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER,
+  UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS,
+  MAPPINGS_BY_FD, MAPPINGS_BY_ST, FIELD_BY_ENTITY, GET_MAPPING_RULE,
+  UPDATE_MT_MAPPING_RULE, GET_MAPPING_BY_ID
+}
