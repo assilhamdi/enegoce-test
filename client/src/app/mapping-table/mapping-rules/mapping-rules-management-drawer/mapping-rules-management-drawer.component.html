@@ -1,1 +1,8 @@
-<p>mapping-rules-management-drawer works!</p>
+<div class="drawer" [class.open]="openForAdd || openForUp">
+    mapping rules management drawer works
+    <p *ngIf="mappingToUpdate && openForAdd ">Adding a mapping of Tag "{{mappingToUpdate.tag}}" for MT
+        "{{mappingToUpdate.mt}}"</p>
+        <p *ngIf="mappingToUpdate && openForUp">Updating the mapping of Tag "{{mappingToUpdate.tag}}" for MT
+            "{{mappingToUpdate.mt}}"</p>
+    <button type="button" (click)="closeDrawer()" class="back-btn">Back</button>
+</div>

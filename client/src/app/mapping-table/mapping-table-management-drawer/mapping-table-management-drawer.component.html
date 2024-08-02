@@ -1,8 +1,8 @@
 <div class="drawer" [class.open]="isOpen">
     <h2>{{ mappingToUpdate ? 'Update Mapping' : 'Add New Mapping' }}</h2>
     <!-- Conditional message based on mappingToUpdate -->
-    <p *ngIf="mappingToUpdate">Updating mapping for "{{mappingToUpdate.databaseField}}" from
-        "{{mappingToUpdate.entityName}}"</p>
+    <p *ngIf="mappingToUpdate">Updating mapping of Tag "{{mappingToUpdate.tag}}" for MT
+        "{{mappingToUpdate.mt}}"</p>
     <p *ngIf="!mappingToUpdate">Please fill in the details for the new mapping</p>
 
     <form (ngSubmit)="onSubmit()" class="form">

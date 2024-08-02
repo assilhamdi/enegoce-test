@@ -31,7 +31,6 @@ export type MtFieldMappingInput ={
     status: String
     tag: String
     fieldDescription: String
-    mappingRule: String
     databaseField: String
     entityName: String
     mt: String

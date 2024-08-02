@@ -6,7 +6,8 @@ import {
   GET_MAPPINGS, SORT_MAPPINGS_BY_ORDER, ADD_MT_MAPPING, UPDATE_MT_MAPPING,
   DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_ST, MAPPINGS_BY_FD,
   FIELD_BY_ENTITY, GET_MAPPING_RULE, UPDATE_MT_MAPPING_RULE,
-  GET_MAPPING_BY_ID
+  GET_MAPPING_BY_ID,
+  DELETE_MT_MAPPING_RULE
 } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
@@ -24,7 +25,7 @@ export class MappingService {
     );
   }
 
-  getMappingById(id: Number):Observable<MtFieldMapping>{
+  getMappingById(id: Number): Observable<MtFieldMapping> {
     return this.apollo.watchQuery<any>({
       query: GET_MAPPING_BY_ID,
       variables: {
@@ -88,7 +89,7 @@ export class MappingService {
     );
   }
 
-  updateMtFieldMappingRule(id: Number, fields: [String], delimiter: String, code: String): Observable<MtFieldMapping> {
+  updateMtFieldMappingRule(id: Number, fields: string[], delimiter: String, code: String): Observable<MtFieldMapping> {
     return this.apollo.mutate<any>({
       mutation: UPDATE_MT_MAPPING_RULE,
       variables: {
@@ -109,6 +110,17 @@ export class MappingService {
       refetchQueries: [{ query: GET_MAPPINGS }]
     }).pipe(
       map(result => result.data?.deleteFieldMapping ?? false)
+    );
+  }
+
+  deleteMappingRule(id: number): Observable<any> {
+    return this.apollo.mutate<any>({
+      mutation: DELETE_MT_MAPPING_RULE,
+      variables: {
+        id: id
+      }
+    }).pipe(
+      map(result => result.data.deleteMappingRule)
     );
   }
 

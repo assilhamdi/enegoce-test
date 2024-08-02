@@ -1,5 +1,5 @@
 <h1>Mappings</h1>
-<button (click)="openDrawer()">Add Mapping</button>
+<button (click)="openMappingDrawer()">Add Mapping</button>
 <br> <!-- Line break for separation -->
 <button (click)="filterMappingsByMt()">Filter by MT</button>
 
@@ -27,13 +27,14 @@
 <br> <!-- Line break for separation -->
 
 
-<app-mapping-table-management-drawer 
-[isOpen]="isOpen" 
-[mappingToUpdate]="mappingToUpdate"
-(drawerStateChange)="handleDrawerStateChange($event)" 
-(mappingAdded)="refreshMappings()"
-(mappingUpdated)="refreshMappings()">
+<app-mapping-table-management-drawer [isOpen]="isMappingDrawerOpen" [mappingToUpdate]="mappingToUpdate"
+  (drawerStateChange)="handleDrawerStateChange($event)" (mappingAdded)="refreshMappings()"
+  (mappingUpdated)="refreshMappings()">
 </app-mapping-table-management-drawer>
+
+<app-mapping-rules-management-drawer [openForAdd]="isRulesDrawerOpen" [mappingToUpdate]="mappingToUpdate" (drawerStateChange)="handleDrawerStateChange($event)">
+
+</app-mapping-rules-management-drawer>
 
 <app-mapping-rules [mappingRule]="mappingRule" [tag]="tag" [mt]="mt"></app-mapping-rules>
 
@@ -67,9 +68,11 @@
       <td>{{ mapping.mt }}</td>
       <td>{{ mapping.fieldOrder }}</td>
       <td>
-        <button (click)="openDrawer(mapping)" >Edit</button>
+        <button (click)="openMappingDrawer(mapping)">Edit</button>
         <button (click)="deleteMapping(mapping.id)" disabled>Delete</button>
-        <button *ngIf="mapping.mappingRule" (click)="display(mapping.id)">Display Mapping Rules</button>
+        <button (click)="mapping.mappingRule ? display(mapping.id) : openRulesDrawer(mapping)">
+          {{ mapping.mappingRule ? 'Display Mapping Rules' : 'Add Mapping Rule' }}
+        </button>
       </td>
     </tr>
   </tbody>

@@ -148,18 +148,6 @@ public class MtFieldMappingService {
 
     //////////////////////Mapping rule handling////////////////////////
 
-    public MtFieldMapping updateMappingRule(Integer id, List<String> fields, String delimiter, String code) {
-        Optional<MtFieldMapping> optionalMapping = mappingRepo.findById(id);
-
-        if (optionalMapping.isPresent()) {
-            MtFieldMapping mtFieldMapping = optionalMapping.get();
-            mtFieldMapping.setMappingRule(constructMappingRule(fields, delimiter, code));
-            return mappingRepo.save(mtFieldMapping);
-        } else {
-            throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
-        }
-    }
-
     public String constructMappingRule(List<String> fields, String delimiter, String code) {
         StringBuilder mappingRule = new StringBuilder();
 
@@ -196,5 +184,28 @@ public class MtFieldMappingService {
         }
     }
 
+    public MtFieldMapping updateMappingRule(Integer id, List<String> fields, String delimiter, String code) {
+        Optional<MtFieldMapping> optionalMapping = mappingRepo.findById(id);
+
+        if (optionalMapping.isPresent()) {
+            MtFieldMapping mtFieldMapping = optionalMapping.get();
+            mtFieldMapping.setMappingRule(constructMappingRule(fields, delimiter, code));
+            return mappingRepo.save(mtFieldMapping);
+        } else {
+            throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
+        }
+    }
+
+    public boolean deleteMappingRule(Integer id) {
+        Optional<MtFieldMapping> optionalMapping = mappingRepo.findById(id);
+
+        if (optionalMapping.isPresent()) {
+            MtFieldMapping mtFieldMapping = optionalMapping.get();
+            mtFieldMapping.setMappingRule(null);
+            return true;
+        } else {
+            throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
+        }
+    }
 
 }

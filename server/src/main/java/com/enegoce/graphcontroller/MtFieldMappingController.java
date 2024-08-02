@@ -38,19 +38,11 @@ public class MtFieldMappingController {
     }
 
     @MutationMapping
-    public MtFieldMapping updateMappingRule(@Argument Integer id, @Argument List<String> fields, @Argument String delimiter, @Argument String code) {
-        return service.updateMappingRule(id, fields, delimiter, code);
-    }
-
-    @MutationMapping
     public boolean deleteFieldMapping(@Argument Integer id) {
         return service.deleteMtFieldMapping(id);
     }
 
-    @QueryMapping
-    public String getMappingRule(@Argument Integer id) {
-        return service.getMappingRuleById(id);
-    }
+
 
     ///////////////////////Filtering methods///////////////////////
     /////////////////////////////////////////////////////////////
@@ -110,5 +102,19 @@ public class MtFieldMappingController {
         return service.getFieldsForEntity(entityName);
     }
 
+    @QueryMapping
+    public String getMappingRule(@Argument Integer id) {
+        return service.getMappingRuleById(id);
+    }
+
+    @MutationMapping
+    public MtFieldMapping updateMappingRule(@Argument Integer id, @Argument List<String> fields, @Argument String delimiter, @Argument String code) {
+        return service.updateMappingRule(id, fields, delimiter, code);
+    }
+
+    @MutationMapping
+    public boolean deleteMappingRule(@Argument Integer id) {
+        return service.deleteMappingRule(id);
+    }
 
 }

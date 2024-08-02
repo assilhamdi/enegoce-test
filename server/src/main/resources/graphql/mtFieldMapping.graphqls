@@ -26,6 +26,7 @@ extend type Mutation {
     updateFieldMapping(id :Int!, input: MtFieldMappingInput!): MtFieldMapping
     deleteFieldMapping(id: Int!): Boolean
     updateMappingRule(id: Int!, fields: [String], delimiter: String, code: String): MtFieldMapping
+    deleteMappingRule(id: Int!): Boolean
 
 }
 

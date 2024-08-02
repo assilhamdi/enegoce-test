@@ -1,10 +1,18 @@
 <div *ngIf="mappingRule">
-    <h2>Mapping Rules of Tag {{ tag }} for MT {{ mt }}</h2>
-    <div *ngFor="let key of getKeys(mappingRule)">
-      <strong>{{ key }}:</strong> {{ mappingRule[key] }}
-    </div>
+
+  <app-mapping-rules-management-drawer [openForUp]="isRulesDrawerOpen" [mappingToUpdate]="mappingToUpdate"
+    (drawerStateChange)="handleDrawerStateChange($event)">
+  </app-mapping-rules-management-drawer>
+
+
+  <h2>Mapping Rules of Tag {{ tag }} for MT {{ mt }}</h2>
+  <div *ngFor="let key of getKeys(mappingRule)">
+    <strong>{{ key }}:</strong> {{ mappingRule[key] }}
   </div>
+
   <div *ngIf="!mappingRule">
     <p>No mapping rule selected</p>
   </div>
   <button (click)="clear()">Clear</button>
+  <button (click)="openRulesDrawer(mappingRule)">Update</button>
+</div>

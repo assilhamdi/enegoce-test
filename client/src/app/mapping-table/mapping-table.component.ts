@@ -15,7 +15,8 @@ export class MappingTableComponent implements OnInit {
   selectedSt: string = "";
   dfFilter: String = "";
   order: boolean = true;
-  isOpen: boolean = false;
+  isMappingDrawerOpen: boolean = false;
+  isRulesDrawerOpen: boolean = false;
   mappingToUpdate: MtFieldMapping | null = null; // Holds the mapping to update
   mappingRule: any;
   tag: String = "";
@@ -75,19 +76,31 @@ export class MappingTableComponent implements OnInit {
     });
   }
 
-  openDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
+  openMappingDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
     this.mappingToUpdate = mappingToUpdate; // Set the mapping to update if provided
-    this.isOpen = true;
+    this.isMappingDrawerOpen = true;
   }
 
 
-  closeDrawer(): void {
-    this.isOpen = false;
+  closeMappingDrawer(): void {
+    this.isMappingDrawerOpen = false;
+    this.mappingToUpdate = null; // Reset mapping to update
+  }
+
+  openRulesDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
+    this.mappingToUpdate = mappingToUpdate; // Set the mapping to update if provided
+    this.isRulesDrawerOpen = true;
+  }
+
+
+  closeRulesDrawer(): void {
+    this.isRulesDrawerOpen = false;
     this.mappingToUpdate = null; // Reset mapping to update
   }
 
   handleDrawerStateChange(isOpen: boolean): void {
-    this.isOpen = isOpen;
+    this.isMappingDrawerOpen = isOpen;
+    this.isRulesDrawerOpen = isOpen;
     if (!isOpen) {
       // If drawer is closed, reset mapping to update
       this.mappingToUpdate = null;

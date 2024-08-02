@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { MtFieldMapping } from '../../graphql/types';
 
 @Component({
   selector: 'app-mapping-rules',
@@ -10,6 +11,9 @@ export class MappingRulesComponent {
   @Input() mappingRule: any;
   @Input() tag: String = "";
   @Input() mt: String= "";
+
+  isRulesDrawerOpen: boolean = false;
+  mappingToUpdate: MtFieldMapping | null = null;
   
   constructor() { }
 
@@ -23,6 +27,24 @@ export class MappingRulesComponent {
     this.mappingRule = null;
     this.tag = "";
     this.mt = "";
+  }
+
+  openRulesDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
+    this.mappingToUpdate = mappingToUpdate; // Set the mapping to update if provided
+    this.isRulesDrawerOpen = true;
+  }
+
+  closeRulesDrawer(): void {
+    this.isRulesDrawerOpen = false;
+    this.mappingToUpdate = null; // Reset mapping to update
+  }
+
+  handleDrawerStateChange(isOpen: boolean): void {
+    this.isRulesDrawerOpen = isOpen;
+    if (!isOpen) {
+      // If drawer is closed, reset mapping to update
+      this.mappingToUpdate = null;
+    }
   }
 
 }

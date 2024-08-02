@@ -77,6 +77,12 @@ const UPDATE_MT_MAPPING_RULE = gql`
   }
 `;
 
+const DELETE_MT_MAPPING_RULE = gql`
+  mutation DeleteMappingRule($id: Int!) {
+    deleteMappingRule(id: $id)
+  }
+`;
+
 const DELETE_MT_MAPPING = gql`
   mutation DeleteMtMapping($id: Int!) {
     deleteFieldMapping(id: $id)
@@ -175,5 +181,5 @@ export {
   GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER,
   UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS,
   MAPPINGS_BY_FD, MAPPINGS_BY_ST, FIELD_BY_ENTITY, GET_MAPPING_RULE,
-  UPDATE_MT_MAPPING_RULE, GET_MAPPING_BY_ID
+  UPDATE_MT_MAPPING_RULE, GET_MAPPING_BY_ID, DELETE_MT_MAPPING_RULE
 }
