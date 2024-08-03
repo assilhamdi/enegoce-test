@@ -29,7 +29,10 @@ export class MappingTableManagementDrawerComponent implements OnInit {
     entityName: '',
     mt: '',
     fieldOrder: 0,
-  };
+    fields: [],
+    delimiter: '', 
+    code: ''
+};
 
   constructor(private mappingService: MappingService) { }
 
@@ -120,14 +123,17 @@ export class MappingTableManagementDrawerComponent implements OnInit {
 
   resetForm() {
     this.newMapping = {
-      status: '',
-      tag: '',
-      fieldDescription: '',
-      databaseField: '',
-      entityName: '',
-      mt: '',
-      fieldOrder: 0,
+        status: '',
+        tag: '',
+        fieldDescription: '',
+        databaseField: '',
+        entityName: '',
+        mt: '',
+        fieldOrder: 0,
+        fields: [], 
+        delimiter: '', 
+        code: '' 
     };
-  }
+}
 
 }

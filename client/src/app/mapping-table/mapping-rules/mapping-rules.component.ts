@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MtFieldMapping } from '../../graphql/types';
 
 @Component({
@@ -6,18 +6,19 @@ import { MtFieldMapping } from '../../graphql/types';
   templateUrl: './mapping-rules.component.html',
   styleUrl: './mapping-rules.component.css'
 })
-export class MappingRulesComponent {
+export class MappingRulesComponent implements OnInit {
 
   @Input() mappingRule: any;
-  @Input() tag: String = "";
-  @Input() mt: String= "";
+  @Input() mapping: any;
+  @Output() mappingUpdated = new EventEmitter<MtFieldMapping | null>();
 
   isRulesDrawerOpen: boolean = false;
   mappingToUpdate: MtFieldMapping | null = null;
   
   constructor() { }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+   }
 
   getKeys(obj: any): string[] {
     return Object.keys(obj);
@@ -25,13 +26,13 @@ export class MappingRulesComponent {
 
   clear(): void {
     this.mappingRule = null;
-    this.tag = "";
-    this.mt = "";
   }
 
   openRulesDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
     this.mappingToUpdate = mappingToUpdate; // Set the mapping to update if provided
     this.isRulesDrawerOpen = true;
+    console.log('Opening drawer with:', mappingToUpdate);
+    this.mappingUpdated.emit(this.mappingToUpdate);
   }
 
   closeRulesDrawer(): void {

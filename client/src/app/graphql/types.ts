@@ -16,23 +16,26 @@ export type InfoDeal={
 }
 
 export type MtFieldMapping ={
-    id: Number
-    status: String
-    databaseField: String
-    tag: String
-    fieldDescription: String
-    entityName: String
-    mappingRule: String
-    mt: String
-    fieldOrder: Number
+    id: number
+    status: string
+    databaseField: string
+    tag: string
+    fieldDescription: string
+    entityName: string
+    mappingRule: string
+    mt: string
+    fieldOrder: number
 }
 
-export type MtFieldMappingInput ={
-    status: String
-    tag: String
-    fieldDescription: String
-    databaseField: String
-    entityName: String
-    mt: String
-    fieldOrder: Number
+export type MtFieldMappingInput = {
+    status: string;
+    tag: string;
+    fieldDescription: string;
+    databaseField: string;
+    entityName: string;
+    mt: string;
+    fieldOrder: number;
+    fields: string[];
+    delimiter: string;
+    code: string; 
 }

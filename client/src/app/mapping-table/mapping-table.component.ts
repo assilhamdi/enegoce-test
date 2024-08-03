@@ -25,6 +25,7 @@ export class MappingTableComponent implements OnInit {
   @Output() mappingRuleFetched = new EventEmitter<any>();
   @Output() tagFetched = new EventEmitter<String>();
   @Output() mtFetched = new EventEmitter<String>();
+  @Output() mappingFetched = new EventEmitter<any>();
 
 
   constructor(private mappingService: MappingService) { }
@@ -188,13 +189,26 @@ export class MappingTableComponent implements OnInit {
     );
   }
 
-  fetchDetails(id: Number) {
+  /*fetchDetails(id: Number) {
     this.mappingService.getMappingById(id).subscribe(
       (mapping) => {
         this.tag = mapping.tag;
         this.mt = mapping.mt;
         this.tagFetched.emit(this.tag);
         this.mtFetched.emit(this.mt);
+      },
+      (error) => {
+        console.error('Error fetching mapping:', error);
+      }
+    )
+  }*/
+
+  fetchDetails(id: Number) {
+    this.mappingService.getMappingById(id).subscribe(
+      (mapping) => {
+        this.mappingToUpdate = mapping;
+        this.mappingFetched.emit(mapping);
+        console.log('displaying fetched mapping :',mapping);
       },
       (error) => {
         console.error('Error fetching mapping:', error);
