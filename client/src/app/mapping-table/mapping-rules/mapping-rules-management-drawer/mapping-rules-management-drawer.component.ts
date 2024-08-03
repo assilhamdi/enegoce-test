@@ -88,26 +88,65 @@ export class MappingRulesManagementDrawerComponent implements OnInit, OnChanges 
       this.newMapping.entityName = this.mappingToUpdate.entityName ?? '';
       this.newMapping.mt = this.mappingToUpdate.mt ?? '';
       this.newMapping.fieldOrder = this.mappingToUpdate.fieldOrder ?? 0;
-
-      this.mappingService.getFieldByEntity(this.newMapping.entityName).subscribe(fields => {
-        this.fields = [fields];
-        if (this.mappingToUpdate?.mappingRule) {
-          this.selectedFields = this.parseMappingRule(this.mappingToUpdate.mappingRule);
-        } else {
-          this.selectedFields = [{ entityName: '', databaseField: '' }];
+  
+      if (this.mappingToUpdate.mappingRule) {
+        let mappingRuleString = this.mappingToUpdate.mappingRule.trim();
+        
+        // Remove leading and trailing quotes if they exist
+        if ((mappingRuleString.startsWith('"') && mappingRuleString.endsWith('"')) ||
+            (mappingRuleString.startsWith("'") && mappingRuleString.endsWith("'"))) {
+          mappingRuleString = mappingRuleString.substring(1, mappingRuleString.length - 1);
         }
-      });
+  
+        try {
+          const parsedRule = JSON.parse(mappingRuleString);
+          this.newMapping.delimiter = parsedRule.delimiter ?? '';
+          this.newMapping.code = parsedRule.code ?? '';
+          this.selectedFields = parsedRule.fields.map((field: string) => {
+            const [entityName, databaseField] = field.split('.');
+            return { entityName, databaseField };
+          });
+  
+          // Fetch fields for each entity and populate this.fields accordingly
+          this.fields = [];
+          this.selectedFields.forEach((field, index) => {
+            this.mappingService.getFieldByEntity(field.entityName).subscribe(fields => {
+              this.fields[index] = fields;
+              const matchingField = fields.find(f => f === field.databaseField);
+              if (matchingField) {
+                this.selectedFields[index].databaseField = matchingField;
+              }
+            });
+          });
+        } catch (error) {
+          console.error('Error parsing mappingRule:', error);
+        }
+      }
     } else {
       this.resetForm();
     }
   }
+  
 
   parseMappingRule(mappingRule: string): SelectedField[] {
-    const parsedRule = JSON.parse(mappingRule);
-    return parsedRule.fields.map((field: string) => {
-      const [entityName, databaseField] = field.split('.');
-      return { entityName, databaseField };
-    });
+    // Trim whitespace and remove surrounding quotes
+    let sanitizedMappingRule = mappingRule.trim();
+    if ((sanitizedMappingRule.startsWith('"') && sanitizedMappingRule.endsWith('"')) ||
+        (sanitizedMappingRule.startsWith("'") && sanitizedMappingRule.endsWith("'"))) {
+      sanitizedMappingRule = sanitizedMappingRule.substring(1, sanitizedMappingRule.length - 1);
+      console.log("newruole:",sanitizedMappingRule );
+    }
+  
+    try {
+      const parsedRule = JSON.parse(sanitizedMappingRule);
+      return parsedRule.fields.map((field: string) => {
+        const [entityName, databaseField] = field.split('.');
+        return { entityName, databaseField };
+      });
+    } catch (error) {
+      console.error('Error parsing mappingRule:', error);
+      return [];
+    }
   }
 
   onSubmit() {

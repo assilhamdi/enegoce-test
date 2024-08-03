@@ -1,37 +1,36 @@
 <div class="drawer" [class.open]="openForAdd || openForUp">
-    <p *ngIf="mappingToUpdate && openForAdd ">Adding a mapping rule of Tag "{{mappingToUpdate.tag}}" for MT
-        "{{mappingToUpdate.mt}}"</p>
-    <p *ngIf="mappingToUpdate && openForUp">Updating the mapping rule of Tag "{{mappingToUpdate.tag}}" for MT
-        "{{mappingToUpdate.mt}}"</p>
-
-        <form (ngSubmit)="onSubmit()" class="form">
-        <!-- Dynamic Entity Name and Fields Selection -->
-        <div class="form-group" *ngFor="let field of selectedFields; let i = index">
-            <label for="entityName-{{i}}">Entity Name {{i + 1}}</label>
-            <select id="entityName-{{i}}" [(ngModel)]="selectedFields[i].entityName" name="entityName-{{i}}" (change)="onEntityChange(i, $event)">
-                <option *ngFor="let entity of entities" [value]="entity">{{ entity }}</option>
-            </select>
-            <label for="databaseField-{{i}}">Database Field {{i + 1}}</label>
-            <select id="databaseField-{{i}}" [(ngModel)]="selectedFields[i].databaseField" name="databaseField-{{i}}">
-                <option *ngFor="let field of fields[i]" [value]="field">{{ field }}</option>
-            </select>
-            <button type="button" (click)="removeField(i)" class="remove-btn">-</button>
-            <button type="button" (click)="addField()" *ngIf="i === selectedFields.length - 1" class="add-btn">+</button>
-        </div>
-            <!-- Delimiter -->
-            <div class="form-group">
-                <label for="delimiter">Delimiter</label>
-                <input type="text" id="delimiter" name="delimiter" [(ngModel)]="newMapping.delimiter">
-            </div>
-            <!-- Code -->
-            <div class="form-group">
-                <label for="code">Code</label>
-                <input type="text" id="code" name="code" [(ngModel)]="newMapping.code">
-            </div>
-            <!-- Buttons -->
-            <div class="buttons-container">
-                <button type="submit" class="submit-btn">{{ mappingToUpdate ? 'Update' : 'Submit' }}</button>
-                <button type="button" (click)="closeDrawer()" class="back-btn">Back</button>
-            </div>
-        </form>
-</div>
+    <p *ngIf="mappingToUpdate && openForAdd">Adding a mapping rule of Tag "{{mappingToUpdate.tag}}" for MT "{{mappingToUpdate.mt}}"</p>
+    <p *ngIf="mappingToUpdate && openForUp">Updating the mapping rule of Tag "{{mappingToUpdate.tag}}" for MT "{{mappingToUpdate.mt}}"</p>
+  
+    <form (ngSubmit)="onSubmit()" class="form">
+      <!-- Dynamic Entity Name and Fields Selection -->
+      <div class="form-group" *ngFor="let field of selectedFields; let i = index">
+        <label for="entityName-{{i}}">Entity Name {{i + 1}}</label>
+        <select id="entityName-{{i}}" [(ngModel)]="selectedFields[i].entityName" name="entityName-{{i}}" (change)="onEntityChange(i, $event)">
+          <option *ngFor="let entity of entities" [value]="entity">{{ entity }}</option>
+        </select>
+        <label for="databaseField-{{i}}">Database Field {{i + 1}}</label>
+        <select id="databaseField-{{i}}" [(ngModel)]="selectedFields[i].databaseField" name="databaseField-{{i}}">
+          <option *ngFor="let field of fields[i]" [value]="field">{{ field }}</option>
+        </select>
+        <button type="button" (click)="removeField(i)" class="remove-btn">-</button>
+        <button type="button" (click)="addField()" *ngIf="i === selectedFields.length - 1" class="add-btn">+</button>
+      </div>
+      <!-- Delimiter -->
+      <div class="form-group">
+        <label for="delimiter">Delimiter</label>
+        <input type="text" id="delimiter" name="delimiter" [(ngModel)]="newMapping.delimiter">
+      </div>
+      <!-- Code -->
+      <div class="form-group">
+        <label for="code">Code</label>
+        <input type="text" id="code" name="code" [(ngModel)]="newMapping.code">
+      </div>
+      <!-- Buttons -->
+      <div class="buttons-container">
+        <button type="submit" class="submit-btn">{{ mappingToUpdate ? 'Update' : 'Submit' }}</button>
+        <button type="button" (click)="closeDrawer()" class="back-btn">Back</button>
+      </div>
+    </form>
+  </div>
+  
