@@ -8,15 +8,8 @@ extend type Query {
 
     ###Filtering
     mappingsByMt(mt: String!): [MtFieldMapping]
-    mappingsByFD(fieldDescription: String!): [MtFieldMapping]
-    mappingsByDF(dbField: String!): [MtFieldMapping]
+    findByFilter(filter: String!): [MtFieldMapping]
     mappingsByST(status: String!): [MtFieldMapping]
-
-    ###Sorting
-    orderMappingsByFO(order: Boolean): [MtFieldMapping]
-    orderMappingsByDF(order: Boolean): [MtFieldMapping]
-    orderMappingsByST(order: Boolean): [MtFieldMapping]
-    orderMappingsByFD(order: Boolean): [MtFieldMapping]
 
 }
 

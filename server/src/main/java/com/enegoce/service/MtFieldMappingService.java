@@ -22,73 +22,13 @@ public class MtFieldMappingService {
     private MtFieldMappingRepository mappingRepo;
 
     public List<MtFieldMapping> mappings() {
-        return mappingRepo.findAll();
+        return mappingRepo.findAllOrderedByMtAndFieldOrder();
     }
 
     public MtFieldMapping mappingById(Integer id) {
         Optional<MtFieldMapping> mapping = mappingRepo.findById(id);
         return mapping.orElse(null);
     }
-    ///////////////////////Filtering methods///////////////////////
-    /////////////////////////////////////////////////////////////
-
-    public List<MtFieldMapping> mappingsByMt(String mt) {
-        return mappingRepo.findByMt(mt);
-    }
-
-    public List<String> mts() {
-        return mappingRepo.findDistinctMtValues();
-    }
-
-    public List<MtFieldMapping> mappingsByFD(String fieldDescription) {
-        return mappingRepo.findByFieldDescriptionContainingIgnoreCase(fieldDescription);
-    }
-
-    public List<MtFieldMapping> mappingsByDF(String dbField) {
-        return mappingRepo.findByDatabaseFieldContainingIgnoreCase(dbField);
-    }
-
-    public List<MtFieldMapping> mappingsByST(char status) {
-        return mappingRepo.findByStatus(status);
-    }
-
-    ///////////////////////Sorting methods///////////////////////
-    /////////////////////////////////////////////////////////////
-
-    public List<MtFieldMapping> orderMappingsByFO(boolean order) {
-        if (order) {
-            return mappingRepo.findAllByOrderByFieldOrderAsc();
-        } else {
-            return mappingRepo.findAllByOrderByFieldOrderDesc();
-        }
-    }
-
-    public List<MtFieldMapping> orderMappingsByDF(boolean order) {
-        if (order) {
-            return mappingRepo.findAllByOrderByDatabaseFieldAsc();
-        } else {
-            return mappingRepo.findAllByOrderByDatabaseFieldDesc();
-        }
-    }
-
-    public List<MtFieldMapping> orderMappingsByST(boolean order) {
-        if (order) {
-            return mappingRepo.findAllByOrderByStatusAsc();
-        } else {
-            return mappingRepo.findAllByOrderByStatusDesc();
-        }
-    }
-
-    public List<MtFieldMapping> orderMappingsByFD(boolean order) {
-        if (order) {
-            return mappingRepo.findAllByOrderByFieldDescriptionAsc();
-        } else {
-            return mappingRepo.findAllByOrderByFieldDescriptionDesc();
-        }
-    }
-
-
-    /////////////////////////////////////////////////////////////
 
     public MtFieldMapping createMtFieldMapping(MtFieldMappingInput input) {
         MtFieldMapping mtFieldMapping = new MtFieldMapping();
@@ -135,6 +75,25 @@ public class MtFieldMappingService {
         } else {
             throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
         }
+    }
+
+    ///////////////////////Filtering methods///////////////////////
+    /////////////////////////////////////////////////////////////
+
+    public List<MtFieldMapping> mappingsByMt(String mt) {
+        return mappingRepo.findByMtOrderByFieldOrderAsc(mt);
+    }
+
+    public List<String> mts() {
+        return mappingRepo.findDistinctMtValues();
+    }
+
+    public List<MtFieldMapping> findByFilter(String filter) {
+        return mappingRepo.findByFilter(filter);
+    }
+
+    public List<MtFieldMapping> mappingsByST(char status) {
+        return mappingRepo.findByStatusOrderedByMtAndFieldOrder(status);
     }
 
     //////////////////////Inputs handling////////////////////////
@@ -202,6 +161,7 @@ public class MtFieldMappingService {
         if (optionalMapping.isPresent()) {
             MtFieldMapping mtFieldMapping = optionalMapping.get();
             mtFieldMapping.setMappingRule(null);
+            this.updateMtFieldMapping(id, mtFieldMapping);
             return true;
         } else {
             throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");

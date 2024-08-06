@@ -23,7 +23,7 @@ public class MtFieldMappingController {
     }
 
     @QueryMapping
-    public MtFieldMapping getMappingById (@Argument Integer id) {
+    public MtFieldMapping getMappingById(@Argument Integer id) {
         return service.mappingById(id);
     }
 
@@ -42,8 +42,6 @@ public class MtFieldMappingController {
         return service.deleteMtFieldMapping(id);
     }
 
-
-
     ///////////////////////Filtering methods///////////////////////
     /////////////////////////////////////////////////////////////
 
@@ -58,41 +56,13 @@ public class MtFieldMappingController {
     } //For populating Select
 
     @QueryMapping
-    List<MtFieldMapping> mappingsByFD(@Argument String fieldDescription) {
-        return service.mappingsByFD(fieldDescription);
-    }
-
-    @QueryMapping
-    List<MtFieldMapping> mappingsByDF(@Argument String dbField) {
-        return service.mappingsByDF(dbField);
+    List<MtFieldMapping> findByFilter(@Argument String filter) {
+        return service.findByFilter(filter);
     }
 
     @QueryMapping
     List<MtFieldMapping> mappingsByST(@Argument char status) {
         return service.mappingsByST(status);
-    }
-
-    ///////////////////////Sorting methods///////////////////////
-    /////////////////////////////////////////////////////////////
-
-    @QueryMapping
-    public List<MtFieldMapping> orderMappingsByFO(@Argument boolean order) {
-        return service.orderMappingsByFO(order);
-    }
-
-    @QueryMapping
-    public List<MtFieldMapping> orderMappingsByDF(@Argument boolean order) {
-        return service.orderMappingsByDF(order);
-    }
-
-    @QueryMapping
-    public List<MtFieldMapping> orderMappingsByST(@Argument boolean order) {
-        return service.orderMappingsByST(order);
-    }
-
-    @QueryMapping
-    public List<MtFieldMapping> orderMappingsByFD(@Argument boolean order) {
-        return service.orderMappingsByFD(order);
     }
 
     //////////////////////Inputs handling////////////////////////
