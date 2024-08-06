@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MtFieldMapping } from '../../graphql/types';
+import { MappingService } from '../../services/mapping/mapping.service';
 
 @Component({
   selector: 'app-mapping-rules',
@@ -15,9 +16,10 @@ export class MappingRulesComponent implements OnInit {
   isRulesDrawerOpen: boolean = false;
   mappingToUpdate: MtFieldMapping | null = null;
   
-  constructor() { }
+  constructor(private mappingService: MappingService) { }
 
   ngOnInit(): void {
+
    }
 
   getKeys(obj: any): string[] {
@@ -26,12 +28,14 @@ export class MappingRulesComponent implements OnInit {
 
   clear(): void {
     this.mappingRule = null;
+    this.mappingToUpdate = null;
+    this.mapping=null;
+    console.log("current mapping : ",this.mapping);
   }
 
   openRulesDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
     this.mappingToUpdate = mappingToUpdate; // Set the mapping to update if provided
     this.isRulesDrawerOpen = true;
-    console.log('Opening drawer with:', mappingToUpdate);
     this.mappingUpdated.emit(this.mappingToUpdate);
   }
 
@@ -45,6 +49,35 @@ export class MappingRulesComponent implements OnInit {
     if (!isOpen) {
       // If drawer is closed, reset mapping to update
       this.mappingToUpdate = null;
+    }
+  }
+
+  delimiterFormatter(value: string): string {
+    if (value === '') {
+      return '[empty]'; // Placeholder for empty string
+    } else if (typeof value === 'string') {
+      let formattedValue = value.replace(/\n/g, '[new-line]'); //Replacing spaces
+      formattedValue = formattedValue.replace(/ /g, '[space]'); //Replacing new lines
+      return formattedValue;
+    }
+    return value;
+  }
+
+  deleteMappingRule(id: number | undefined): void {
+    if (id !== undefined) {
+      this.mappingService.deleteMappingRule(id).subscribe(
+        success => {
+          if (success) {
+            console.log('Mapping deleted successfully');
+            this.mappingRule = null;
+          } else {
+            console.error('Failed to delete mapping rule');
+          }
+        },
+        error => {
+          console.error('Error deleting mapping rule:', error);
+        }
+      );
     }
   }
 

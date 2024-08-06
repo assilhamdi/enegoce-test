@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, EventEmitter, Output, SimpleChanges } from '@angular/core';
 import { MtFieldMapping } from '../graphql/types';
 import { MappingService } from '../services/mapping/mapping.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-mapping-table',
@@ -13,7 +14,7 @@ export class MappingTableComponent implements OnInit {
   distinctMtValues: string[] = [];
   selectedMt: string = "";
   selectedSt: string = "";
-  dfFilter: String = "";
+  filter: String = "";
   order: boolean = true;
   isMappingDrawerOpen: boolean = false;
   isRulesDrawerOpen: boolean = false;
@@ -21,6 +22,8 @@ export class MappingTableComponent implements OnInit {
   mappingRule: any;
   tag: String = "";
   mt: String = "";
+
+  private filterSubject: Subject<string> = new Subject<string>();
 
   @Output() mappingRuleFetched = new EventEmitter<any>();
   @Output() tagFetched = new EventEmitter<String>();
@@ -33,6 +36,13 @@ export class MappingTableComponent implements OnInit {
   ngOnInit(): void {
     this.fetchMappings();
     this.fetchUniqueMts();
+
+    this.filterSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(filterValue => {
+      this.filterMappings();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -58,23 +68,11 @@ export class MappingTableComponent implements OnInit {
     this.mappingService.getUniqueMts().subscribe(
       mts => {
         this.distinctMtValues = mts;
-        console.log('Distinct MT values:', this.distinctMtValues);
       },
       error => {
         console.error('Error fetching unique MTs:', error);
       }
     );
-  }
-
-  sortByOrder(order: boolean) {
-    this.mappingService.orderMappingsByFO(order).subscribe({
-      next: mappings => {
-        this.mappings = mappings;
-      },
-      error: error => {
-        console.error('Error fetching mappings:', error);
-      }
-    });
   }
 
   openMappingDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
@@ -159,20 +157,26 @@ export class MappingTableComponent implements OnInit {
     );
   }
 
-  filterMappingsByDf(): void {
-    this.mappingService.MappingsByFD(this.dfFilter).subscribe(
+  filterMappings(): void {
+    this.mappingService.findByFilter(this.filter).subscribe(
       mappings => {
         this.mappings = mappings;
       },
       error => {
-        console.error('Error fetching mappings by Database Field:', error);
+        console.error('Error fetching mappings by filter:', error);
       }
     );
+  }
+
+  onFilterChange(value: string): void {
+    this.filterSubject.next(value);
   }
 
   resetFilter(): void {
     // Reset the selected MT and show all mappings
     this.selectedMt = 'All';
+    this.selectedSt = '';
+    this.filter ='';
     this.fetchMappings();
   }
   
@@ -188,20 +192,6 @@ export class MappingTableComponent implements OnInit {
       }
     );
   }
-
-  /*fetchDetails(id: Number) {
-    this.mappingService.getMappingById(id).subscribe(
-      (mapping) => {
-        this.tag = mapping.tag;
-        this.mt = mapping.mt;
-        this.tagFetched.emit(this.tag);
-        this.mtFetched.emit(this.mt);
-      },
-      (error) => {
-        console.error('Error fetching mapping:', error);
-      }
-    )
-  }*/
 
   fetchDetails(id: Number) {
     this.mappingService.getMappingById(id).subscribe(

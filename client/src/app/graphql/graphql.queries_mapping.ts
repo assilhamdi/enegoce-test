@@ -107,25 +107,6 @@ const GET_MAPPING_RULE = gql`
   }
 `;
 
-/////////////////// SORTING /////////////////
-/////////////////////////////////////////////
-
-const SORT_MAPPINGS_BY_ORDER = gql`
-  query OrderMappingsByFO($order: Boolean!) {
-    orderMappingsByFO(order: $order) {
-      id
-      status
-      databaseField
-      tag
-      fieldDescription
-      entityName
-      mappingRule
-      mt
-      fieldOrder
-    }
-  }
-`;
-
 ////////////////// FILTERING ////////////////
 /////////////////////////////////////////////
 
@@ -161,9 +142,9 @@ const MAPPINGS_BY_ST = gql`
   }
 `;
 
-const MAPPINGS_BY_FD = gql`
-  query MappingsByDbField($dbField: String!) {
-    mappingsByDF(dbField: $dbField) {
+const FILTER_MAPPINGS = gql`
+  query FindByFilter($filter: String!) {
+    findByFilter(filter: $filter) {
       id
       status
       databaseField
@@ -178,8 +159,8 @@ const MAPPINGS_BY_FD = gql`
 `;
 
 export {
-  GET_MAPPINGS, ADD_MT_MAPPING, SORT_MAPPINGS_BY_ORDER,
-  UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS,
-  MAPPINGS_BY_FD, MAPPINGS_BY_ST, FIELD_BY_ENTITY, GET_MAPPING_RULE,
+  GET_MAPPINGS, ADD_MT_MAPPING, FILTER_MAPPINGS,
+  UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, 
+  MAPPINGS_BY_ST, FIELD_BY_ENTITY, GET_MAPPING_RULE,
   UPDATE_MT_MAPPING_RULE, GET_MAPPING_BY_ID, DELETE_MT_MAPPING_RULE
 }

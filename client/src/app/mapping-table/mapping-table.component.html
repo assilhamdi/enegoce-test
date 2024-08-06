@@ -9,7 +9,7 @@
 </select>
 <button (click)="resetFilter()">Reset</button>
 
-<br> <!-- Line break for separation -->
+<br>
 
 <button (click)="filterMappingsBySt()">Filter by Status</button>
 <select [(ngModel)]="selectedSt">
@@ -18,13 +18,10 @@
 </select>
 <button (click)="resetFilter()">Reset</button>
 
-<br> <!-- Line break for separation -->
+<br>
 
-<button (click)="filterMappingsByDf()">Filter by db Field</button>
-<input [(ngModel)]="dfFilter">
+<input [(ngModel)]="filter" (ngModelChange)="filterMappings()" placeholder="Filter Mappings">
 <button (click)="resetFilter()">Reset</button>
-
-<br> <!-- Line break for separation -->
 
 
 <app-mapping-table-management-drawer [isOpen]="isMappingDrawerOpen" [mappingToUpdate]="mappingToUpdate"
@@ -48,12 +45,6 @@
       <th>Entity Name</th>
       <th>MT</th>
       <th>Field Order
-        <button (click)="sortByOrder(true)">
-          &uarr; <!-- Up arrow symbol -->
-        </button>
-        <button (click)="sortByOrder(false)">
-          &darr; <!-- Down arrow symbol -->
-        </button>
       </th>
       <th>Operations</th>
     </tr>

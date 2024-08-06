@@ -12,7 +12,7 @@ interface SelectedField {
   templateUrl: './mapping-rules-management-drawer.component.html',
   styleUrl: './mapping-rules-management-drawer.component.css'
 })
-export class MappingRulesManagementDrawerComponent implements OnInit, OnChanges {
+export class MappingRulesManagementDrawerComponent implements OnInit{
 
   @Input() openForAdd: boolean = false;
   @Input() openForUp: boolean = false;
@@ -39,33 +39,32 @@ export class MappingRulesManagementDrawerComponent implements OnInit, OnChanges 
   constructor(private mappingService: MappingService) { }
 
   ngOnInit(): void {
-    // Initialize form fields if mappingToUpdate is provided
-    this.initializeForm();
+    this.resetForm(); // Ensure form is reset on initialization
+    console.log("current mapping : ",this.newMapping);
   }
-
+  
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['mappingToUpdate'] && changes['mappingToUpdate'].currentValue) {
+      this.initializeForm();
+    }
+  }
+  
   openDrawerForAdd() {
     this.openForAdd = true;
+    this.resetForm(); // Ensure form is reset when opening for add
   }
 
   openDrawerForUp() {
     this.openForUp = true;
+    this.initializeForm(); // Initialize form with data for update
   }
 
   closeDrawer() {
-    if (this.openForAdd) {
-      this.openForAdd = false;
-      this.drawerStateChange.emit(this.openForAdd);
-    }
-    if (this.openForUp) {
-      this.openForUp = false;
-      this.drawerStateChange.emit(this.openForUp);
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mappingToUpdate'] && !changes['mappingToUpdate'].firstChange) {
-      this.initializeForm();
-    }
+    this.openForAdd = false;
+    this.openForUp = false;
+    this.resetForm();    
+    console.log("current mapping : ",this.newMapping);
+    this.drawerStateChange.emit(false);
   }
 
   onEntityChange(index: number, event: Event): void {
@@ -81,23 +80,22 @@ export class MappingRulesManagementDrawerComponent implements OnInit, OnChanges 
 
   initializeForm(): void {
     if (this.mappingToUpdate) {
-      console.log('Initializing form with:', this.mappingToUpdate);
       this.newMapping.status = this.mappingToUpdate.status ?? '';
       this.newMapping.tag = this.mappingToUpdate.tag ?? '';
       this.newMapping.fieldDescription = this.mappingToUpdate.fieldDescription ?? '';
       this.newMapping.entityName = this.mappingToUpdate.entityName ?? '';
       this.newMapping.mt = this.mappingToUpdate.mt ?? '';
       this.newMapping.fieldOrder = this.mappingToUpdate.fieldOrder ?? 0;
-  
+
       if (this.mappingToUpdate.mappingRule) {
         let mappingRuleString = this.mappingToUpdate.mappingRule.trim();
-        
+
         // Remove leading and trailing quotes if they exist
         if ((mappingRuleString.startsWith('"') && mappingRuleString.endsWith('"')) ||
-            (mappingRuleString.startsWith("'") && mappingRuleString.endsWith("'"))) {
+          (mappingRuleString.startsWith("'") && mappingRuleString.endsWith("'"))) {
           mappingRuleString = mappingRuleString.substring(1, mappingRuleString.length - 1);
         }
-  
+
         try {
           const parsedRule = JSON.parse(mappingRuleString);
           this.newMapping.delimiter = parsedRule.delimiter ?? '';
@@ -106,7 +104,7 @@ export class MappingRulesManagementDrawerComponent implements OnInit, OnChanges 
             const [entityName, databaseField] = field.split('.');
             return { entityName, databaseField };
           });
-  
+
           // Fetch fields for each entity and populate this.fields accordingly
           this.fields = [];
           this.selectedFields.forEach((field, index) => {
@@ -126,17 +124,17 @@ export class MappingRulesManagementDrawerComponent implements OnInit, OnChanges 
       this.resetForm();
     }
   }
-  
+
 
   parseMappingRule(mappingRule: string): SelectedField[] {
     // Trim whitespace and remove surrounding quotes
     let sanitizedMappingRule = mappingRule.trim();
     if ((sanitizedMappingRule.startsWith('"') && sanitizedMappingRule.endsWith('"')) ||
-        (sanitizedMappingRule.startsWith("'") && sanitizedMappingRule.endsWith("'"))) {
+      (sanitizedMappingRule.startsWith("'") && sanitizedMappingRule.endsWith("'"))) {
       sanitizedMappingRule = sanitizedMappingRule.substring(1, sanitizedMappingRule.length - 1);
-      console.log("newruole:",sanitizedMappingRule );
+      console.log("newruole:", sanitizedMappingRule);
     }
-  
+
     try {
       const parsedRule = JSON.parse(sanitizedMappingRule);
       return parsedRule.fields.map((field: string) => {
