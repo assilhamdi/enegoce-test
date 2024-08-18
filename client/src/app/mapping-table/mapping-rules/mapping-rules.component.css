@@ -1,0 +1,28 @@
+.rules-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .fields-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .fields-list li {
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .fields-list li:last-child {
+    border-bottom: none;
+  }
+  
+  .fields-list li:before {
+    content: "\2022"; /* Unicode character for a bullet point */
+    margin-right: 10px;
+    color: #666;
+  }

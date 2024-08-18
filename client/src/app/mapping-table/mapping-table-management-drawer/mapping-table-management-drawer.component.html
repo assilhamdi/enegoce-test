@@ -57,6 +57,7 @@
                 <label for="entityName">Entity Name</label>
                 <select id="entityName" [(ngModel)]="newMapping.entityName" (change)="onEntityChange($event)"
                     name="entityName">
+                    
                     <option *ngFor="let entity of entities" [value]="entity">{{ entity }}</option>
                 </select>
             </div>
@@ -65,6 +66,7 @@
             <div class="form-group">
                 <label for="databaseField">Database Field</label>
                 <select id="databaseField" [(ngModel)]="newMapping.databaseField" name="databaseField">
+                    <option value="" *ngIf="!newMapping.entityName">Select an Entity Name</option>
                     <option *ngFor="let field of dbFields" [value]="field">{{ field }}</option>
                 </select>
             </div>
@@ -85,6 +87,7 @@
                         <label for="mrDatabaseField-{{i}}">Database Field {{i + 1}}</label>
                         <select id="mrDatabaseField-{{i}}" [(ngModel)]="selectedFields[i].mrDatabaseField"
                             name="mrDatabaseField-{{i}}">
+                            <option value="" *ngIf="!selectedFields[i].mrEntityName">Select an Entity Name</option>
                             <option *ngFor="let field of mrFields[i]" [value]="field">{{ field }}</option>
                         </select>
                     </div>

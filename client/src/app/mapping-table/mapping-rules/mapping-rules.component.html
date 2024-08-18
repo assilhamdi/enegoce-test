@@ -1,8 +1,10 @@
 <div *ngIf="mappingRule">
-
   <h2>Mapping Rules of Tag {{ mapping?.tag }} for MT {{ mapping?.mt }}</h2>
-  <div *ngFor="let key of getKeys(mappingRule)">
-    <strong>{{ key }}:</strong> <span [innerHTML]="delimiterFormatter(mappingRule[key])"></span>
+  <div class="rules-container">
+    <div *ngFor="let key of getKeys(mappingRule)">
+      <strong>{{ key }}:</strong>
+      <span [innerHTML]="delimiterFormatter(mappingRule[key])"></span>
+    </div>
   </div>
-  <button (click)="clear()">Clear</button>
+  <button class="btn btn-primary" (click)="clear()">Clear</button>
 </div>

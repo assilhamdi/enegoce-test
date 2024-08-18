@@ -14,9 +14,8 @@ export class MappingRulesComponent implements OnInit {
   @Output() mappingUpdated = new EventEmitter<MtFieldMapping | null>();
 
   isRulesDrawerOpen: boolean = false;
-  mappingToUpdate: MtFieldMapping | null = null;
   
-  constructor(private mappingService: MappingService) { }
+  constructor() { }
 
   ngOnInit(): void {
 
@@ -28,28 +27,8 @@ export class MappingRulesComponent implements OnInit {
 
   clear(): void {
     this.mappingRule = null;
-    this.mappingToUpdate = null;
     this.mapping=null;
     console.log("current mapping : ",this.mapping);
-  }
-
-  openRulesDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
-    this.mappingToUpdate = mappingToUpdate; // Set the mapping to update if provided
-    this.isRulesDrawerOpen = true;
-    this.mappingUpdated.emit(this.mappingToUpdate);
-  }
-
-  closeRulesDrawer(): void {
-    this.isRulesDrawerOpen = false;
-    this.mappingToUpdate = null; // Reset mapping to update
-  }
-
-  handleDrawerStateChange(isOpen: boolean): void {
-    this.isRulesDrawerOpen = isOpen;
-    if (!isOpen) {
-      // If drawer is closed, reset mapping to update
-      this.mappingToUpdate = null;
-    }
   }
 
   delimiterFormatter(value: string): string {

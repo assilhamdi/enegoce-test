@@ -210,6 +210,7 @@ export class MappingTableManagementDrawerComponent implements OnInit {
     this.selectedFields = [{ mrEntityName: '', mrDatabaseField: '' }];
     this.mrFields = [[]];
     this.mappingToUpdate = null;
+    this.mappingType = 'normal';
   }
 
   onMappingTypeChange(type: 'normal' | 'rules') {
@@ -234,6 +235,7 @@ export class MappingTableManagementDrawerComponent implements OnInit {
 
   closeDrawer() {
     this.isOpen = false;
+    this.resetForm();
     this.drawerStateChange.emit(this.isOpen);
   }
 
