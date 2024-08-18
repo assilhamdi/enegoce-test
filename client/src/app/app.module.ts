@@ -16,7 +16,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MappingTableComponent } from './mapping-table/mapping-table.component';
 import { MappingTableManagementDrawerComponent } from './mapping-table/mapping-table-management-drawer/mapping-table-management-drawer.component';
 import { MappingRulesComponent } from './mapping-table/mapping-rules/mapping-rules.component';
-import { MappingRulesManagementDrawerComponent } from './mapping-table/mapping-rules/mapping-rules-management-drawer/mapping-rules-management-drawer.component';
 
 @NgModule({
   declarations: [
@@ -25,7 +24,6 @@ import { MappingRulesManagementDrawerComponent } from './mapping-table/mapping-r
     MappingTableComponent,
     MappingTableManagementDrawerComponent,
     MappingRulesComponent,
-    MappingRulesManagementDrawerComponent,
   ],
   imports: [
     BrowserModule,

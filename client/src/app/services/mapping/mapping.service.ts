@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { Apollo } from 'apollo-angular';
-import { Observable, filter, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
 import {
   GET_MAPPINGS, FILTER_MAPPINGS, ADD_MT_MAPPING, UPDATE_MT_MAPPING,
   DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_ST,
-  FIELD_BY_ENTITY, GET_MAPPING_RULE, UPDATE_MT_MAPPING_RULE,
+  FIELD_BY_ENTITY, GET_MAPPING_RULE,
   GET_MAPPING_BY_ID,
-  DELETE_MT_MAPPING_RULE
 } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
@@ -66,7 +65,7 @@ export class MappingService {
     );
   }
 
-  updateMtFieldMapping(id: Number, mapping: MtFieldMappingInput): Observable<MtFieldMapping> {
+  updateFieldMapping(id: Number, mapping: MtFieldMappingInput): Observable<MtFieldMapping> {
     return this.apollo.mutate<any>({
       mutation: UPDATE_MT_MAPPING,
       variables: {
@@ -78,20 +77,6 @@ export class MappingService {
     );
   }
 
-  updateMtFieldMappingRule(id: Number, fields: string[], delimiter: String, code: String): Observable<MtFieldMapping> {
-    return this.apollo.mutate<any>({
-      mutation: UPDATE_MT_MAPPING_RULE,
-      variables: {
-        id: id,
-        fields: fields,
-        delimiter: delimiter,
-        code: code
-      }
-    }).pipe(
-      map(result => result.data.updateMtFieldMappingRule)
-    );
-  }
-
   deleteFieldMapping(id: Number): Observable<boolean> {
     return this.apollo.mutate<{ deleteFieldMapping: boolean }>({
       mutation: DELETE_MT_MAPPING,
@@ -99,17 +84,6 @@ export class MappingService {
       refetchQueries: [{ query: GET_MAPPINGS }]
     }).pipe(
       map(result => result.data?.deleteFieldMapping ?? false)
-    );
-  }
-
-  deleteMappingRule(id: number): Observable<any> {
-    return this.apollo.mutate<any>({
-      mutation: DELETE_MT_MAPPING_RULE,
-      variables: {
-        id: id
-      }
-    }).pipe(
-      map(result => result.data.deleteMappingRule)
     );
   }
 

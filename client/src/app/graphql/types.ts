@@ -15,21 +15,23 @@ export type InfoDeal={
     addAmtCovered: String
 }
 
-export type MtFieldMapping ={
-    id: number
-    status: string
-    databaseField: string
-    tag: string
-    fieldDescription: string
-    entityName: string
-    mappingRule: string
-    mt: string
-    fieldOrder: number
+export type MtFieldMapping = {
+    id: number;
+    status: string;
+    tag: string;
+    fieldName: string;
+    fieldDescription: string;
+    databaseField: string;
+    entityName: string;
+    mt: string;
+    fieldOrder: number;
+    mappingRule: string;
 }
 
 export type MtFieldMappingInput = {
     status: string;
     tag: string;
+    fieldName: string;
     fieldDescription: string;
     databaseField: string;
     entityName: string;

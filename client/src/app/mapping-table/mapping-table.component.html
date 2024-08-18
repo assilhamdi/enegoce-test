@@ -29,35 +29,32 @@
   (mappingUpdated)="refreshMappings()">
 </app-mapping-table-management-drawer>
 
-<app-mapping-rules-management-drawer [openForAdd]="isRulesDrawerOpen" [mappingToUpdate]="mappingToUpdate" (drawerStateChange)="handleDrawerStateChange($event)">
-
-</app-mapping-rules-management-drawer>
-
 <app-mapping-rules [mappingRule]="mappingRule" [mapping]="mappingToUpdate"></app-mapping-rules>
 
 <table class="finance-table">
   <thead>
     <tr>
-      <th>Status</th>
-      <th>Database Field</th>
-      <th>Tag</th>
-      <th>Field Description</th>
-      <th>Entity Name</th>
       <th>MT</th>
-      <th>Field Order
-      </th>
+      <th>Field Order</th>
+      <th>Tag</th>
+      <th>Field Name</th>
+      <th>Status</th>
+      <th>Entity Name</th>
+      <th>Database Field</th>
+      <th>Field Description</th>
       <th>Operations</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let mapping of mappings">
-      <td>{{ mapping.status }}</td>
-      <td>{{ mapping.databaseField }}</td>
-      <td>{{ mapping.tag }}</td>
-      <td>{{ mapping.fieldDescription }}</td>
-      <td>{{ mapping.entityName }}</td>
       <td>{{ mapping.mt }}</td>
       <td>{{ mapping.fieldOrder }}</td>
+      <td>{{ mapping.tag }}</td>
+      <td>{{ mapping.fieldName }}</td>
+      <td>{{ mapping.status }}</td>
+      <td>{{ mapping.entityName }}</td>
+      <td>{{ mapping.databaseField }}</td>
+      <td>{{ mapping.fieldDescription }}</td>
       <td>
         <button (click)="openMappingDrawer(mapping)">Edit</button>
         <button (click)="deleteMapping(mapping.id)" disabled>Delete</button>

@@ -16,6 +16,8 @@ public class MtFieldMapping {
     @Column(name = "Tag")
     private String tag;
 
+    private String fieldName;
+
     private String fieldDescription;
 
     private String mappingRule;
@@ -28,14 +30,14 @@ public class MtFieldMapping {
 
     private Integer fieldOrder;
 
-
     public MtFieldMapping() {
     }
 
-    public MtFieldMapping(Integer id, char status, String tag, String fieldDescription, String mappingRule, String databaseField, String entityName, String mt, Integer fieldOrder) {
+    public MtFieldMapping(Integer id, char status, String tag, String fieldName, String fieldDescription, String mappingRule, String databaseField, String entityName, String mt, Integer fieldOrder) {
         this.id = id;
         this.status = status;
         this.tag = tag;
+        this.fieldName = fieldName;
         this.fieldDescription = fieldDescription;
         this.mappingRule = mappingRule;
         this.databaseField = databaseField;
@@ -66,6 +68,14 @@ public class MtFieldMapping {
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
     public String getFieldDescription() {
@@ -112,7 +122,7 @@ public class MtFieldMapping {
         return fieldOrder;
     }
 
-    public void setFieldOrder(Integer order) {
-        this.fieldOrder = order;
+    public void setFieldOrder(Integer fieldOrder) {
+        this.fieldOrder = fieldOrder;
     }
 }

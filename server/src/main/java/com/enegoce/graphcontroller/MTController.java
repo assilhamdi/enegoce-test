@@ -51,9 +51,9 @@ public class MTController {
         String response = null;
 
         if ("txt".equalsIgnoreCase(format)) {
-            mtFilePath = mtFilePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".txt";
+            mtFilePath = mtFilePath + "MT798" + "_With_" + mt + "_" + timestamp + ".txt";
         } else if ("xml".equalsIgnoreCase(format)) {
-            mtFilePath = mtFilePath + "/MT798" + "_With_" + mt + "_" + timestamp + ".xml";
+            mtFilePath = mtFilePath + "MT798" + "_With_" + mt + "_" + timestamp + ".xml";
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response).getBody();
         }

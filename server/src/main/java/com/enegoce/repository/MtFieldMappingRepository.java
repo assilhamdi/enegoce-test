@@ -26,6 +26,7 @@ public interface MtFieldMappingRepository extends JpaRepository<MtFieldMapping, 
     @Query("SELECT m FROM MtFieldMapping m " +
             "WHERE LOWER(m.tag) LIKE LOWER(CONCAT('%', :filter, '%')) " +
             "OR LOWER(m.fieldDescription) LIKE LOWER(CONCAT('%', :filter, '%')) " +
+            "OR LOWER(m.fieldName) LIKE LOWER(CONCAT('%', :filter, '%')) " +
             "OR LOWER(m.entityName) LIKE LOWER(CONCAT('%', :filter, '%')) " +
             "OR LOWER(m.databaseField) LIKE LOWER(CONCAT('%', :filter, '%')) " +
             "ORDER BY m.mt ASC, m.fieldOrder ASC")

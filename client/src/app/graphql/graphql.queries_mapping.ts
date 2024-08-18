@@ -9,6 +9,7 @@ const GET_MAPPINGS = gql`
         tag
         fieldDescription
         entityName
+        fieldName
         mappingRule
         mt
         fieldOrder
@@ -25,6 +26,7 @@ const GET_MAPPING_BY_ID = gql`
       tag
       fieldDescription
       entityName
+      fieldName
       mappingRule
       mt
       fieldOrder
@@ -33,16 +35,17 @@ const GET_MAPPING_BY_ID = gql`
 `;
 
 const ADD_MT_MAPPING = gql`
-  mutation CreateMtMapping($input: MtFieldMappingInput!) {
+  mutation AddMtMapping($input: MtFieldMappingInput!) {
     addMtFieldMapping(input: $input) {
-        status
-        databaseField
-        tag
-        fieldDescription
-        entityName
-        mappingRule
-        mt
-        fieldOrder
+      status
+      tag
+      fieldName
+      fieldDescription
+      databaseField
+      entityName
+      mt
+      fieldOrder
+      mappingRule
     }
   }
 `;
@@ -51,35 +54,15 @@ const UPDATE_MT_MAPPING = gql`
   mutation UpdateMtMapping($id: Int!, $input: MtFieldMappingInput!) {
     updateFieldMapping(id: $id, input: $input) {
       status
-      databaseField
       tag
+      fieldName
       fieldDescription
+      databaseField
       entityName
-      mappingRule
       mt
       fieldOrder
-    }
-  }
-`;
-
-const UPDATE_MT_MAPPING_RULE = gql`
-  mutation UpdateMappingRule($id: Int!, $fields: [String], $delimiter: String, $code: String) {
-    updateMappingRule(id: $id, fields: $fields, delimiter: $delimiter, code: $code) {
-      status
-      databaseField
-      tag
-      fieldDescription
-      entityName
       mappingRule
-      mt
-      fieldOrder
     }
-  }
-`;
-
-const DELETE_MT_MAPPING_RULE = gql`
-  mutation DeleteMappingRule($id: Int!) {
-    deleteMappingRule(id: $id)
   }
 `;
 
@@ -162,5 +145,5 @@ export {
   GET_MAPPINGS, ADD_MT_MAPPING, FILTER_MAPPINGS,
   UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, 
   MAPPINGS_BY_ST, FIELD_BY_ENTITY, GET_MAPPING_RULE,
-  UPDATE_MT_MAPPING_RULE, GET_MAPPING_BY_ID, DELETE_MT_MAPPING_RULE
+  GET_MAPPING_BY_ID
 }

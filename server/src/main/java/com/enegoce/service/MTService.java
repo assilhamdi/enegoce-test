@@ -149,24 +149,25 @@ public class MTService {
     private void processInfoDealForXml(XMLStreamWriter xmlWriter, InfoDeal infoDeal, Settlment latestSettlment, Transport latestTransport, List<MtFieldMapping> mappings) throws XMLStreamException {
         for (MtFieldMapping mapping : mappings) {
             String entityName = mapping.getEntityName();
-            String fieldName = mapping.getDatabaseField();
+            String databaseField = mapping.getDatabaseField();
             String mtTag = mapping.getTag();
             String mappingRule = mapping.getMappingRule();
+            String fieldName = mapping.getFieldName();
 
             if (mappingRule != null && !mappingRule.isEmpty()) {
-                processMappingRuleForXml(xmlWriter, mappingRule, mtTag, infoDeal, latestSettlment, latestTransport);
+                processMappingRuleForXml(xmlWriter, mappingRule, mtTag, fieldName, infoDeal, latestSettlment, latestTransport);
             } else {
-                if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
+                if (databaseField == null || entityName == null || databaseField.contains("//todo//") || entityName.contains("//todo//")) {
                     continue; // Temporary skip
                 }
 
-                String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                String getterMethodName = "get" + Character.toUpperCase(databaseField.charAt(0)) + databaseField.substring(1);
                 Object fieldValue = null;
 
                 try {
                     fieldValue = getFieldValue(entityName, getterMethodName, infoDeal, latestSettlment, latestTransport, null, null);
                 } catch (Exception e) {
-                    logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
+                    logger.error("Error accessing field " + databaseField + " in entity " + entityName, e);
                 }
 
                 if (fieldValue != null) {
@@ -176,10 +177,17 @@ public class MTService {
                     xmlWriter.writeStartElement("tag");
                     xmlWriter.writeCharacters(mtTag);
                     xmlWriter.writeEndElement(); // End tag
+
+                    xmlWriter.writeCharacters("\n\t\t"); // Add indentation for <field name> element
+                    xmlWriter.writeStartElement("fieldName");
+                    xmlWriter.writeCharacters(fieldName);
+                    xmlWriter.writeEndElement(); // End fieldName
+
                     xmlWriter.writeCharacters("\n\t\t"); // Add indentation for <value> element
                     xmlWriter.writeStartElement("value");
                     xmlWriter.writeCharacters(formatFieldValue(fieldValue));
                     xmlWriter.writeEndElement(); // End value
+
                     xmlWriter.writeCharacters("\n\t"); // Add indentation before closing </field>
                     xmlWriter.writeEndElement(); // End field
                     xmlWriter.writeCharacters("\n"); // Ensure new line after </field>
@@ -188,7 +196,7 @@ public class MTService {
         }
     }
 
-    private void processMappingRuleForXml(XMLStreamWriter xmlWriter, String mappingRule, String mtTag, InfoDeal infoDeal, Settlment latestSettlment, Transport latestTransport) {
+    private void processMappingRuleForXml(XMLStreamWriter xmlWriter, String mappingRule, String mtTag, String fieldName, InfoDeal infoDeal, Settlment latestSettlment, Transport latestTransport) {
         try {
             JSONObject ruleJson = new JSONObject(mappingRule);
             JSONArray fieldsArray = ruleJson.optJSONArray("fields");
@@ -227,10 +235,17 @@ public class MTService {
                     xmlWriter.writeStartElement("tag");
                     xmlWriter.writeCharacters(mtTag);
                     xmlWriter.writeEndElement(); // End tag
+
+                    xmlWriter.writeCharacters("\n\t\t"); // Add indentation for <field name> element
+                    xmlWriter.writeStartElement("fieldName");
+                    xmlWriter.writeCharacters(fieldName);
+                    xmlWriter.writeEndElement(); // End fieldName
+
                     xmlWriter.writeCharacters("\n\t\t"); // Add indentation for <value> element
                     xmlWriter.writeStartElement("value");
-                    xmlWriter.writeCharacters(combinedValue.toString());
+                    xmlWriter.writeCharacters(combinedValue.toString()); // Use combinedValue
                     xmlWriter.writeEndElement(); // End value
+
                     xmlWriter.writeCharacters("\n\t"); // Add indentation before closing </field>
                     xmlWriter.writeEndElement(); // End field
                     xmlWriter.writeCharacters("\n"); // Ensure new line after </field>
@@ -246,20 +261,20 @@ public class MTService {
     private boolean processInfoDeal(BufferedWriter writer, InfoDeal infoDeal, Settlment latestSettlment, Transport latestTransport, List<MtFieldMapping> mappings, String mt) throws IOException {
         for (MtFieldMapping mapping : mappings) {
             String entityName = mapping.getEntityName();
-            String fieldName = mapping.getDatabaseField();
+            String databaseField = mapping.getDatabaseField();
             String mtTag = mapping.getTag();
             String mappingRule = mapping.getMappingRule();
-            String fieldDescription = mapping.getFieldDescription();
+            String fieldName = mapping.getFieldName();
 
             if (mappingRule != null && !mappingRule.isEmpty()) {
-                processMappingRule(writer, mappingRule, mtTag, fieldDescription, infoDeal, latestSettlment, latestTransport);
+                processMappingRule(writer, mappingRule, mtTag, fieldName, infoDeal, latestSettlment, latestTransport);
             }
             //Specific fields handling//
             else if (mtTag.equals("27")) {
                 DealComment comment1 = dealService.commentByDealAndType(infoDeal.getId(), "47A");
                 DealComment comment2 = dealService.commentByDealAndType(infoDeal.getId(), "46B");
                 //Dynamic Sequence total
-                writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                writer.write(":" + mtTag + ": " + fieldName + "\r\n");
                 if (mt.equals("700")) {
                     if (comment1 != null || comment2 != null) {
                         writer.write("1/2" + "\r\n");
@@ -275,28 +290,28 @@ public class MTService {
                     }
                 }
             } else if (mtTag.equals("40E")) {
-                writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                writer.write(":" + mtTag + ": " + fieldName + "\r\n");
                 writer.write("UCP URR LATEST VERSION" + "\r\n");
 
             }
             /////////////////////////////
             else {
-                if (fieldName == null || entityName == null || fieldName.contains("//todo//") || entityName.contains("//todo//")) {
+                if (databaseField == null || entityName == null || databaseField.contains("//todo//") || entityName.contains("//todo//")) {
                     continue;
                 }
 
-                String getterMethodName = "get" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+                String getterMethodName = "get" + Character.toUpperCase(databaseField.charAt(0)) + databaseField.substring(1);
                 Object fieldValue = null;
 
                 try {
                     fieldValue = getFieldValue(entityName, getterMethodName, infoDeal, latestSettlment, latestTransport, null, null);
                 } catch (Exception e) {
-                    logger.error("Error accessing field " + fieldName + " in entity " + entityName, e);
+                    logger.error("Error accessing field " + databaseField + " in entity " + entityName, e);
                 }
 
 
                 if (fieldValue != null) {
-                    writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                    writer.write(":" + mtTag + ": " + fieldName + "\r\n");
                     writer.write(formatFieldValue(fieldValue) + "\r\n");
                 }
             }
@@ -304,7 +319,7 @@ public class MTService {
         return true;
     }
 
-    private void processMappingRule(BufferedWriter writer, String mappingRule, String mtTag, String fieldDescription, InfoDeal infoDeal, Settlment settlment, Transport transport) {
+    private void processMappingRule(BufferedWriter writer, String mappingRule, String mtTag, String fieldName, InfoDeal infoDeal, Settlment settlment, Transport transport) {
         try {
             JSONObject ruleJson = new JSONObject(mappingRule);
             JSONArray fieldsArray = ruleJson.optJSONArray("fields");
@@ -336,7 +351,7 @@ public class MTService {
                 }
 
                 if (!combinedValue.isEmpty()) {
-                    writer.write(":" + mtTag + ": " + fieldDescription + "\r\n");
+                    writer.write(":" + mtTag + ": " + fieldName + "\r\n");
                     writer.write(formatFieldValue(combinedValue) + "\r\n");
                 }
             }
@@ -399,7 +414,7 @@ public class MTService {
             Transport transport = dealService.latestTransportByDealId(dealId);
 
             if ("txt".equalsIgnoreCase(format)) {
-                writer.write("12:" + mt + "\r\n");
+                writer.write("12: Sub-Message Type" + mt + "\r\n");
                 return generateAndExportMtMessageWithWriter(infoDeal, settlment, transport, writer, mappings, mt);
             } else if ("xml".equalsIgnoreCase(format)) {
                 return generateAndExportMt798MessageWithXml(infoDeal, settlment, transport, writer, mappings, mt);
@@ -428,6 +443,10 @@ public class MTService {
             xmlWriter.writeCharacters("\n\t\t"); // Add indentation for <tag>
             xmlWriter.writeStartElement("tag");
             xmlWriter.writeCharacters("12");
+            xmlWriter.writeEndElement(); // End tag
+            xmlWriter.writeCharacters("\n\t\t"); // Add indentation for <tag>
+            xmlWriter.writeStartElement("fieldName");
+            xmlWriter.writeCharacters("Sub-Message Type");
             xmlWriter.writeEndElement(); // End tag
             xmlWriter.writeCharacters("\n\t\t"); // Add indentation for <value>
             xmlWriter.writeStartElement("value");

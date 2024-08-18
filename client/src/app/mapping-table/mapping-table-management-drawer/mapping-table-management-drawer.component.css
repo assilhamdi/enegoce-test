@@ -1,108 +1,144 @@
 .drawer {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 20px;
-    width: 300px;
-    box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100%;
-    overflow-y: auto;
-    z-index: 1000;
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .drawer.open {
-    transform: translateX(0);
-  }
-  
-  h2 {
-    margin-top: 0;
-    font-size: 1.5rem;
-    color: #333;
-  }
-  
-  .form-group {
-    margin-bottom: 15px;
-    width: 100%;
-  }
-  
-  label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
-  
-  .custom-label {
-    color: #000; /* Change color to match other labels */
-    font-size: 14px; /* Adjust font size as needed */
-    font-weight: bold; /* Adjust font weight as needed */
-    margin-bottom: 8px; /* Adjust margin as needed */
-  }
-  
-  .mat-form-field .mat-form-field-label {
-    font-weight: bold;
-    margin-bottom: 8px;
-    color: #000;
-    font-size: 14px;
-    line-height: 1.5;
-  }
-  
-  .mat-form-field {
-    width: 100%;
-  }
-  
-  .mat-datepicker-toggle {
-    top: calc(50% - 12px); /* Adjust vertical alignment if necessary */
-  }
-  
-  .mat-datepicker-content {
-    width: 100% !important; /* Force width to match other inputs */
-    box-sizing: border-box; /* Include padding and border in width calculation */
-  }
-  
-  
-  input[type="text"] {
-    width: calc(100% - 10px);
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-  }
-  
-  .buttons-container {
-    margin-top: auto; /* Pushes the buttons to the bottom */
-    margin-bottom: 25px;
-    display: flex;
-    justify-content: space-between;
-    height: 50px; /* Adjust the height as needed */
-    overflow-y: auto; /* Enable vertical scrolling if necessary */
-    display: flex;
-    justify-content: space-between;
-    align-items: center; /* Center the buttons vertically */
-  }
-  
-  .submit-btn,
-  .back-btn {
-    width: calc(50% - 5px);
-    padding: 8px 0;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-  }
-  
-  .submit-btn {
-    background-color: #007bff;
-    color: #fff;
-  }
-  
-  .back-btn {
-    background-color: #ccc;
-    color: #333;
-  }
-  
-  
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 20px;
+  width: 400px;
+  box-shadow: -4px 0 8px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  overflow: auto; /* Allows scrolling if content exceeds height */
+  z-index: 1000;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.custom-label {
+  color: #000;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.mat-form-field .mat-form-field-label {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #000;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.mat-form-field {
+  width: 100%;
+}
+
+.mat-datepicker-toggle {
+  top: calc(50% - 12px);
+}
+
+.mat-datepicker-content {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+input[type="text"], 
+input[type="number"], 
+textarea {
+  width: calc(100% - 10px);
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.dynamic-fields {
+  margin-top: 20px;
+  flex: 1; /* Allows this section to grow and take up available space */
+}
+
+.dynamic-fields .form-group {
+  margin-bottom: 10px;
+}
+
+.dynamic-fields button {
+  margin-top: 10px;
+  padding: 8px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: #fff;
+}
+
+.dynamic-fields button.remove-btn {
+  background-color: #dc3545;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto; /* Pushes the actions to the bottom */
+  padding: 10px 0;
+  border-top: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.actions button {
+  width: 48%; /* Adjusts button width to fit within the container */
+  padding: 8px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.actions button:first-child {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.actions button:last-child {
+  background-color: #ccc;
+  color: #333;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:focus {
+  outline: none;
+}
+
+.radio-label {
+  display: inline-block;
+  margin-right: 20px;
+}

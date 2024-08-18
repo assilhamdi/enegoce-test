@@ -6,7 +6,6 @@ import com.enegoce.entities.MtFieldMapping;
 import com.enegoce.entities.MtFieldMappingInput;
 import com.enegoce.repository.MtFieldMappingRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,30 +34,40 @@ public class MtFieldMappingService {
 
         mtFieldMapping.setStatus(input.status());
         mtFieldMapping.setTag(input.tag());
+        mtFieldMapping.setFieldName(input.fieldName());
         mtFieldMapping.setFieldDescription(input.fieldDescription());
-        mtFieldMapping.setMappingRule(null);
         mtFieldMapping.setDatabaseField(input.databaseField());
         mtFieldMapping.setEntityName(input.entityName());
         mtFieldMapping.setMt(input.mt());
         mtFieldMapping.setFieldOrder(input.fieldOrder());
+        mtFieldMapping.setMappingRule(constructMappingRule(
+                input.fields(),
+                input.delimiter(),
+                input.code()
+        ));
 
         return mappingRepo.save(mtFieldMapping);
     }
 
-    public MtFieldMapping updateMtFieldMapping(Integer id, MtFieldMapping input) {
+    public MtFieldMapping updateMtFieldMapping(Integer id, MtFieldMappingInput input) {
         Optional<MtFieldMapping> existingOpt = mappingRepo.findById(id);
 
         if (existingOpt.isPresent()) {
             MtFieldMapping existing = existingOpt.get();
 
-            existing.setStatus(input.getStatus());
-            existing.setTag(input.getTag());
-            existing.setFieldDescription(input.getFieldDescription());
-            existing.setMappingRule(input.getMappingRule());
-            existing.setDatabaseField(input.getDatabaseField());
-            existing.setEntityName(input.getEntityName());
-            existing.setMt(input.getMt());
-            existing.setFieldOrder(input.getFieldOrder());
+            existing.setStatus(input.status());
+            existing.setTag(input.tag());
+            existing.setFieldName(input.fieldName());
+            existing.setFieldDescription(input.fieldDescription());
+            existing.setDatabaseField(input.databaseField());
+            existing.setEntityName(input.entityName());
+            existing.setMt(input.mt());
+            existing.setFieldOrder(input.fieldOrder());
+            existing.setMappingRule(constructMappingRule(
+                    input.fields(),
+                    input.delimiter(),
+                    input.code()
+            ));
 
             return mappingRepo.save(existing);
         } else {
@@ -109,60 +118,50 @@ public class MtFieldMappingService {
 
     public String constructMappingRule(List<String> fields, String delimiter, String code) {
         StringBuilder mappingRule = new StringBuilder();
+        boolean hasContent = false;
 
-        mappingRule.append("{\"fields\": [");
+        mappingRule.append("{");
 
-        for (int i = 0; i < fields.size(); i++) {
-            mappingRule.append("\"").append(fields.get(i)).append("\"");
-            if (i < fields.size() - 1) {
-                mappingRule.append(",");
+        if (fields != null && !fields.isEmpty() && fields.stream().anyMatch(field -> !field.isEmpty())) {
+            hasContent = true;
+            mappingRule.append("\"fields\": [");
+            for (int i = 0; i < fields.size(); i++) {
+                if (!fields.get(i).isEmpty()) {
+                    mappingRule.append("\"").append(fields.get(i)).append("\"");
+                    if (i < fields.size() - 1 && !fields.get(i + 1).isEmpty()) {
+                        mappingRule.append(",");
+                    }
+                }
             }
+            mappingRule.append("]");
         }
 
-        mappingRule.append("]");
-
         if (delimiter != null && !delimiter.isEmpty()) {
-            mappingRule.append(",\"delimiter\": \"").append(delimiter).append("\"");
+            if (hasContent) {
+                mappingRule.append(",");
+            }
+            hasContent = true;
+            mappingRule.append("\"delimiter\": \"").append(delimiter).append("\"");
         }
 
         if (code != null && !code.isEmpty()) {
-            mappingRule.append(",\"code\": \"").append(code).append("\"");
+            if (hasContent) {
+                mappingRule.append(",");
+            }
+            hasContent = true;
+            mappingRule.append("\"code\": \"").append(code).append("\"");
         }
 
         mappingRule.append("}");
 
-        return mappingRule.toString();
+        return hasContent ? mappingRule.toString() : null;
     }
+
 
     public String getMappingRuleById(Integer id) {
         Optional<MtFieldMapping> optionalMapping = mappingRepo.findById(id);
         if (optionalMapping.isPresent()) {
             return optionalMapping.get().getMappingRule();
-        } else {
-            throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
-        }
-    }
-
-    public MtFieldMapping updateMappingRule(Integer id, List<String> fields, String delimiter, String code) {
-        Optional<MtFieldMapping> optionalMapping = mappingRepo.findById(id);
-
-        if (optionalMapping.isPresent()) {
-            MtFieldMapping mtFieldMapping = optionalMapping.get();
-            mtFieldMapping.setMappingRule(constructMappingRule(fields, delimiter, code));
-            return mappingRepo.save(mtFieldMapping);
-        } else {
-            throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
-        }
-    }
-
-    public boolean deleteMappingRule(Integer id) {
-        Optional<MtFieldMapping> optionalMapping = mappingRepo.findById(id);
-
-        if (optionalMapping.isPresent()) {
-            MtFieldMapping mtFieldMapping = optionalMapping.get();
-            mtFieldMapping.setMappingRule(null);
-            this.updateMtFieldMapping(id, mtFieldMapping);
-            return true;
         } else {
             throw new EntityNotFoundException("MtFieldMapping with id " + id + " not found");
         }

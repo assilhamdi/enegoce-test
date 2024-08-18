@@ -63,22 +63,4 @@ export class MappingRulesComponent implements OnInit {
     return value;
   }
 
-  deleteMappingRule(id: number | undefined): void {
-    if (id !== undefined) {
-      this.mappingService.deleteMappingRule(id).subscribe(
-        success => {
-          if (success) {
-            console.log('Mapping deleted successfully');
-            this.mappingRule = null;
-          } else {
-            console.error('Failed to delete mapping rule');
-          }
-        },
-        error => {
-          console.error('Error deleting mapping rule:', error);
-        }
-      );
-    }
-  }
-
 }
