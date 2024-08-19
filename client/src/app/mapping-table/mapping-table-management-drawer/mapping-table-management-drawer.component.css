@@ -142,3 +142,8 @@ button:focus {
   display: inline-block;
   margin-right: 20px;
 }
+
+.current-mapping-rule pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

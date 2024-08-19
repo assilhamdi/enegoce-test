@@ -15,7 +15,6 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MappingTableComponent } from './mapping-table/mapping-table.component';
 import { MappingTableManagementDrawerComponent } from './mapping-table/mapping-table-management-drawer/mapping-table-management-drawer.component';
-import { MappingRulesComponent } from './mapping-table/mapping-rules/mapping-rules.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +22,6 @@ import { MappingRulesComponent } from './mapping-table/mapping-rules/mapping-rul
     DealLcComponent,
     MappingTableComponent,
     MappingTableManagementDrawerComponent,
-    MappingRulesComponent,
   ],
   imports: [
     BrowserModule,

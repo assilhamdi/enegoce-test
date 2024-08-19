@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output, SimpleChanges } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, SimpleChanges } from '@angular/core';
 import { MtFieldMapping } from '../graphql/types';
 import { MappingService } from '../services/mapping/mapping.service';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
@@ -15,20 +15,10 @@ export class MappingTableComponent implements OnInit {
   selectedMt: string = "";
   selectedSt: string = "";
   filter: String = "";
-  order: boolean = true;
   isMappingDrawerOpen: boolean = false;
-  isRulesDrawerOpen: boolean = false;
   mappingToUpdate: MtFieldMapping | null = null; // Holds the mapping to update
-  mappingRule: any;
-  tag: String = "";
-  mt: String = "";
 
   private filterSubject: Subject<string> = new Subject<string>();
-
-  @Output() mappingRuleFetched = new EventEmitter<any>();
-  @Output() tagFetched = new EventEmitter<String>();
-  @Output() mtFetched = new EventEmitter<String>();
-  @Output() mappingFetched = new EventEmitter<any>();
 
 
   constructor(private mappingService: MappingService) { }
@@ -86,20 +76,8 @@ export class MappingTableComponent implements OnInit {
     this.mappingToUpdate = null; // Reset mapping to update
   }
 
-  openRulesDrawer(mappingToUpdate: MtFieldMapping | null = null): void {
-    this.mappingToUpdate = mappingToUpdate; // Set the mapping to update if provided
-    this.isRulesDrawerOpen = true;
-  }
-
-
-  closeRulesDrawer(): void {
-    this.isRulesDrawerOpen = false;
-    this.mappingToUpdate = null; // Reset mapping to update
-  }
-
   handleDrawerStateChange(isOpen: boolean): void {
     this.isMappingDrawerOpen = isOpen;
-    this.isRulesDrawerOpen = isOpen;
     if (!isOpen) {
       // If drawer is closed, reset mapping to update
       this.mappingToUpdate = null;
@@ -178,37 +156,6 @@ export class MappingTableComponent implements OnInit {
     this.selectedSt = '';
     this.filter ='';
     this.fetchMappings();
-  }
-  
-  fetchMappingRule(id: Number) {
-    this.mappingService.getMappingRule(id).subscribe(
-      (rule) => {
-        this.mappingRule = rule; // Set the fetched rule
-        this.mappingRuleFetched.emit(rule); // Emit the fetched rule
-        console.log(rule);
-      },
-      (error) => {
-        console.error('Error fetching mapping rule:', error);
-      }
-    );
-  }
-
-  fetchDetails(id: Number) {
-    this.mappingService.getMappingById(id).subscribe(
-      (mapping) => {
-        this.mappingToUpdate = mapping;
-        this.mappingFetched.emit(mapping);
-        console.log('displaying fetched mapping :',mapping);
-      },
-      (error) => {
-        console.error('Error fetching mapping:', error);
-      }
-    )
-  }
-
-  display(id: Number) {
-    this.fetchMappingRule(id);
-    this.fetchDetails(id);
   }
 
 }

@@ -1,6 +1,6 @@
 <h1>Mappings</h1>
 <button (click)="openMappingDrawer()">Add Mapping</button>
-<br> <!-- Line break for separation -->
+<br>
 <button (click)="filterMappingsByMt()">Filter by MT</button>
 
 <select [(ngModel)]="selectedMt">
@@ -29,8 +29,6 @@
   (mappingUpdated)="refreshMappings()">
 </app-mapping-table-management-drawer>
 
-<app-mapping-rules [mappingRule]="mappingRule" [mapping]="mappingToUpdate"></app-mapping-rules>
-
 <table class="finance-table">
   <thead>
     <tr>
@@ -58,9 +56,6 @@
       <td>
         <button (click)="openMappingDrawer(mapping)">Edit</button>
         <button (click)="deleteMapping(mapping.id)" disabled>Delete</button>
-        <button (click)="mapping.mappingRule ? display(mapping.id) : openRulesDrawer(mapping)">
-          {{ mapping.mappingRule ? 'Display Mapping Rules' : 'Add Mapping Rule' }}
-        </button>
       </td>
     </tr>
   </tbody>

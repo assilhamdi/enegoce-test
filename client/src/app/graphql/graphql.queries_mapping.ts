@@ -84,12 +84,6 @@ const FIELD_BY_ENTITY = gql`
   }
 `;
 
-const GET_MAPPING_RULE = gql`
-  query GetMappingRule($id: Int!) {
-    getMappingRule(id: $id)
-  }
-`;
-
 ////////////////// FILTERING ////////////////
 /////////////////////////////////////////////
 
@@ -102,6 +96,7 @@ const MAPPINGS_BY_MT = gql`
       tag
       fieldDescription
       entityName
+      fieldName
       mappingRule
       mt
       fieldOrder
@@ -118,6 +113,7 @@ const MAPPINGS_BY_ST = gql`
       tag
       fieldDescription
       entityName
+      fieldName
       mappingRule
       mt
       fieldOrder
@@ -134,6 +130,7 @@ const FILTER_MAPPINGS = gql`
       tag
       fieldDescription
       entityName
+      fieldName
       mappingRule
       mt
       fieldOrder
@@ -143,7 +140,6 @@ const FILTER_MAPPINGS = gql`
 
 export {
   GET_MAPPINGS, ADD_MT_MAPPING, FILTER_MAPPINGS,
-  UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, 
-  MAPPINGS_BY_ST, FIELD_BY_ENTITY, GET_MAPPING_RULE,
-  GET_MAPPING_BY_ID
+  UPDATE_MT_MAPPING, DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS,
+  MAPPINGS_BY_ST, FIELD_BY_ENTITY, GET_MAPPING_BY_ID
 }

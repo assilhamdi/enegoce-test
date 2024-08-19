@@ -5,8 +5,7 @@ import { MtFieldMapping, MtFieldMappingInput } from '../../graphql/types';
 import {
   GET_MAPPINGS, FILTER_MAPPINGS, ADD_MT_MAPPING, UPDATE_MT_MAPPING,
   DELETE_MT_MAPPING, MAPPINGS_BY_MT, MTS, MAPPINGS_BY_ST,
-  FIELD_BY_ENTITY, GET_MAPPING_RULE,
-  GET_MAPPING_BY_ID,
+  FIELD_BY_ENTITY, GET_MAPPING_BY_ID,
 } from '../../graphql/graphql.queries_mapping';
 
 @Injectable({
@@ -85,17 +84,6 @@ export class MappingService {
     }).pipe(
       map(result => result.data?.deleteFieldMapping ?? false)
     );
-  }
-
-  getMappingRule(id: Number): Observable<any> {
-    return this.apollo.watchQuery<any>({
-      query: GET_MAPPING_RULE,
-      variables: { id }
-    })
-      .valueChanges
-      .pipe(
-        map(({ data }) => JSON.parse(data.getMappingRule))
-      );
   }
 
   ////////////////// FILTERING ////////////////

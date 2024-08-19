@@ -24,7 +24,7 @@ export class MappingTableManagementDrawerComponent implements OnInit {
   entities = ['DealComment', 'DealParty', 'InfoDeal', 'Settlement', 'Transport'];
   dbFields: string[] = [];
   mrFields: string[][] = [];
-  mts = ['700', '701', '760', '798'];
+  mts = ['700', '701', '760', '761', '798'];
 
 
   newMapping: MtFieldMappingInput = {
@@ -45,6 +45,8 @@ export class MappingTableManagementDrawerComponent implements OnInit {
 
   mappingType: 'normal' | 'rules' = 'normal';
 
+  currentMappingRule: any = {};
+
   constructor(private mappingService: MappingService) { }
 
   ngOnInit(): void {
@@ -55,6 +57,7 @@ export class MappingTableManagementDrawerComponent implements OnInit {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['mappingToUpdate'] && !changes['mappingToUpdate'].firstChange) {
       this.initializeForm();
+      this.updateCurrentMappingRule();
     }
   }
 
@@ -74,9 +77,11 @@ export class MappingTableManagementDrawerComponent implements OnInit {
       const entityName = target.value;
       console.log(`Entity changed at index ${index}: ${entityName}`);
       this.selectedFields[index].mrEntityName = entityName;
+      this.updateCurrentMappingRule();
       this.mappingService.getFieldByEntity(entityName).subscribe(fields => {
         console.log('Fields fetched for dynamic entity change:', entityName, fields);
         this.mrFields[index] = fields;
+        this.updateCurrentMappingRule();
       });
     }
   }
@@ -190,6 +195,7 @@ export class MappingTableManagementDrawerComponent implements OnInit {
     if (index > -1 && index < this.selectedFields.length) {
       this.selectedFields.splice(index, 1);
       this.mrFields.splice(index, 1);
+      this.updateCurrentMappingRule();
     }
   }
 
@@ -211,6 +217,7 @@ export class MappingTableManagementDrawerComponent implements OnInit {
     this.mrFields = [[]];
     this.mappingToUpdate = null;
     this.mappingType = 'normal';
+    this.currentMappingRule = {};
   }
 
   onMappingTypeChange(type: 'normal' | 'rules') {
@@ -228,6 +235,21 @@ export class MappingTableManagementDrawerComponent implements OnInit {
       this.newMapping.code = '';
     }
   }
+
+  updateCurrentMappingRule(): void {
+    if (this.mappingType === 'rules') {
+        this.currentMappingRule = {
+            delimiter: this.newMapping.delimiter,
+            code: this.newMapping.code,
+            fields: this.selectedFields.map(field => `${field.mrEntityName}.${field.mrDatabaseField}`)
+        };
+    } else {
+        this.currentMappingRule = {
+            entityName: this.newMapping.entityName,
+            databaseField: this.newMapping.databaseField
+        };
+    }
+}
 
   openDrawer() {
     this.isOpen = true;
